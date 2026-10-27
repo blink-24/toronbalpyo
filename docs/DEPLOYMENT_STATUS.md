@@ -4,18 +4,20 @@
 
 | 항목 | 현재 상태 |
 |---|---|
-| 2차시 학습·활동·공유 화면 | 구현 및 Pages 게시. 실제 브라우저 활동 확인은 후속 |
+| 2차시 학습·활동·공유 화면 | 자체 검토 수정분 PR #6 병합·Pages 게시 완료. Chromium 데스크톱·모바일 크기 검사 통과 |
 | 대본 엔진·선택적 AI 어댑터 | 기본 대본 모드 연결. AI 키·모델 미설정 |
 | Google Sheets 스키마 | 9탭·155개 헤더와 초기 설정 준비 |
 | Google 계정 | 요청한 개인 계정 연결과 소유권 확인 완료 |
 | 실제 Google Sheet | 비공개 시트 생성. 9탭·155개 헤더·설정 8행·Asia/Seoul 확인 |
-| Apps Script 프로젝트·웹 앱 | 사용자 초기 실행·배포 완료. 실제 서버 접속 검사 5개 통과 |
-| GitHub | 구현 PR #1, 상태 PR #3, 실제 서버 연결 PR #4 병합 완료 |
-| GitHub Pages | 사용자 Pages 설정 후 실행 40481995416 재시도 성공. 공개 주소 https://blink-24.github.io/toronbalpyo/ |
-| 브라우저·학교 태블릿 | 실제 실행 검증 미실시 |
+| Apps Script 프로젝트·웹 앱 | 최초 배포 서버로 실제 정상 저장·중복 ACK 확인. 추가 안정성 보완은 저장소 코드에 반영됐으며 소유자의 새 버전 배포 대기 |
+| GitHub | 구현·연결·자체 검토 PR #1·#3·#4·#5·#6 병합 완료 |
+| GitHub Pages | 자체 검토 수정분 실행 40486746828 게시 및 공개 파일 검사 성공. https://blink-24.github.io/toronbalpyo/ |
+| 브라우저·학교 태블릿 | Chromium 자동 브라우저 데스크톱·모바일 크기 통과. 학교 실제 기기·망과 교사 실제 암호 로그인은 별도 확인 |
 | 3·4차시 앱·녹음 업로드 | 이번 2차시 구현의 후속 범위 |
 
-`config.js`에 실제 `/exec` URL을 반영했다. [Live API connection](https://github.com/blink-24/toronbalpyo/actions/runs/40481995409)에서 공개 상태·실제 시트 설정·익명 집계 허용 필드·교사 무암호 조회 거부·잘못된 POST 입력 저장 전 거부가 모두 통과했다. 학생 기록을 생성하지 않은 검사이며 정상 제출 저장·교사 암호 로그인·브라우저 CORS·학교 기기 동작은 아직 별도 확인 대상이다.
+`config.js`에 실제 `/exec` URL을 반영했다. [Live API connection](https://github.com/blink-24/toronbalpyo/actions/runs/40481995409)의 5개 검사에 이어 [전체 브라우저 검사](https://github.com/blink-24/toronbalpyo/actions/runs/40486318647)에서 수정 후보 화면과 실제 Google 서버의 질문·답변·제출·중복 ACK·익명 공유를 확인했다. 모바일 오프라인 2문항 종료와 재연결 후 저장도 통과했고 실제 시트에서 문항 수와 한 세션당 한 행을 대조했다. 시험 세션 3개의 제출·대담·진행 기록 49행만 정리하고 재조회로 확인했다.
+
+자체 검토 결과와 적용 범위는 [AUDIT_20261027.md](AUDIT_20261027.md), 서버의 남은 소유자 작업은 [SERVER_UPDATE.md](SERVER_UPDATE.md)에 있다. **GitHub의 서버 파일 수정은 현재 실행 중인 Apps Script 서버를 자동 갱신하지 않는다.**
 
 공개 사이트: [채움 토론과 반대 신문](https://blink-24.github.io/toronbalpyo/). 배포 뒤 HTML·설정·메인 모듈·스타일 HTTP 확인을 수행하도록 워크플로를 추가했다. HTTP 파일 확인과 실제 브라우저 실행은 구분한다.
 

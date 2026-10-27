@@ -15,7 +15,7 @@
 ## 소유자 작업
 
 1. 기존 데이터베이스 시트의 **확장 프로그램 → Apps Script**를 연다.
-2. [최신 서버 코드 전체](https://github.com/blink-24/toronbalpyo/raw/refs/heads/main/backend/ServerBundle.gs)를 전체 복사한다.
+2. [이번 검토를 통과한 서버 코드 전체](https://raw.githubusercontent.com/blink-24/toronbalpyo/da972c88936a6e915f8439875f368cd437ed5b48/backend/ServerBundle.gs)를 전체 복사한다. 고정된 검토 버전이며 SHA-256은 `3c2f61a5d0e346412f69db22e4ba76268681a2ecac1c6c35944b72144fcbc0ff`이다.
 3. `Code.gs`의 현재 코드 전체를 새 코드로 교체하고 저장한다. 코드 4부분 뒤에 추가하는 방식이 아니라 **전체 교체**다. 기존 스크립트 속성의 교사 암호·시트 ID는 유지한다.
 4. **배포 → 배포 관리 → 기존 웹앱의 연필 아이콘 → 버전: 새 버전 → 배포**로 갱신한다. 기존 배포를 갱신하면 같은 `/exec` 주소를 유지할 수 있다.
 5. 갱신 완료 후 실제 서버에 대한 검사를 다시 진행한다. 암호나 API 키를 대화·저장소에 보내지 않는다.
