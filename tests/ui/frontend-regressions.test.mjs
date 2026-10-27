@@ -85,9 +85,9 @@ test('게시 앱은 배포 설정 주소만 선택하고 주소 입력·기기 �
   vm.runInNewContext(init, context);
   assert.equal(selected, context.runtime.apiUrl);
   assert.doesNotMatch(main, /chaeum:public-endpoint|connect-endpoint|api-endpoint|api\.setEndpoint|adminSettings/);
-  const teacher = { teacherPasscode: '', teacherData: null, teacherClass: 11, busy: false, api: { isConfigured: () => true }, h: escapeHtml, button: () => '<button>돌아가기</button>', errorHtml: () => '' };
+  const teacher = { serverConfig: { classCount: 13 }, teacherPasscode: '', teacherData: null, teacherClass: 11, busy: false, api: { isConfigured: () => true }, h: escapeHtml, button: () => '<button>돌아가기</button>', errorHtml: () => '' };
   vm.runInNewContext(between('function teacherView()', 'function render()') + ';globalThis.screen=teacherView();', teacher);
-  assert.match(teacher.screen, /교사용 암호/); assert.doesNotMatch(teacher.screen, /type="url"|연결 설정|api-endpoint/);
+  assert.match(teacher.screen, /value="13"/); assert.doesNotMatch(teacher.screen, /value="14"/); assert.match(teacher.screen, /교사용 암호/); assert.doesNotMatch(teacher.screen, /type="url"|연결 설정|api-endpoint/);
 });
 
 function queueFixture() {

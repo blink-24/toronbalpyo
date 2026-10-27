@@ -32,7 +32,8 @@ console.log('PASS: 공개 서버 상태 응답');
 const config = await call('config');
 assert.equal(config.ok, true, 'config: 시트 설정 읽기 실패');
 assert.equal(config.data?.grade, 2);
-assert.equal(config.data?.classCount, 11);
+assert.ok(Number.isInteger(config.data?.classCount) && config.data.classCount >= 1 && config.data.classCount <= 99, '반 수는 현재 시트의 유효한 운영 설정을 따릅니다.');
+console.log(`INFO: 현재 운영 반 수 ${config.data.classCount}`);
 assert.ok(Array.isArray(config.data?.acceptLessons));
 assert.ok(config.data.acceptLessons.every(lesson => [2, 4].includes(lesson)));
 if (ping.data.version === '5.1.0') {
