@@ -26,8 +26,8 @@ async function call(action, payload, method = 'GET') {
 const ping = await call('ping');
 assert.equal(ping.ok, true, 'ping: 서버 오류');
 assert.equal(ping.data?.status, 'ok');
-assert.ok(['5.0.0', '5.1.0'].includes(ping.data?.version), '확인하지 않은 서버 버전입니다.');
-console.log('PASS: 공개 서버 상태 응답');
+assert.equal(ping.data?.version, '5.1.0', '2·4차시 서버 5.1.0 배포가 필요합니다.');
+console.log(`PASS: 공개 서버 상태 응답(버전 ${ping.data.version})`);
 
 const config = await call('config');
 assert.equal(config.ok, true, 'config: 시트 설정 읽기 실패');
@@ -36,11 +36,10 @@ assert.ok(Number.isInteger(config.data?.classCount) && config.data.classCount >=
 console.log(`INFO: 현재 운영 반 수 ${config.data.classCount}`);
 assert.ok(Array.isArray(config.data?.acceptLessons));
 assert.ok(config.data.acceptLessons.every(lesson => [2, 4].includes(lesson)));
-if (ping.data.version === '5.1.0') {
-  assert.ok(config.data.implementedLessons?.includes(4));
-  assert.ok([3, 4, 5].includes(config.data.l4Questions));
-  assert.equal(config.data.l4AiEnabled, false);
-} else console.log('INFO: 최초 서버가 실행 중입니다. 4차시·교사 개방 설정은 서버 새 버전 적용 대기입니다.');
+assert.ok(config.data.implementedLessons?.includes(2) && config.data.implementedLessons.includes(4));
+assert.ok([3, 4, 5].includes(config.data.l4Questions));
+assert.equal(config.data.l4AiEnabled, false);
+console.log(`INFO: 구현 차시 ${config.data.implementedLessons.join(',')}, 개방 차시 ${config.data.acceptLessons.join(',') || '없음'}, 4차시 질문 ${config.data.l4Questions}개, 대본 모드`);
 for (const key of ['PASSCODE', 'AI_API_KEY', 'AI_MODEL', 'passcode', 'apiKey']) assert.ok(!(key in config.data));
 console.log('PASS: 실제 시트 설정 조회 및 비밀값 비노출');
 
@@ -60,6 +59,14 @@ const privateQuery = await call('l2_summary');
 assert.equal(privateQuery.ok, false);
 assert.equal(privateQuery.error?.code, 'UNAUTHORIZED', '교사 암호 설정 또는 접근 거부를 확인하세요.');
 console.log('PASS: 암호 없는 교사 조회 거부');
+
+const private4 = await call('l4_summary');
+assert.equal(private4.ok, false);
+assert.equal(private4.error?.code, 'UNAUTHORIZED');
+const control = await call('set_lessons', { acceptLessons: config.data.acceptLessons }, 'POST');
+assert.equal(control.ok, false);
+assert.equal(control.error?.code, 'UNAUTHORIZED');
+console.log('PASS: 4차시 교사 조회·개방 설정 변경의 무암호 요청 거부(설정 변경 없음)');
 
 const invalid = await call('submit', { lesson: 2, kind: 'l2_session', studentId: '00000' }, 'POST');
 assert.equal(invalid.ok, false);
