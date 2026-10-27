@@ -1,7 +1,7 @@
 {
   "version": "5.1.0",
   "baseline": "lessonplan-v6-webapp-v5-user-script-first-2026-10-27",
-  "external_state": "PR9 merged and Pages40495061769 published; current classCount13 preserved; Apps Script owner upgrade pending",
+  "external_state": "New user /exec API5.1.0 verified; l4_sessions39headers verified; current open lesson2; teacher login/open4/real submit pending",
   "tests_passed": 109,
   "files": [
     {
@@ -22,7 +22,7 @@
     },
     {
       "path": ".github/workflows/lesson4-browser.yml",
-      "sha256": "788af88ba4dc832f5f5ff79b3943e957d5fbfdbfdbc6d5d9b82035db70143925"
+      "sha256": "cc27abb4901d0f1c55052852a107e2d5d1c8d506faf445a8ffb6f76e5a5f3069"
     },
     {
       "path": ".github/workflows/live-api.yml",
@@ -78,7 +78,7 @@
     },
     {
       "path": "config.js",
-      "sha256": "fdba48c320f0710a8ff7deed320960490452f8f267d53b41b74c8f39bf8b5979"
+      "sha256": "5e9dbc21c55eacf0cd8db184959ae26f93e3e6e551a8f2ec164b421c8fc7bda3"
     },
     {
       "path": "data/content.json",
@@ -102,7 +102,7 @@
     },
     {
       "path": "docs/DEPLOYMENT_STATUS.md",
-      "sha256": "e142f670a3cd5a57a0cc3eebadf85ffaca9a408cf92d6de32d32888e4dc2ae60"
+      "sha256": "5c0ae048e950158c3699c3be3c9db51931f0cfa498ab8b04198c47527e57d09e"
     },
     {
       "path": "docs/LESSON4_IMPLEMENTATION_CONTRACT.md",
@@ -114,7 +114,7 @@
     },
     {
       "path": "docs/OWNER_SETUP.md",
-      "sha256": "db6a8d66fafb3113f03ab48ee2c54e0eac0d70c1184e9cf2b422286f9d9920c8"
+      "sha256": "98eb10da377fc817f6d045680fa2b18232c6f86635e15a16eec580f08dc96dbb"
     },
     {
       "path": "docs/SERVER_UPDATE.md",
@@ -122,7 +122,7 @@
     },
     {
       "path": "docs/VALIDATION.md",
-      "sha256": "2a7ebd206d60025ecd9434f06f8ca958b6a4680af44db7e3b2e2091ce33ff08a"
+      "sha256": "ad7117f6bda6230f2dc99c7a69824f4c3274bce9b80792e3a22a0934dc5ae721"
     },
     {
       "path": "index.html",
@@ -135,6 +135,10 @@
     {
       "path": "qa/browser-audit.mjs",
       "sha256": "0f8a78ee728d3019f30dae6d9e28c3030612b130aaab94e954274713376cafab"
+    },
+    {
+      "path": "qa/connection-browser.mjs",
+      "sha256": "25d7da04290de818fd4d9aee8f183d2ad883288d2268af84f34170387280e4bd"
     },
     {
       "path": "qa/lesson4-browser.mjs",
@@ -150,7 +154,7 @@
     },
     {
       "path": "scripts/check-live-api.mjs",
-      "sha256": "3779e58e5bf0b58cf68d32a5dd0c8019361fb9eebc362a45fe606c7b2b7fecc2"
+      "sha256": "4925a6b0609bb7b513d6d50106ef19fb0e2ffa65a0930c4b163dc0629979cb2e"
     },
     {
       "path": "scripts/check-project.mjs",
