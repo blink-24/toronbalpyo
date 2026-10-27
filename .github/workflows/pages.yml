@@ -101,3 +101,33 @@ jobs:
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify published application files
+        env:
+          CLASSROOM_SITE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import vm from 'node:vm';
+          const base = new URL(process.env.CLASSROOM_SITE_URL);
+          assert.equal(base.protocol, 'https:');
+          async function read(relative) {
+            const response = await fetch(new URL(relative, base), { signal: AbortSignal.timeout(15000), cache: 'no-store' });
+            assert.equal(response.status, 200, `${relative || 'index'}: HTTP ${response.status}`);
+            return response.text();
+          }
+          for (let attempt = 1; attempt <= 4; attempt++) {
+            try {
+              const [html, config, main, css] = await Promise.all(['', 'config.js', 'src/main.js', 'styles.css'].map(read));
+              assert.ok(html.includes('<title>채움 · 토론과 반대 신문</title>') && html.includes('id="app"'));
+              const scope = { window: {} };
+              vm.runInNewContext(config, scope, { timeout: 1000 });
+              assert.match(scope.window.CLASSROOM_CONFIG?.apiUrl || '', /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/);
+              assert.ok(main.includes('createApiClient') && css.length > 100);
+              console.log('PASS: published HTML, configured API URL, main module and styles');
+              break;
+            } catch (error) {
+              if (attempt === 4) throw error;
+              await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+          }
+          JS
