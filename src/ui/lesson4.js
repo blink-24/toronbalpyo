@@ -194,6 +194,7 @@ export function createLesson4Controller({ api, storage, getState, setState, pers
     }
   }
   function onConfigChanged() { if (!getAccess().allowed) { generation++; busy = false; } }
+  function suspend() { save(); generation++; busy = false; error = ''; }
   function startRecovery() { queue.start(); flushProgress(); }
   async function recover() {
     if (!getAccess().allowed || busy) return;
@@ -201,6 +202,6 @@ export function createLesson4Controller({ api, storage, getState, setState, pers
     if (a().stage === 'dialogue' && a().session && !a().remoteQuestions[a().turn]) await remote('question');
     else if (a().stage === 'feedback' && a().blocked) await remote('feedback');
   }
-  return { render: view, handleForm, handleInput, handleClick, onConfigChanged, startRecovery, recover, resultText,
+  return { render: view, handleForm, handleInput, handleClick, onConfigChanged, startRecovery, recover, resultText, suspend,
     hasPending: () => queue.getItems().length > 0, stop: () => queue.stop(), isBusy: () => busy };
 }

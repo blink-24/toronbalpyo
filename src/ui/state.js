@@ -21,6 +21,24 @@ export function loadState(storage) {
   return initialState();
 }
 export function saveState(storage, state) { storage.setItem(STATE_KEY, JSON.stringify(state)); }
+// 개인 기록에는 다른 차시의 모둠 로그인 정보를 함께 넣지 않습니다.
+export function saveStudentDraft(storage, state) {
+  if (!/^\d{5}$/.test(state.studentId || '')) return;
+  const { version, studentId, tab, learningIndex, learned, activityView, activity } = state;
+  storage.setItem(`chaeum:v5:student:${studentId}`, JSON.stringify({ version, lesson: 2, studentId, tab, learningIndex, learned, activityView, activity }));
+}
+export function restoreStudentDraft(storage, studentId, current = initialState()) {
+  let saved;
+  try { saved = JSON.parse(storage.getItem(`chaeum:v5:student:${studentId}`)); } catch {}
+  const fresh = initialState();
+  if (saved?.version !== 5 || saved.studentId !== studentId) return { ...fresh, studentId, learned: current.learned, learningIndex: current.learningIndex, tab: 'activity' };
+  return { ...fresh, studentId, lesson: 2, tab: saved.tab === 'learn' ? 'learn' : 'activity', learningIndex: saved.learningIndex || 0,
+    learned: Array.isArray(saved.learned) ? saved.learned : [], activityView: 'perform',
+    activity: { ...fresh.activity, ...saved.activity } };
+}
+export function signedOutState(current) {
+  return { ...initialState(), lesson: current.lesson === 4 ? 4 : 2, tab: 'activity' };
+}
 export function composeArgument({ stance, reasonText, card, motion }) {
   const date = card.year && card.year !== '밝혀지지 않음' ? `의 ${card.year} 자료` : '';
   const reason = reasonText.replace(/[.。]+$/, '');

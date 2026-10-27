@@ -21,6 +21,12 @@ jobs:
           node-version: '22'
           package-manager-cache: false
       - run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.64.1
+      - name: Install a pinned Korean font for readable screenshots
+        timeout-minutes: 2
+        run: |
+          mkdir -p "$HOME/.local/share/fonts/classroom-qa"
+          curl --fail --location --retry 2 --max-time 45 'https://raw.githubusercontent.com/google/fonts/b38c5c93af322c45f633e17ac440ec1e6c94d489/ofl/notosanskr/NotoSansKR%5Bwght%5D.ttf' --output "$HOME/.local/share/fonts/classroom-qa/NotoSansKR.ttf"
+          fc-cache -f "$HOME/.local/share/fonts/classroom-qa"
       - name: Use runner Chrome or install Chromium
         timeout-minutes: 3
         run: |

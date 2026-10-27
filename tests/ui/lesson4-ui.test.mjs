@@ -142,3 +142,15 @@ test('우리 모둠의 입장에 따라 상대 토론자의 찬반을 표시한�
     f.controller.stop();
   }
 });
+
+test('모둠 로그아웃 준비는 초안·현재 질문을 보관하고 같은 모둠 재입장에서 복원한다', async () => {
+  const server = serverFixture(), storage = memory(), f = controllerFixture(server, { storage });
+  await prepare(f); await answer(f); f.controller.handleInput('l4-answer', '아직 확정하지 않은 두 번째 답입니다.');
+  const sid = f.state().sessionId, sub = f.state().submissionId;
+  f.controller.suspend();
+  const restored = controllerFixture(server, { storage }); await restored.controller.handleForm(entryData({ representative: members[1] }));
+  assert.equal(restored.state().sessionId, sid); assert.equal(restored.state().submissionId, sub);
+  assert.equal(restored.state().turn, 2); assert.equal(restored.state().answers.length, 1);
+  assert.equal(restored.state().answerDrafts[2], '아직 확정하지 않은 두 번째 답입니다.');
+  f.controller.stop(); restored.controller.stop();
+});
