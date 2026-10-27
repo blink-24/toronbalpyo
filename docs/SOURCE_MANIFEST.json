@@ -1,8 +1,8 @@
 {
-  "version": "5.1.1",
-  "baseline": "lessonplan-v6-webapp-v5-user-script-first-2026-10-27",
-  "external_state": "Frontend5.1.1 logout/resume published PR13; server5.1.0 unchanged; entry confirmation followup",
-  "tests_passed": 116,
+  "version": "5.2.0",
+  "baseline": "lessonplan-v6-webapp-v5-user-keyword30-script-first-2026-10-27",
+  "external_state": "Keyword scripts implemented and verified locally; actual server5.1.0 unchanged until owner deployment; frontend negotiates script version",
+  "tests_passed": 155,
   "files": [
     {
       "path": ".github/ISSUE_TEMPLATE/bug_report.yml",
@@ -42,7 +42,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "bf7e107d05c7f6de9d9cbcc82d4624cb257414304565cb02cf8266fb41c22c77"
+      "sha256": "0db0408973deedce2feab010e0cc380d4a7b592964028c979a770a752b43262c"
     },
     {
       "path": "assets/favicon.svg",
@@ -58,7 +58,7 @@
     },
     {
       "path": "backend/ServerBundle.gs",
-      "sha256": "bc10764bbf487a2f8835bf072e06330f36091fc65c677d3fd3f20ed3e4627731"
+      "sha256": "125af2173dac3da33c992cbbf6ca9c13e65737f4165fe55769dbe94a75826a45"
     },
     {
       "path": "backend/appsscript.json",
@@ -70,7 +70,7 @@
     },
     {
       "path": "backend/service.js",
-      "sha256": "14447858d53c2d1f1b2b24397de6dc4da7bffaafe4c7b774aa8d45e37e48ce12"
+      "sha256": "2dea8ec4c167ee5cdbd5a58098729b0239d2d2ae787b93882d507c97d626edcc"
     },
     {
       "path": "backend/sync.mjs",
@@ -78,7 +78,7 @@
     },
     {
       "path": "config.js",
-      "sha256": "003914b55cebe1bb0b3ca390be24ce47ba162f80b67a363f1e3bccd75f2a3933"
+      "sha256": "317681b6dd6cf2549bf380d90932284f876783db010205da54af0215c0a561fd"
     },
     {
       "path": "data/content.json",
@@ -86,11 +86,11 @@
     },
     {
       "path": "data/lesson4.json",
-      "sha256": "d90e3a1ded17ed55ca39f14dd3929fa88f6e66cedd5e79fd78c68f0af9c4e6fb"
+      "sha256": "51461da1cd6dd757e3a05bfd120a65a01d90771677203f39149b29f158094679"
     },
     {
       "path": "docs/API_CONTRACT.md",
-      "sha256": "d180004cf2e80e2e74a8ef3bab50c6276ddaf3484f7d0266a765101f372e66ef"
+      "sha256": "cd1c02e6b88b7c2e966129af0244d530b143278198a1872f15613f44340543f6"
     },
     {
       "path": "docs/AUDIT_20261027.md",
@@ -98,15 +98,19 @@
     },
     {
       "path": "docs/CONTENT_TRACE.md",
-      "sha256": "fce12e2c139624321e2fa29321da84c5edb435f67509a74062cf6241f4afa613"
+      "sha256": "81b7578ea47b26d56e03843385ff08f6b75c01bbfc5d89cdb071d4a60d0bc055"
     },
     {
       "path": "docs/DEPLOYMENT_STATUS.md",
-      "sha256": "0a1ca1280efe346702f9ecacab3c963e924034fadb67356f09dd0bbde0a2fd92"
+      "sha256": "a05055cc32640b425a357b1eca86243bcacd05358279ec29109fb8bdd609bb5e"
     },
     {
       "path": "docs/LESSON4_IMPLEMENTATION_CONTRACT.md",
-      "sha256": "79ff7c5b45d38d993e8181448813d8eb1010dbb96d08f0f0d47766d498d72d85"
+      "sha256": "76198c3daec8ee3d33a67021a142870a1f87c3137b9192902e755685cfea7bb9"
+    },
+    {
+      "path": "docs/LESSON4_KEYWORD_SCRIPTS.md",
+      "sha256": "465b9160ad7c6d1f06373961321909aa656ca7d2c87a620ec57996a80f0badbb"
     },
     {
       "path": "docs/MAINTENANCE.md",
@@ -118,11 +122,11 @@
     },
     {
       "path": "docs/SERVER_UPDATE.md",
-      "sha256": "d7c326f052d7a82ecebab79d7c4809bc0fb55bc4ec3c3c2cfdbdf2c6f418142a"
+      "sha256": "1ecba9cab1f166d9924e944942d8f927779dc88a299a978ceb1954dc8051c9ff"
     },
     {
       "path": "docs/VALIDATION.md",
-      "sha256": "e053a2600d383f66ea66173c03726d4beca6fd4fe03fec5b4bd9887deb414f9b"
+      "sha256": "d5b8ba7b0479d927f55f0d365339530b595e31c5fa343a0abc00262357836e5e"
     },
     {
       "path": "index.html",
@@ -130,7 +134,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "3af5c7c63c9db280b702f388aa6efd7d850e4d64f389f698bee222f1d2cfd724"
+      "sha256": "d47071898bc50a036f56190951541d6fb4fe2b8b68baa5428c6e5e8102e30ba3"
     },
     {
       "path": "qa/browser-audit.mjs",
@@ -138,11 +142,11 @@
     },
     {
       "path": "qa/connection-browser.mjs",
-      "sha256": "25d7da04290de818fd4d9aee8f183d2ad883288d2268af84f34170387280e4bd"
+      "sha256": "ed09a800e2d6aae519d16861a37f571c2495aa4f87bf5cabdd786c61e917c00a"
     },
     {
       "path": "qa/lesson4-browser.mjs",
-      "sha256": "7ab75d97aae09e1f5475ddc4c4de3b3e893379be6a9dc9ac0ddf800c91810933"
+      "sha256": "8479f48e53f8e2736824b776e52a425d77f4344d648d4f4c1ed94d5e3109b32f"
     },
     {
       "path": "qa/lesson4-fixture.mjs",
@@ -154,7 +158,7 @@
     },
     {
       "path": "scripts/check-live-api.mjs",
-      "sha256": "4925a6b0609bb7b513d6d50106ef19fb0e2ffa65a0930c4b163dc0629979cb2e"
+      "sha256": "89d80ad009e5b469914d0bc005a1e4268af46e4973de81c2cc452b028897b65b"
     },
     {
       "path": "scripts/check-project.mjs",
@@ -170,11 +174,11 @@
     },
     {
       "path": "src/core/lesson4-content.js",
-      "sha256": "d6571832ffa7b29100ad43f890736b308ff9935eb78f12fa2aa1a2367d56bb79"
+      "sha256": "52fbcf8a654c61d218835f73808298dac10c228fe6318afc6fb40ce969baaa2b"
     },
     {
       "path": "src/core/lesson4.js",
-      "sha256": "93751ddc9c3547ffff066d0ae77e80ab323734d03d431193579f6d5022ed4bda"
+      "sha256": "0aa65f315cd13afb3703bef1be0d3ffa051bfe35afe12a5dc8df2002063ef8b7"
     },
     {
       "path": "src/main.js",
@@ -190,7 +194,7 @@
     },
     {
       "path": "src/ui/lesson-policy.js",
-      "sha256": "ce3f4795df4f75bbfcb450a97c58468a93b7cdeb8468cc3a7461ec2b7234010d"
+      "sha256": "2ec740cafaeeb3bc424b0419a95e3ef987199fab61bf1ccf0b8311f5127f7b81"
     },
     {
       "path": "src/ui/lesson4-state.js",
@@ -198,7 +202,7 @@
     },
     {
       "path": "src/ui/lesson4.js",
-      "sha256": "70e041cc6201725dce4ecf9e0e25f299849941b6c6a0632e348801d611a04402"
+      "sha256": "ab2af01f7ce084934fed45afcb3721a61f60e455c6c6a139704731bd001990cc"
     },
     {
       "path": "src/ui/state.js",
@@ -217,12 +221,20 @@
       "sha256": "4fe4bfee4a7508f078b759d90895e15631581cc36ab83420094dda0f280a655a"
     },
     {
+      "path": "tests/fixtures/lesson4-legacy.json",
+      "sha256": "31887615f01c4ce63672d8fde068e82632aa1e6c83f7851571c3dd7662372dcb"
+    },
+    {
       "path": "tests/lesson4-backend.test.mjs",
-      "sha256": "49b297eb50159479785e340a587ce9a9e1df5247e41156bfdd9ab7abb40caf76"
+      "sha256": "b762a9e3c6c4c6d42bbed580276651233d3dd4bd798408cb5e738b1ba40d2948"
     },
     {
       "path": "tests/lesson4-engine.test.mjs",
-      "sha256": "56b94b519c0c155192ce960665b00b83df2a988647db081c1030b898716dc444"
+      "sha256": "eca808660f712e5e9b10534f9018127405d580ab89091058df2f7c39820fb4be"
+    },
+    {
+      "path": "tests/lesson4-keywords.test.mjs",
+      "sha256": "3e411597c4ef29c0f1c4d27e85e125b469413af5421c152c3fc28b84d889687e"
     },
     {
       "path": "tests/native-upgrade.test.mjs",
@@ -234,7 +246,7 @@
     },
     {
       "path": "tests/ui/lesson4-ui.test.mjs",
-      "sha256": "db4e8341933697cff1e7ce8525bbeee8dcb4bb9f83470743da322ae1a0badb5d"
+      "sha256": "a259006cec6488772ba1e942111b2133829f50fb842c31805423df374941fab2"
     },
     {
       "path": "tests/ui/network.test.mjs",

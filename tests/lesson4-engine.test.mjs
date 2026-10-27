@@ -8,7 +8,7 @@ const engine = createLesson4Engine(LESSON4_CONTENT);
 const pro = '공공 의료에 상담 도우미를 도입하는 데 찬성합니다. 응급 의료 취약지와 고령 주민이 겪는 접근의 어려움을 줄이는 일이 필요하기 때문입니다. 다만 실제 진료 연결과 이용 지원을 함께 검토해야 합니다.';
 const con = '공공 의료 상담 도우미 도입을 유보해야 한다고 생각합니다. 오류가 생겼을 때 운영 기관의 책임과 건강 정보 보호 절차가 구체적이지 않기 때문입니다. 필요한 주민에게는 사람의 상담 창구를 마련해야 합니다.';
 const reflection = '다음 입론에서는 출처와 정책 주장의 연결 범위를 함께 확인하겠습니다.';
-const input = (overrides = {}) => ({ stance: '찬성', arg1: pro, sessionId: 'l4_test_session_01', seed: 'group-seed-one', ...overrides });
+const input = (overrides = {}) => ({ scriptVersion: '1.0.0', stance: '찬성', arg1: pro, sessionId: 'l4_test_session_01', seed: 'group-seed-one', ...overrides });
 const code = expected => error => error.code === expected;
 
 function answerSession(session, count = session.questionCount, answerFor) {

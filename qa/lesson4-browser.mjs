@@ -32,6 +32,10 @@ async function context(options = {}) {
     if (url.hostname === 'script.google.com') {
       if (ctx.apiOffline) return route.abort('internetdisconnected');
       const response = await route.fetch({ url: api + url.search });
+      if (ctx.legacyScripts && url.searchParams.get('action') === 'config') {
+        const body = await response.json(); delete body.data.l4ScriptVersion; body.data.appVersion = '5.1.0';
+        return route.fulfill({ response, body: JSON.stringify(body), headers: { ...response.headers(), 'access-control-allow-origin': '*' } });
+      }
       if (ctx.oldServer && url.searchParams.get('action') === 'config') {
         const body = await response.json(); delete body.data.implementedLessons;
         delete body.data.l4AiEnabled; body.data.appVersion = '5.0.0';
@@ -137,6 +141,8 @@ try {
       await page.reload({ waitUntil: 'networkidle' });
       assert.equal(await page.locator('#l4-arg1').inputValue(), argument, 'argument draft survives reload');
       await page.locator('[data-action="l4-start"]').click(); await stage(page, 'dialogue');
+      assert.equal((await state(page)).lesson4.session.version, '1.1.0');
+      assert.ok((await state(page)).lesson4.session.plan.some(q => q.id.startsWith('L4K-')));
       for (let turn = 1; turn <= (options.early ? 3 : 4); turn++) {
         assert.equal((await state(page)).lesson4.turn, turn);
         assert.ok((await page.locator('.l4-help-cards .evidence-card').count()) >= 2);
@@ -213,6 +219,27 @@ try {
   await inspect(watching, 'reopened-draft-preserved'); await watchingContext.close();
   report.cases.push({ name: 'teacher group results and both closed on client/server', status: 'passed' });
   await call('set_lessons', { passcode: 'fixture-teacher-only', acceptLessons: [2,4] });
+  const migrationContext = await context(); migrationContext.legacyScripts = true;
+  const migration = await migrationContext.newPage(); migration.setDefaultTimeout(35000);
+  await migration.goto(site + '#/lesson4', { waitUntil: 'networkidle' });
+  await migration.locator('#l4-representative').fill('21199');
+  await migration.locator('#l4-group-name').fill('버전 전환 검토');
+  for (let n = 1; n <= 4; n++) await migration.locator(`#l4-member-${n}`).fill(`211${95 + n}`);
+  await migration.locator('#l4-entry-submit').click(); await stage(migration, 'argument');
+  await migration.locator('[data-action="l4-stance"][data-value="찬성"]').click();
+  await migration.locator('#l4-arg1').fill('공공 의료 상담 도우미는 정확도와 개인정보 보호 조건을 확인한 뒤 도입 여부를 판단해야 합니다.');
+  await migration.locator('[data-action="l4-start"]').click(); await stage(migration, 'dialogue');
+  const legacyPlan = (await state(migration)).lesson4.session.plan;
+  assert.equal((await state(migration)).lesson4.session.version, '1.0.0');
+  migrationContext.legacyScripts = false;
+  await migration.reload({ waitUntil: 'networkidle' }); await stage(migration, 'dialogue');
+  await migration.locator('#l4-answer').fill('자료의 한계를 인정합니다. 다만 의료 상담의 출처와 적용 조건을 확인해야 하기 때문에 근거의 범위를 구분하겠습니다.');
+  await migration.locator('[data-action="l4-answer-next"]').click(); await stage(migration, 'dialogue');
+  assert.equal((await state(migration)).lesson4.turn, 2);
+  assert.equal((await state(migration)).lesson4.session.version, '1.0.0');
+  assert.deepEqual((await state(migration)).lesson4.session.plan, legacyPlan);
+  await inspect(migration, 'script-version-resume'); await migrationContext.close();
+  report.cases.push({ name: 'server capability rollout preserves existing script plan and answers', status: 'passed' });
   const legacyContext = await context(); legacyContext.oldServer = true;
   const legacy = await legacyContext.newPage();
   await legacy.goto(site, { waitUntil: 'networkidle' });

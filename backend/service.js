@@ -3,7 +3,7 @@ import { createEngine, DomainError, invariant, normalizeStance, validateStudentI
 import { createLesson4Engine } from '../src/core/lesson4.js';
 import LESSON4_CONTENT from '../src/core/lesson4-content.js';
 
-export const VERSION = '5.1.0';
+export const VERSION = '5.2.0';
 export const COMMON_HEADERS = ['receivedAt', 'submissionId', 'studentId', 'cls', 'groupNo', 'lesson', 'clientTs', 'appVersion'];
 export const HEADERS = {
   config: ['key', 'value', 'note'],
@@ -71,7 +71,7 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
     return { grade: integer('grade', 2, 1, 3), classCount: integer('classCount', 11, 1, 99), groupMax: integer('groupMax', 8, 1, 20),
       acceptLessons: accepts, l2Questions: integer('l2Questions', 3, 2, 3), aiEnabled: ['anthropic', 'gemini'].includes(provider) && Boolean(prop('AI_MODEL') && prop('AI_API_KEY')),
       publicSharing: safeText(source.publicSharing || 'true') === 'true', appVersion: VERSION, implementedLessons: [2, 4],
-      l4Questions: integer('l4Questions', 4, 3, 5), l4AiEnabled: false,
+      l4Questions: integer('l4Questions', 4, 3, 5), l4AiEnabled: false, l4ScriptVersion: lesson4Content.version,
       lessons: { 2: { enabled: accepts.includes(2) }, 3: { enabled: false, reason: '아직 열리지 않음' }, 4: { enabled: accepts.includes(4), mode: 'script' } } };
   }
   function teacher(request) {
@@ -336,6 +336,8 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
     if (existing) assertGroupOwner(existing, actor);
     const fresh = lesson4Engine.buildSession({ stance: supplied.stance, arg1: supplied.arg1, arg5: supplied.arg5,
       sessionId: sid, questionCount: questionCount || existing?.questionCount || config().l4Questions,
+      scriptVersion: existing?.version || supplied.scriptVersion || supplied.version
+        || (/^5\.1\./.test(safeText(request.appVersion)) ? '1.0.0' : lesson4Content.version),
       seed: existing?.seed || supplied.seed || request.seed || sid });
     if (!existing || existing.draft) return { ...fresh, ...groupMeta(actor) };
     invariant(['stance', 'arg1', 'arg5'].every(key => fresh[key] === existing[key]), 'SESSION_LOCKED', '대담을 시작한 입론은 새 세션에서 변경해 주세요.');

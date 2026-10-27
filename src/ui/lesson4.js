@@ -35,7 +35,8 @@ export function createLesson4Controller({ api, storage, getState, setState, pers
   const errorHtml = () => error ? `<p class="error-message" role="alert">${h(error)}</p>` : '';
   const btn = (text, action, { primary = false, disabled = false, extra = '' } = {}) => `<button type="button" class="btn ${primary ? 'primary' : ''}" data-action="l4-${action}" ${disabled || busy ? 'disabled' : ''} ${extra}>${text}</button>`;
   const count = (key, value, max) => `<div class="char-count"><span data-l4-count="${key}">${value.length}</span> / ${max}자</div>`;
-  const selection = () => ({ stance: a().stance, arg1: a().arg1, arg5: a().arg5 });
+  const selection = () => ({ stance: a().stance, arg1: a().arg1, arg5: a().arg5,
+    scriptVersion: a().session?.version || (getConfig().l4ScriptVersion === LESSON4_CONTENT.version ? LESSON4_CONTENT.version : '1.0.0') });
   const common = () => ({ lesson: 4, sessionId: a().sessionId, ...a().identity, clientTs: new Date().toISOString(), appVersion: getAppVersion() });
   const request = mode => ({ ...common(), mode, turn: a().turn, selection: selection(), history: a().answers.map(item => ({ questionId: item.questionId, answer: item.answer, helpIds: item.helpIds })), earlyFinish: a().earlyFinish });
   const currentQuestion = () => ({ ...engine.getQuestion(a().session, a().turn), ...(a().remoteQuestions[a().turn] || {}) });

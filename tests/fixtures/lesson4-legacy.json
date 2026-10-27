@@ -1,0 +1,203 @@
+{
+  "description": "Frozen from main1e8aac1 lesson4 v1.0.0 before expansion; synthetic arguments only",
+  "cases": [
+    {
+      "input": {
+        "stance": "찬성",
+        "questionCount": 3,
+        "arg1": "공공 의료 상담 도우미의 도입 조건과 주민의 정보 보호 범위를 함께 검토해야 합니다.",
+        "arg5": "보건소에서 무료로 제공할 경우 책임과 비용을 확인하고 비대면 진료와 구분하겠습니다.",
+        "sessionId": "legacy_pro_3_0",
+        "seed": "before-update-0"
+      },
+      "digest": "3ef7b7741dfe5144f999c404330e8c4b8b9171cb39fd46d36f77105acdd4cd3b"
+    },
+    {
+      "input": {
+        "stance": "찬성",
+        "questionCount": 3,
+        "arg1": "바빌론의 법정 관리와 매각 사례를 보면 기술 성능을 확인해야 하며 어르신에게 스마트폰과 전화 이용 지원이 필요합니다.",
+        "arg5": "보건소에서 무료로 제공할 경우 책임과 비용을 확인하고 비대면 진료와 구분하겠습니다.",
+        "sessionId": "legacy_pro_3_1",
+        "seed": "before-update-1"
+      },
+      "digest": "82a3e3f179b9585b1d11a901469287ab8365e9ca640b0b861af0fb8c643e1532"
+    },
+    {
+      "input": {
+        "stance": "찬성",
+        "questionCount": 3,
+        "arg1": "의료 잡지 설문에서 열 명 중 일곱 명이 반대했고 근거 카드 5와 카드 6을 인용하여 해당 제도의 효과를 주장합니다.",
+        "arg5": "보건소에서 무료로 제공할 경우 책임과 비용을 확인하고 비대면 진료와 구분하겠습니다.",
+        "sessionId": "legacy_pro_3_2",
+        "seed": "before-update-2"
+      },
+      "digest": "58be04635c1cb73ca17f5f3163800de285eed4d8f0392f3e8c2b5b488075c9d2"
+    },
+    {
+      "input": {
+        "stance": "찬성",
+        "questionCount": 4,
+        "arg1": "공공 의료 상담 도우미의 도입 조건과 주민의 정보 보호 범위를 함께 검토해야 합니다.",
+        "arg5": "보건소에서 무료로 제공할 경우 책임과 비용을 확인하고 비대면 진료와 구분하겠습니다.",
+        "sessionId": "legacy_pro_4_0",
+        "seed": "before-update-0"
+      },
+      "digest": "febff3e16e36bc87894472a63fecbb08d4507586e38eb426ab2669f1610b33b7"
+    },
+    {
+      "input": {
+        "stance": "찬성",
+        "questionCount": 4,
+        "arg1": "바빌론의 법정 관리와 매각 사례를 보면 기술 성능을 확인해야 하며 어르신에게 스마트폰과 전화 이용 지원이 필요합니다.",
+        "arg5": "보건소에서 무료로 제공할 경우 책임과 비용을 확인하고 비대면 진료와 구분하겠습니다.",
+        "sessionId": "legacy_pro_4_1",
+        "seed": "before-update-1"
+      },
+      "digest": "4c06e6bb5271ceb83dbd2f1b39c3f4da428738365a7b68166e3a63485b5047e9"
+    },
+    {
+      "input": {
+        "stance": "찬성",
+        "questionCount": 4,
+        "arg1": "의료 잡지 설문에서 열 명 중 일곱 명이 반대했고 근거 카드 5와 카드 6을 인용하여 해당 제도의 효과를 주장합니다.",
+        "arg5": "보건소에서 무료로 제공할 경우 책임과 비용을 확인하고 비대면 진료와 구분하겠습니다.",
+        "sessionId": "legacy_pro_4_2",
+        "seed": "before-update-2"
+      },
+      "digest": "9f71cd0d2d65ac3bad8bb9cc4f2eec7cf06f992e761cbb1bc467b6ce269a3906"
+    },
+    {
+      "input": {
+        "stance": "찬성",
+        "questionCount": 5,
+        "arg1": "공공 의료 상담 도우미의 도입 조건과 주민의 정보 보호 범위를 함께 검토해야 합니다.",
+        "arg5": "보건소에서 무료로 제공할 경우 책임과 비용을 확인하고 비대면 진료와 구분하겠습니다.",
+        "sessionId": "legacy_pro_5_0",
+        "seed": "before-update-0"
+      },
+      "digest": "70953fca7695d065288178c1f8cdf585a36370618e417694d896ca119ee7673c"
+    },
+    {
+      "input": {
+        "stance": "찬성",
+        "questionCount": 5,
+        "arg1": "바빌론의 법정 관리와 매각 사례를 보면 기술 성능을 확인해야 하며 어르신에게 스마트폰과 전화 이용 지원이 필요합니다.",
+        "arg5": "보건소에서 무료로 제공할 경우 책임과 비용을 확인하고 비대면 진료와 구분하겠습니다.",
+        "sessionId": "legacy_pro_5_1",
+        "seed": "before-update-1"
+      },
+      "digest": "afa29918ceaf14dd9d9014c61a538447ede1cac97fa0828b3691333218c66b36"
+    },
+    {
+      "input": {
+        "stance": "찬성",
+        "questionCount": 5,
+        "arg1": "의료 잡지 설문에서 열 명 중 일곱 명이 반대했고 근거 카드 5와 카드 6을 인용하여 해당 제도의 효과를 주장합니다.",
+        "arg5": "보건소에서 무료로 제공할 경우 책임과 비용을 확인하고 비대면 진료와 구분하겠습니다.",
+        "sessionId": "legacy_pro_5_2",
+        "seed": "before-update-2"
+      },
+      "digest": "56c04e286204cbb34562ca06f96490da26884e14e0fbedd43e40c49d106b1c8e"
+    },
+    {
+      "input": {
+        "stance": "반대",
+        "questionCount": 3,
+        "arg1": "공공 의료 상담 도우미의 도입 조건과 주민의 정보 보호 범위를 함께 검토해야 합니다.",
+        "arg5": "보건소에서 무료로 제공할 경우 책임과 비용을 확인하고 비대면 진료와 구분하겠습니다.",
+        "sessionId": "legacy_con_3_0",
+        "seed": "before-update-0"
+      },
+      "digest": "6e19e0bedeabdd8405f912e3f4eb5b312763077526f74f702f653081af4b6d7c"
+    },
+    {
+      "input": {
+        "stance": "반대",
+        "questionCount": 3,
+        "arg1": "바빌론의 법정 관리와 매각 사례를 보면 기술 성능을 확인해야 하며 어르신에게 스마트폰과 전화 이용 지원이 필요합니다.",
+        "arg5": "보건소에서 무료로 제공할 경우 책임과 비용을 확인하고 비대면 진료와 구분하겠습니다.",
+        "sessionId": "legacy_con_3_1",
+        "seed": "before-update-1"
+      },
+      "digest": "91f80e70fa44732f4095e9a2b1ca53f2bd348942a3c5dccfac03883bb737294f"
+    },
+    {
+      "input": {
+        "stance": "반대",
+        "questionCount": 3,
+        "arg1": "의료 잡지 설문에서 열 명 중 일곱 명이 반대했고 근거 카드 5와 카드 6을 인용하여 해당 제도의 효과를 주장합니다.",
+        "arg5": "보건소에서 무료로 제공할 경우 책임과 비용을 확인하고 비대면 진료와 구분하겠습니다.",
+        "sessionId": "legacy_con_3_2",
+        "seed": "before-update-2"
+      },
+      "digest": "626bdd0acd3ab946ab1e5b995a6a2a68bdd7c378b8d6547bdea556917265d88b"
+    },
+    {
+      "input": {
+        "stance": "반대",
+        "questionCount": 4,
+        "arg1": "공공 의료 상담 도우미의 도입 조건과 주민의 정보 보호 범위를 함께 검토해야 합니다.",
+        "arg5": "보건소에서 무료로 제공할 경우 책임과 비용을 확인하고 비대면 진료와 구분하겠습니다.",
+        "sessionId": "legacy_con_4_0",
+        "seed": "before-update-0"
+      },
+      "digest": "997fc2b75eba528e95c1ad7cbd41f3e4d8dcbd153f3368a0a5159a8803068260"
+    },
+    {
+      "input": {
+        "stance": "반대",
+        "questionCount": 4,
+        "arg1": "바빌론의 법정 관리와 매각 사례를 보면 기술 성능을 확인해야 하며 어르신에게 스마트폰과 전화 이용 지원이 필요합니다.",
+        "arg5": "보건소에서 무료로 제공할 경우 책임과 비용을 확인하고 비대면 진료와 구분하겠습니다.",
+        "sessionId": "legacy_con_4_1",
+        "seed": "before-update-1"
+      },
+      "digest": "146c08b959fa1049d7c02710e493893be138d31072c569f299ca5e239c97a141"
+    },
+    {
+      "input": {
+        "stance": "반대",
+        "questionCount": 4,
+        "arg1": "의료 잡지 설문에서 열 명 중 일곱 명이 반대했고 근거 카드 5와 카드 6을 인용하여 해당 제도의 효과를 주장합니다.",
+        "arg5": "보건소에서 무료로 제공할 경우 책임과 비용을 확인하고 비대면 진료와 구분하겠습니다.",
+        "sessionId": "legacy_con_4_2",
+        "seed": "before-update-2"
+      },
+      "digest": "14d0d4f77b33355904ba0b7456ff9182c420b713f71d471d4d9f7c4e6ce067f6"
+    },
+    {
+      "input": {
+        "stance": "반대",
+        "questionCount": 5,
+        "arg1": "공공 의료 상담 도우미의 도입 조건과 주민의 정보 보호 범위를 함께 검토해야 합니다.",
+        "arg5": "보건소에서 무료로 제공할 경우 책임과 비용을 확인하고 비대면 진료와 구분하겠습니다.",
+        "sessionId": "legacy_con_5_0",
+        "seed": "before-update-0"
+      },
+      "digest": "839b16c41cb078db7ff0a533efb39c65df7ed5973fde0c9e2990936cc11522e0"
+    },
+    {
+      "input": {
+        "stance": "반대",
+        "questionCount": 5,
+        "arg1": "바빌론의 법정 관리와 매각 사례를 보면 기술 성능을 확인해야 하며 어르신에게 스마트폰과 전화 이용 지원이 필요합니다.",
+        "arg5": "보건소에서 무료로 제공할 경우 책임과 비용을 확인하고 비대면 진료와 구분하겠습니다.",
+        "sessionId": "legacy_con_5_1",
+        "seed": "before-update-1"
+      },
+      "digest": "1fcea5b6eaf0e77541ac36c8d647ff1a10f3fd98b185f7fc1b831ba2ec274384"
+    },
+    {
+      "input": {
+        "stance": "반대",
+        "questionCount": 5,
+        "arg1": "의료 잡지 설문에서 열 명 중 일곱 명이 반대했고 근거 카드 5와 카드 6을 인용하여 해당 제도의 효과를 주장합니다.",
+        "arg5": "보건소에서 무료로 제공할 경우 책임과 비용을 확인하고 비대면 진료와 구분하겠습니다.",
+        "sessionId": "legacy_con_5_2",
+        "seed": "before-update-2"
+      },
+      "digest": "88ae16dc4fdb10f9b868a88ad0c785289b01af8f761296fc8864efd0e165cce0"
+    }
+  ]
+}

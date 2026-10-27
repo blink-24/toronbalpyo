@@ -5,6 +5,7 @@ export function normalizeLessonConfig(data = {}) {
     groupMax: Number(data.groupMax) || 8, acceptLessons: array(data.acceptLessons ?? '2').filter(value => [2, 4].includes(value)),
     implementedLessons, l2Questions: Number(data.l2Questions) === 2 ? 2 : 3,
     l4Questions: [3, 4, 5].includes(Number(data.l4Questions)) ? Number(data.l4Questions) : 4,
+    l4ScriptVersion: data.l4ScriptVersion === '1.1.0' ? '1.1.0' : '1.0.0',
     aiEnabled: Boolean(data.aiEnabled), l4AiEnabled: false, publicSharing: data.publicSharing !== false,
     appVersion: String(data.appVersion || data.version || '5.0.0') };
 }

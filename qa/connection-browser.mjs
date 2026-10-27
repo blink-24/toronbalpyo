@@ -24,14 +24,15 @@ try {
     try { return JSON.parse(localStorage.getItem('chaeum:v5:public-config') || '{}').implementedLessons?.includes(4); } catch { return false; }
   });
   const config = await page.evaluate(() => JSON.parse(localStorage.getItem('chaeum:v5:public-config')));
-  assert.equal(config.appVersion, '5.1.0'); assert.equal(config.l4AiEnabled, false);
+  assert.ok(['5.1.0', '5.2.0'].includes(config.appVersion)); assert.equal(config.l4AiEnabled, false);
+  assert.equal(config.l4ScriptVersion, config.appVersion === '5.2.0' ? '1.1.0' : '1.0.0');
   assert.equal(await page.locator('[data-action="learn-slide"]').count(), config.acceptLessons.includes(2) ? 19 : 0);
   await page.locator('#lesson-tab-4').click();
   if (config.acceptLessons.includes(4)) await page.locator('form[data-form="l4-entry"]').waitFor();
   else { await page.locator('[data-lesson-locked="4"]').waitFor(); assert.match(await page.locator('[data-lesson-locked="4"]').innerText(), /지금 닫혀/); }
   assert.equal(blockedPosts.length, 0); assert.deepEqual(errors, []);
   await page.screenshot({ path: new URL('real-api-read-only.png', output).pathname, fullPage: true });
-  const report = { site, realApi: true, readOnly: true, createdRecords: 0, blockedPosts, errors, version: config.appVersion, classCount: config.classCount, acceptLessons: config.acceptLessons, l4AiEnabled: config.l4AiEnabled };
+  const report = { site, realApi: true, readOnly: true, createdRecords: 0, blockedPosts, errors, version: config.appVersion, scriptVersion: config.l4ScriptVersion, classCount: config.classCount, acceptLessons: config.acceptLessons, l4AiEnabled: config.l4AiEnabled };
   await fs.writeFile(new URL('real-api-read-only.json', output), JSON.stringify(report, null, 2));
-  console.log('PASS: 실제 서버5.1.0 브라우저 CORS·2/4차시 화면·현재 개방 설정(읽기 전용, 저장 없음)');
+  console.log(`PASS: 실제 서버${config.appVersion}·대본${config.l4ScriptVersion} 브라우저 CORS·2/4차시 화면(읽기 전용, 저장 없음)`);
 } finally { await context.close(); await browser.close(); }
