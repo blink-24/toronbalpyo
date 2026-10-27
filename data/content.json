@@ -1,0 +1,1170 @@
+{
+  "version": "5.0.0",
+  "lesson": 2,
+  "title": "반대 신문 체험",
+  "motion": "보행 중에 스마트폰을 사용하면 벌금을 부과해야 한다.",
+  "motionType": "정책 논제",
+  "fictionalCity": "한빛시",
+  "source": {
+    "webappSpec": "5_발표토론연계_웹앱스펙_v5(1).md",
+    "webappSpecSha256": "b5f0ab9d260d1cbec993b3d5030fe34799f512641cbd5bde03d633994fe8eeab",
+    "lessonPlanVersion": "v6",
+    "lessonPlanSha256": "201ed842f071206e456bec60e9fc167269aae2d3e4d4b8d58a5dcafb93ab68fe",
+    "sections": [
+      "3-3",
+      "3-4",
+      "3-5",
+      "3-6",
+      "3-7",
+      "3-8"
+    ]
+  },
+  "stances": [
+    {
+      "id": "pro",
+      "value": "찬성",
+      "label": "찬성: 벌금을 부과해야 한다",
+      "claim": "보행 중에 스마트폰을 사용하면 벌금을 부과해야 한다"
+    },
+    {
+      "id": "con",
+      "value": "반대",
+      "label": "반대: 부과해서는 안 된다",
+      "claim": "보행 중에 스마트폰을 사용해도 벌금을 부과해서는 안 된다"
+    }
+  ],
+  "limits": {
+    "reasonMin": 10,
+    "reasonMax": 120,
+    "argumentMax": 300,
+    "answerMax": 300,
+    "reflectionMin": 10,
+    "reflectionMax": 150,
+    "defaultQuestionCount": 3,
+    "minQuestionCount": 2,
+    "helpCardsPerQuestion": 2,
+    "totalSeconds": 1080,
+    "serverTimeoutMs": 20000
+  },
+  "steps": [
+    {
+      "id": "stance",
+      "label": "입장",
+      "seconds": 60
+    },
+    {
+      "id": "reason",
+      "label": "이유",
+      "seconds": 120
+    },
+    {
+      "id": "evidence",
+      "label": "근거 카드",
+      "seconds": 120
+    },
+    {
+      "id": "argument",
+      "label": "내 입론",
+      "seconds": 120
+    },
+    {
+      "id": "dialogue",
+      "label": "반대 신문",
+      "seconds": 540
+    },
+    {
+      "id": "feedback",
+      "label": "피드백·성찰",
+      "seconds": 120
+    }
+  ],
+  "labels": {
+    "virtualBadge": "수업용 가상 자료",
+    "unknown": "밝혀지지 않음",
+    "cardInstruction": "교과서 203쪽 신뢰성 기준(출처가 있는가, 믿을 만한가, 최신인가)으로 살펴보고 고르세요.",
+    "chatNotice": "챗봇의 말도 틀릴 수 있습니다. 교과서 203쪽 기준(타당성·신뢰성·공정성)으로 판단하세요.",
+    "scriptNotice": "지금은 연습용 대본으로 진행합니다.",
+    "offTopicReminder": "질문에 대한 답을 써 주세요.",
+    "earlyFeedback": "시간이 부족해요: 피드백 보기",
+    "reflectionPrompt": "반대 신문을 받아 보니, 다음에 입론을 쓸 때 ___을 하겠다.",
+    "weakCardReminder": "처음 고른 근거 카드의 출처를 다시 살펴보세요(203쪽 신뢰성 기준)."
+  },
+  "criteria": [
+    "신뢰성",
+    "타당성",
+    "공정성"
+  ],
+  "criterionExplanations": {
+    "타당성": "이유와 근거에서 주장이 무리 없이 나오는가",
+    "신뢰성": "자료의 출처가 있고 믿을 만하며 최신인가",
+    "공정성": "한쪽에 치우치지 않고 공동체의 가치를 고려했는가"
+  },
+  "reasons": [
+    {
+      "id": "RP1",
+      "stance": "찬성",
+      "stanceId": "pro",
+      "text": "보행 중 스마트폰 사용은 주변을 살피지 못하게 해 사고 위험을 높이기 때문입니다",
+      "weakness": "위험 → '벌금'이라는 해결책으로의 연결(타당성)",
+      "custom": false
+    },
+    {
+      "id": "RP2",
+      "stance": "찬성",
+      "stanceId": "pro",
+      "text": "벌금을 물리면 사람들이 스마트폰을 보며 걷는 습관을 곧바로 고칠 것이기 때문입니다",
+      "weakness": "'곧바로'의 논리적 비약(타당성, 심각도 높음)",
+      "custom": false
+    },
+    {
+      "id": "RP3",
+      "stance": "찬성",
+      "stanceId": "pro",
+      "text": "스마트폰을 보며 걷는 사람 때문에 다른 보행자들이 불편과 위험을 겪기 때문입니다",
+      "weakness": "불편 → 벌금의 비례성(공정성)",
+      "custom": false
+    },
+    {
+      "id": "RN1",
+      "stance": "반대",
+      "stanceId": "con",
+      "text": "벌금은 길을 걷는 개인의 생활을 지나치게 간섭하는 일이기 때문입니다",
+      "weakness": "공동체 안전이라는 가치 고려 부족(공정성)",
+      "custom": false
+    },
+    {
+      "id": "RN2",
+      "stance": "반대",
+      "stanceId": "con",
+      "text": "보행 중 사고는 대부분 운전자의 부주의로 일어나기 때문입니다",
+      "weakness": "운전자 쪽으로만 책임을 돌림(공정성, 심각도 높음 — 교과서 ㉢을 뒤집은 꼴)",
+      "custom": false
+    },
+    {
+      "id": "RN3",
+      "stance": "반대",
+      "stanceId": "con",
+      "text": "벌금보다 안전 교육과 안내 표지가 사고를 더 잘 줄이기 때문입니다",
+      "weakness": "효과 비교 자료가 필요(타당성)",
+      "custom": false
+    },
+    {
+      "id": "RX",
+      "stance": "공통",
+      "stanceId": "custom",
+      "text": "직접 쓰기(10~120자)",
+      "weakness": "AI 모드: AI가 약점 판단 / 대본: 타당성 일반 질문",
+      "custom": true
+    }
+  ],
+  "evidenceCards": [
+    {
+      "id": "PA",
+      "stance": "찬성",
+      "stanceId": "pro",
+      "source": "한빛시 교통안전연구원(가상)",
+      "year": "2025년",
+      "method": "횡단보도 3곳에서 보행자 1,200명 관찰",
+      "content": "스마트폰을 보며 건너는 보행자가 좌우를 살핀 비율은 그렇지 않은 보행자의 절반 정도였다.",
+      "reliability": "높음",
+      "weakness": "위험이 크다 ≠ 벌금이 알맞다(타당성)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "PB",
+      "stance": "찬성",
+      "stanceId": "pro",
+      "source": "인터넷 게시판 글(작성자 모름)",
+      "year": "밝혀지지 않음",
+      "method": "밝혀지지 않음",
+      "content": "스마트폰을 보다가 넘어지는 사람을 매일 본다.",
+      "reliability": "낮음",
+      "weakness": "출처·시기 없음(신뢰성)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "PC",
+      "stance": "찬성",
+      "stanceId": "pro",
+      "source": "어느 해외 신문 기사(가상)",
+      "year": "2009년",
+      "method": "밝혀지지 않음",
+      "content": "보행 중 휴대 전화 사용으로 인한 사고가 늘고 있다.",
+      "reliability": "낮음",
+      "weakness": "오래됨·다른 나라(신뢰성)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "PD",
+      "stance": "찬성",
+      "stanceId": "pro",
+      "source": "한빛시청 시범 사업 보고서(가상)",
+      "year": "2025년",
+      "method": "벌금 시범 구역 2곳, 6개월 전후 비교",
+      "content": "시범 구역에서 보행 중 스마트폰 사용 비율이 줄었다.",
+      "reliability": "높음",
+      "weakness": "줄어든 까닭이 벌금뿐인가(타당성)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "NA",
+      "stance": "반대",
+      "stanceId": "con",
+      "source": "한빛시 청소년 정책 연구 모임(가상)",
+      "year": "2025년",
+      "method": "고등학생 800명 설문",
+      "content": "응답자의 다수가 '벌금보다 안전 교육이 더 효과적'이라고 답했다.",
+      "reliability": "보통",
+      "weakness": "생각이 많다 ≠ 효과가 있다(타당성), 청소년만 조사(공정성)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "NB",
+      "stance": "반대",
+      "stanceId": "con",
+      "source": "출처가 밝혀지지 않은 SNS 카드 뉴스",
+      "year": "밝혀지지 않음",
+      "method": "밝혀지지 않음",
+      "content": "벌금을 도입한 도시에서 시민 불만이 폭증했다.",
+      "reliability": "낮음",
+      "weakness": "출처 없음(신뢰성)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "NC",
+      "stance": "반대",
+      "stanceId": "con",
+      "source": "스마트폰 판매 업체 홍보 자료(가상)",
+      "year": "2024년",
+      "method": "밝혀지지 않음",
+      "content": "보행 중 스마트폰 사용은 생각보다 위험하지 않다.",
+      "reliability": "낮음",
+      "weakness": "이해 당사자의 자료(신뢰성)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "ND",
+      "stance": "반대",
+      "stanceId": "con",
+      "source": "한빛시 교통안전연구원(가상)",
+      "year": "2025년",
+      "method": "보행자 사고 300건 분석",
+      "content": "보행자 사고의 원인으로 운전자의 안전 운전 의무 위반이 가장 많았다.",
+      "reliability": "높음",
+      "weakness": "'가장 많다' → '보행자는 책임 없다'로 넓히면 치우침(공정성)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    }
+  ],
+  "helpCards": [
+    {
+      "id": "H1",
+      "criterion": "신뢰성",
+      "stance": "찬성",
+      "stanceId": "pro",
+      "content": "한빛시 교통안전연구원(가상), 2025년, 보행자 사고 300건 분석: 사고 직전 스마트폰을 보고 있던 보행자가 적지 않았다.",
+      "source": "한빛시 교통안전연구원(가상)",
+      "year": "2025년",
+      "citation": "한빛시 교통안전연구원(가상), 2025년",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "H2",
+      "criterion": "신뢰성",
+      "stance": "찬성",
+      "stanceId": "pro",
+      "content": "한빛시청 시범 사업 보고서(가상), 2025년: 벌금 시범 구역 2곳에서 6개월 뒤 보행 중 스마트폰 사용 비율이 줄었다.",
+      "source": "한빛시청 시범 사업 보고서(가상)",
+      "year": "2025년",
+      "citation": "한빛시청 시범 사업 보고서(가상), 2025년",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "H3",
+      "criterion": "신뢰성",
+      "stance": "반대",
+      "stanceId": "con",
+      "content": "한빛시 교육청(가상), 2025년: 보행 안전 교육을 한 학교 주변에서 보행 중 스마트폰 사용 비율이 줄었다.",
+      "source": "한빛시 교육청(가상)",
+      "year": "2025년",
+      "citation": "한빛시 교육청(가상), 2025년",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "H4",
+      "criterion": "신뢰성",
+      "stance": "반대",
+      "stanceId": "con",
+      "content": "한빛시 시민 설문(가상), 2025년, 성인 1,000명, 조사 기관·방법 공개: '벌금보다 안내·교육'을 원한다는 응답이 더 많았다.",
+      "source": "한빛시 시민 설문(가상)",
+      "year": "2025년",
+      "citation": "한빛시 시민 설문(가상), 2025년",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "H5",
+      "criterion": "타당성",
+      "stance": "찬성",
+      "stanceId": "pro",
+      "content": "같은 기간 시범 구역과 아닌 구역 비교(가상): 사용 비율이 시범 구역에서만 크게 줄었다.",
+      "source": "같은 기간 시범 구역과 아닌 구역 비교(가상)",
+      "year": null,
+      "citation": "같은 기간 시범 구역과 아닌 구역 비교(가상)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "H6",
+      "criterion": "타당성",
+      "stance": "찬성",
+      "stanceId": "pro",
+      "content": "경고 안내판만 설치한 구역(가상): 6개월 동안 사용 비율에 변화가 거의 없었다.",
+      "source": "경고 안내판만 설치한 구역(가상)",
+      "year": null,
+      "citation": "경고 안내판만 설치한 구역(가상)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "H7",
+      "criterion": "타당성",
+      "stance": "반대",
+      "stanceId": "con",
+      "content": "안전 교육 전후 비교(가상): 교육 뒤 3개월 동안 사용 비율이 줄었다.",
+      "source": "안전 교육 전후 비교(가상)",
+      "year": null,
+      "citation": "안전 교육 전후 비교(가상)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "H8",
+      "criterion": "타당성",
+      "stance": "반대",
+      "stanceId": "con",
+      "content": "벌금 시범 구역(가상): 단속이 끝나자 사용 비율이 다시 늘었다.",
+      "source": "벌금 시범 구역(가상)",
+      "year": null,
+      "citation": "벌금 시범 구역(가상)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "H9",
+      "criterion": "공정성",
+      "stance": "공통",
+      "stanceId": "all",
+      "content": "보행자와 운전자 모두의 주의 의무를 함께 다룬 한빛시 보행 안전 수칙(가상).",
+      "source": "한빛시 보행 안전 수칙(가상)",
+      "year": null,
+      "citation": "한빛시 보행 안전 수칙(가상)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "H10",
+      "criterion": "공정성",
+      "stance": "찬성",
+      "stanceId": "pro",
+      "content": "시범 운영안(가상): 첫 적발은 경고, 다시 적발되면 소액 벌금, 횡단보도 주변에만 적용.",
+      "source": "시범 운영안(가상)",
+      "year": null,
+      "citation": "시범 운영안(가상)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "H11",
+      "criterion": "공정성",
+      "stance": "반대",
+      "stanceId": "con",
+      "content": "사고 원인 분석(가상): 운전자 과실이 가장 많았지만 보행자의 부주의가 함께 원인이 된 사고도 있었다.",
+      "source": "사고 원인 분석(가상)",
+      "year": null,
+      "citation": "사고 원인 분석(가상)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "H12",
+      "criterion": "공정성",
+      "stance": "공통",
+      "stanceId": "all",
+      "content": "한빛시 교통안전 캠페인(가상): \"어린이·노인의 보행 안전은 모두가 함께 지킵니다.\"",
+      "source": "한빛시 교통안전 캠페인(가상)",
+      "year": null,
+      "citation": "한빛시 교통안전 캠페인(가상)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q-REL-PB",
+      "criterion": "신뢰성",
+      "confirm": "근거로 인터넷 게시판 글을 드셨는데요, 작성자를 확인할 수 없는 글이 맞습니까?",
+      "verify": "작성자도 날짜도 알 수 없는 글을 이 주장의 근거로 삼을 수 있습니까?",
+      "better": "출처가 약함을 인정하고, 출처·시기·조사 방법이 밝혀진 자료로 바꾸어 답한다",
+      "targetKey": "card.source"
+    },
+    {
+      "id": "Q-REL-PC",
+      "criterion": "신뢰성",
+      "confirm": "근거로 2009년 해외 신문 기사를 드셨지요?",
+      "verify": "십수 년 전 다른 나라의 기사가 지금 한빛시의 상황을 보여 준다고 할 수 있습니까?",
+      "better": "최신 자료가 아님을 인정하고 최근 국내(가상) 조사로 보완한다",
+      "targetKey": "card.source"
+    },
+    {
+      "id": "Q-REL-NB",
+      "criterion": "신뢰성",
+      "confirm": "근거로 든 카드 뉴스는 출처가 밝혀져 있지 않지요?",
+      "verify": "출처를 알 수 없는 카드 뉴스로 '불만 폭증'을 입증할 수 있습니까?",
+      "better": "출처 없는 자료임을 인정하고 조사 기관·방법이 공개된 설문으로 바꾼다",
+      "targetKey": "card.source"
+    },
+    {
+      "id": "Q-REL-NC",
+      "criterion": "신뢰성",
+      "confirm": "근거 자료는 스마트폰 판매 업체의 홍보 자료가 맞습니까?",
+      "verify": "스마트폰을 파는 업체의 자료를 믿을 만한 근거라고 할 수 있습니까?",
+      "better": "이해 당사자의 자료라는 한계를 인정하고 중립적인 기관의 자료를 든다",
+      "targetKey": "card.source"
+    },
+    {
+      "id": "Q-REL-GEN",
+      "criterion": "신뢰성",
+      "confirm": "근거로 든 자료는 {source}의 {year} 자료이지요?",
+      "verify": "그 결과가 다른 기관의 조사로도 확인되었습니까?",
+      "better": "조사 기관·방법을 다시 밝히고, 같은 결과를 보인 다른 자료가 있으면 덧붙인다",
+      "targetKey": "card.source",
+      "sourceConfirm": "근거로 든 자료는 {source}의 {year} 자료이지요?(시기가 없으면 '{source}의 자료이지요?')",
+      "confirmWithoutYear": "근거로 든 자료는 {source}의 자료이지요?"
+    },
+    {
+      "id": "Q-VAL-RP2",
+      "criterion": "타당성",
+      "confirm": "벌금을 물리면 습관을 '곧바로' 고칠 것이라고 하셨지요?",
+      "verify": "벌금만으로 습관이 곧바로 바뀐다는 근거를 제시하셨습니까?",
+      "better": "'곧바로'가 지나쳤음을 인정하고, 벌금 전후 비교 자료로 '줄어든다'는 정도로 고쳐 답한다",
+      "targetKey": "reason.immediacy"
+    },
+    {
+      "id": "Q-VAL-PA",
+      "criterion": "타당성",
+      "confirm": "스마트폰을 보는 보행자가 좌우를 덜 살핀다는 관찰 결과를 드셨지요?",
+      "verify": "위험이 크다는 사실만으로 벌금이 알맞은 해결책이라는 결론이 바로 나옵니까?",
+      "better": "위험 → 행동을 바꿀 강한 방법이 필요 → 벌금의 효과 자료로 이유와 주장을 잇는다",
+      "targetKey": "card.observationToPolicy"
+    },
+    {
+      "id": "Q-VAL-PD",
+      "criterion": "타당성",
+      "confirm": "시범 구역에서 사용 비율이 줄었다고 하셨지요?",
+      "verify": "그 감소가 벌금 때문이고 안내판이나 홍보 같은 다른 까닭은 아니라고 확신할 수 있습니까?",
+      "better": "다른 원인 가능성을 인정하고, 시범 구역과 아닌 구역을 비교한 자료로 보완한다",
+      "targetKey": "card.causation"
+    },
+    {
+      "id": "Q-VAL-NA",
+      "criterion": "타당성",
+      "confirm": "고등학생 다수가 교육이 더 효과적이라고 '답했다'는 설문을 드셨지요?",
+      "verify": "효과가 있다고 생각하는 사람이 많다는 것이 실제로 효과가 있다는 증거가 됩니까?",
+      "better": "의견과 효과를 구분하고, 교육 전후를 비교한 자료로 바꾼다",
+      "targetKey": "card.opinionToEffect"
+    },
+    {
+      "id": "Q-VAL-ND",
+      "criterion": "타당성",
+      "confirm": "사고 원인으로 운전자의 의무 위반이 가장 많았다는 분석을 근거로 드셨지요?",
+      "verify": "가장 많은 원인이 운전자라고 해서 보행자의 스마트폰 사용은 사고와 관계없다고 할 수 있습니까?",
+      "better": "보행자 부주의도 원인일 수 있음을 인정하고, 그래도 벌금보다 나은 방법이 있다는 쪽으로 주장을 잇는다",
+      "targetKey": "card.causeToPolicy"
+    },
+    {
+      "id": "Q-VAL-RP1",
+      "criterion": "타당성",
+      "confirm": "스마트폰 사용이 사고 위험을 높인다고 하셨지요?",
+      "verify": "위험을 줄이는 방법이 여러 가지인데 꼭 벌금이어야 하는 까닭을 말씀하셨습니까?",
+      "better": "안내·교육만으로는 부족했다는 자료로 벌금이 필요한 까닭을 보탠다",
+      "targetKey": "reason.riskToPolicy"
+    },
+    {
+      "id": "Q-VAL-RN3",
+      "criterion": "타당성",
+      "confirm": "교육과 안내 표지가 벌금보다 효과적이라고 하셨지요?",
+      "verify": "두 방법의 효과를 비교한 자료를 제시하셨습니까?",
+      "better": "비교 자료가 없었음을 인정하고 교육 전후·벌금 전후 자료를 함께 든다",
+      "targetKey": "reason.effectComparison"
+    },
+    {
+      "id": "Q-VAL-RX",
+      "criterion": "타당성",
+      "confirm": "'{snippet}…'처럼 말씀하셨지요?",
+      "verify": "그 이유가 '{stanceClaim}'는 주장을 직접 뒷받침한다고 할 수 있습니까?",
+      "better": "이유와 주장 사이의 연결을 '왜냐하면/따라서'로 풀어 말한다",
+      "targetKey": "reason.claimLink"
+    },
+    {
+      "id": "Q-VAL-RN2",
+      "criterion": "타당성",
+      "confirm": "보행 중 사고의 원인을 들어 벌금에 반대하셨지요?",
+      "verify": "사고의 주된 원인이 누구냐는 문제와 보행 중 스마트폰 사용에 벌금을 물릴지는 서로 다른 문제 아닙니까?",
+      "better": "원인이 운전자에게 많더라도 보행자 쪽 위험을 줄이는 다른 방법(교육 등)이 낫다는 쪽으로 이유와 주장을 다시 잇는다",
+      "targetKey": "stance.policyLink"
+    },
+    {
+      "id": "Q-VAL-PB",
+      "criterion": "타당성",
+      "confirm": "스마트폰을 보다가 넘어지는 사람을 매일 본다는 내용을 근거로 드셨지요?",
+      "verify": "한 사람이 본 장면으로 모든 보행자에게 벌금을 물려야 한다는 결론까지 나아갈 수 있습니까?",
+      "better": "개인의 경험을 일반화했음을 인정하고 많은 사람을 조사한 자료로 바꾼다",
+      "targetKey": "card.generalization"
+    },
+    {
+      "id": "Q-VAL-PC",
+      "criterion": "타당성",
+      "confirm": "보행 중 휴대 전화 사고가 늘고 있다는 내용을 드셨지요?",
+      "verify": "사고가 늘었다는 사실만으로 벌금이 알맞은 해결책이라는 결론이 나옵니까?",
+      "better": "사고 증가 → 강한 대책 필요 → 벌금의 효과 자료로 연결을 보탠다",
+      "targetKey": "card.accidentsToPolicy"
+    },
+    {
+      "id": "Q-VAL-NB",
+      "criterion": "타당성",
+      "confirm": "벌금을 도입한 도시에서 시민 불만이 폭증했다는 내용을 드셨지요?",
+      "verify": "시민의 불만이 크다는 것이 벌금이 효과가 없다는 증거가 됩니까?",
+      "better": "불만과 효과를 구분하고, 효과를 비교한 자료로 바꾼다",
+      "targetKey": "card.discontentToEffect"
+    },
+    {
+      "id": "Q-VAL-NC",
+      "criterion": "타당성",
+      "confirm": "보행 중 스마트폰 사용이 생각보다 위험하지 않다는 내용을 드셨지요?",
+      "verify": "'생각보다 위험하지 않다'는 말로 벌금이 필요 없다는 결론이 바로 나옵니까?",
+      "better": "위험의 정도를 보여 주는 중립적 자료와 함께 벌금 대신 쓸 방법을 제시한다",
+      "targetKey": "card.riskToPolicy"
+    },
+    {
+      "id": "Q-FAIR-RN2",
+      "criterion": "공정성",
+      "confirm": "보행 중 사고는 '대부분' 운전자의 부주의 때문이라고 하셨지요?",
+      "verify": "그것은 보행자의 책임은 빼고 운전자에게만 책임을 돌리는 치우친 주장 아닙니까?",
+      "better": "한쪽으로 치우쳤음을 인정하고 보행자·운전자 모두의 책임을 인정하는 쪽으로 고친다",
+      "targetKey": "reason.blame"
+    },
+    {
+      "id": "Q-FAIR-RN1",
+      "criterion": "공정성",
+      "confirm": "벌금이 개인의 생활을 지나치게 간섭한다고 하셨지요?",
+      "verify": "다른 보행자와 운전자의 안전이라는 공동체의 가치는 고려하지 않으신 것 아닙니까?",
+      "better": "공동체 안전도 중요함을 인정하고, 간섭이 적으면서 안전을 지키는 방법을 제시한다",
+      "targetKey": "reason.freedomOnly"
+    },
+    {
+      "id": "Q-FAIR-RP3",
+      "criterion": "공정성",
+      "confirm": "다른 보행자가 불편을 겪는다는 것을 이유로 드셨지요?",
+      "verify": "벌금을 내야 하는 보행자의 사정은 고려하지 않고 불편을 겪는 쪽의 입장만 내세운 주장 아닙니까?",
+      "better": "위험이 큰 장소(횡단보도 등)로 범위를 좁히거나 첫 적발은 경고로 하는 등 정도를 조정한다",
+      "targetKey": "reason.otherPedestrians"
+    },
+    {
+      "id": "Q-FAIR-ND",
+      "criterion": "공정성",
+      "confirm": "운전자의 의무 위반이 가장 많다는 자료를 드셨지요?",
+      "verify": "그 자료로 보행자의 책임은 없다고 말하는 것은 한쪽에 치우친 해석 아닙니까?",
+      "better": "자료의 범위를 넘어선 해석이었음을 인정한다",
+      "targetKey": "card.exclusiveBlame"
+    },
+    {
+      "id": "Q-FAIR-P",
+      "criterion": "공정성",
+      "confirm": "벌금을 부과해야 한다는 입장이시지요?",
+      "verify": "벌금을 내기 어려운 학생이나 노인의 사정은 고려하지 않은, 한쪽에 치우친 주장 아닙니까?",
+      "better": "액수·적용 범위를 조정하는 방안(경고 먼저, 소액 등)으로 공정성을 보완한다",
+      "targetKey": "stance.proportionality"
+    },
+    {
+      "id": "Q-FAIR-N",
+      "criterion": "공정성",
+      "confirm": "벌금을 부과해서는 안 된다는 입장이시지요?",
+      "verify": "그렇다면 스마트폰을 보며 걷는 사람과 부딪힐 수 있는 다른 보행자의 안전은 고려하지 않으신 것 아닙니까?",
+      "better": "개인의 자유와 다른 사람의 안전을 함께 고려하는 대안을 제시한다",
+      "targetKey": "stance.otherSafety"
+    }
+  ],
+  "argumentTemplate": {
+    "opening": "저는 '보행 중에 스마트폰을 사용하면 벌금을 부과해야 한다.'는 논제에 {stance}합니다.",
+    "reason": "그 이유는 {reason}.",
+    "evidence": "{source}의 {year} 자료에 따르면 '{content}'라고 합니다.",
+    "evidenceWithoutYear": "{source}에 따르면 '{content}'라고 합니다.",
+    "removeTrailingPeriodFromCard": true
+  },
+  "questionPlanRules": {
+    "criteriaUnique": true,
+    "sort": [
+      {
+        "field": "severity",
+        "direction": "desc"
+      },
+      {
+        "criterionOrder": [
+          "신뢰성",
+          "타당성",
+          "공정성"
+        ]
+      }
+    ],
+    "questionCount2": "정렬된 세 질문 중 앞의 두 개",
+    "reliability": [
+      {
+        "cardIds": [
+          "PB",
+          "PC",
+          "NB",
+          "NC"
+        ],
+        "questionByCardPrefix": "Q-REL-",
+        "severity": 3
+      },
+      {
+        "fallbackId": "Q-REL-GEN",
+        "severity": 1
+      }
+    ],
+    "validity": [
+      {
+        "reasonIds": [
+          "RP2"
+        ],
+        "fallbackId": "Q-VAL-RP2",
+        "severity": 3
+      },
+      {
+        "reasonIds": [
+          "RN2"
+        ],
+        "cardIds": [
+          "NB",
+          "NC",
+          "ND"
+        ],
+        "fallbackId": "Q-VAL-RN2",
+        "severity": 2
+      },
+      {
+        "cardIds": [
+          "PA",
+          "PD",
+          "NA"
+        ],
+        "questionByCardPrefix": "Q-VAL-",
+        "severity": 2
+      },
+      {
+        "reasonIds": [
+          "RN1"
+        ],
+        "cardIds": [
+          "ND"
+        ],
+        "fallbackId": "Q-VAL-ND",
+        "severity": 2
+      },
+      {
+        "reasonIds": [
+          "RP1",
+          "RN3"
+        ],
+        "questionByReasonPrefix": "Q-VAL-",
+        "severity": 2
+      },
+      {
+        "reasonIds": [
+          "RX"
+        ],
+        "fallbackId": "Q-VAL-RX",
+        "severity": 2
+      },
+      {
+        "reasonIds": [
+          "RP3",
+          "RN1"
+        ],
+        "cardIds": [
+          "PB",
+          "PC",
+          "NB",
+          "NC"
+        ],
+        "questionByCardPrefix": "Q-VAL-",
+        "severity": 2
+      }
+    ],
+    "fairness": [
+      {
+        "reasonIds": [
+          "RN2"
+        ],
+        "fallbackId": "Q-FAIR-RN2",
+        "severity": 3
+      },
+      {
+        "reasonIds": [
+          "RN1"
+        ],
+        "fallbackId": "Q-FAIR-RN1",
+        "severity": 2
+      },
+      {
+        "reasonIds": [
+          "RP3"
+        ],
+        "fallbackId": "Q-FAIR-RP3",
+        "severity": 2
+      },
+      {
+        "cardIds": [
+          "ND"
+        ],
+        "fallbackId": "Q-FAIR-ND",
+        "severity": 2
+      },
+      {
+        "stanceId": "pro",
+        "fallbackId": "Q-FAIR-P",
+        "severity": 1
+      },
+      {
+        "stanceId": "con",
+        "fallbackId": "Q-FAIR-N",
+        "severity": 1
+      }
+    ]
+  },
+  "feedbackRules": {
+    "reliability": {
+      "strong": "출처(기관·조사명·시기)를 밝히거나 도움 자료를 인용함",
+      "partial": "'조사, 자료, 통계, 수치'는 말했으나 출처가 없음",
+      "weak": "자료 없이 의견만",
+      "partialKeywords": [
+        "조사",
+        "자료",
+        "통계",
+        "수치"
+      ]
+    },
+    "validity": {
+      "strong": "이유와 주장을 연결어(때문에·따라서·그러므로·왜냐하면·즉)로 잇고 40자 이상",
+      "partial": "연결어나 40자 중 하나만",
+      "weak": "둘 다 없음",
+      "connectors": [
+        "때문에",
+        "따라서",
+        "그러므로",
+        "왜냐하면",
+        "즉"
+      ],
+      "minLength": 40
+    },
+    "attitude": {
+      "positive": [
+        "맞습니다",
+        "인정합니다",
+        "말씀대로",
+        "다만"
+      ],
+      "negative": [
+        "모르겠",
+        "상관없",
+        "아무튼",
+        "그건 중요하지 않"
+      ],
+      "shortAnswerThreshold": 10,
+      "labels": [
+        "인정함",
+        "보통",
+        "피함"
+      ]
+    },
+    "ratingLabels": {
+      "●": "잘 바탕함",
+      "◐": "조금",
+      "○": "보완 필요"
+    },
+    "revealCriteriaAfterDialogue": true,
+    "firstCommittedAnswerOnly": true
+  },
+  "feedbackExamples": [
+    {
+      "answer": "맞습니다. 게시판 글은 출처가 약합니다. 다만 [자료 H1] 한빛시 교통안전연구원(가상) 2025년 분석에서도 사고 직전 스마트폰을 본 보행자가 적지 않았기 때문에 위험은 분명합니다.",
+      "expected": {
+        "reliability": "●",
+        "validity": "●",
+        "attitude": "인정함"
+      }
+    },
+    {
+      "answer": "통계를 보면 위험한 건 사실입니다.",
+      "expected": {
+        "reliability": "◐",
+        "validity": "○",
+        "attitude": "보통"
+      }
+    },
+    {
+      "answer": "그건 중요하지 않습니다.",
+      "expected": {
+        "reliability": "○",
+        "validity": "○",
+        "attitude": "피함"
+      }
+    }
+  ],
+  "operatingRules": {
+    "secondAnswerAllowsEarlyFeedback": true,
+    "rebuttalAfterAnswer": false,
+    "irrelevantAnswerReminderMax": 1,
+    "helpCitationTag": "[자료 {id}]",
+    "showCriterionBeforeFeedback": false,
+    "studentNameCollected": false,
+    "lesson2Recording": false,
+    "teacherProjectionHideStudentNumber": true,
+    "noTextbook202Passage": true
+  },
+  "futureLesson4": {
+    "questionCountMin": 3,
+    "questionCountMax": 5,
+    "defaultQuestionCount": 4,
+    "helpCardsMin": 2,
+    "helpCardsMax": 3,
+    "questionBankStatus": "4차시 작업 때 확정",
+    "medicalHelpCardsStatus": "4차시 작업 때 확정",
+    "reuseLesson2Data": false
+  },
+  "topic": "보행 중에 스마트폰을 사용하면 벌금을 부과해야 한다.",
+  "criterionDescriptions": {
+    "타당성": "이유와 근거에서 주장이 무리 없이 나오는가",
+    "신뢰성": "자료의 출처가 있고 믿을 만하며 최신인가",
+    "공정성": "한쪽에 치우치지 않고 공동체의 가치를 고려했는가"
+  },
+  "learningSlides19": [
+    {
+      "id": "L2-01",
+      "slide": 1,
+      "sourceSlide": 1,
+      "title": "반대 신문하며 토론하기",
+      "textbookPages": "201~203쪽",
+      "points": [
+        "같은 논제로 입론을 검토하는 방법을 익힙니다.",
+        "이번 체험에서는 내가 입론을 세우고 질문을 받습니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    },
+    {
+      "id": "L2-02",
+      "slide": 2,
+      "sourceSlide": 2,
+      "title": "토론의 개념",
+      "textbookPages": "201쪽",
+      "points": [
+        "찬반이 근거를 들어 주장을 설명하고 상대 논증을 살핍니다.",
+        "양측 관점을 접하고 공동체 문제를 합리적으로 검토합니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    },
+    {
+      "id": "L2-03",
+      "slide": 3,
+      "sourceSlide": 3,
+      "title": "논제의 유형",
+      "textbookPages": "201쪽",
+      "points": [
+        "참·거짓을 가리는 사실, 옳고 그름을 판단하는 가치, 구체적 행동을 다루는 정책을 구분합니다.",
+        "벌금 부과 여부를 묻는 이번 논제는 정책 논제입니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    },
+    {
+      "id": "L2-04",
+      "slide": 4,
+      "sourceSlide": 4,
+      "title": "입론·반대 신문·반박",
+      "textbookPages": "201쪽",
+      "points": [
+        "입론은 주장·이유·근거를 갖춘 논증을 제시합니다.",
+        "반대 신문은 상대 논증을 질문으로 검토하고, 반박은 쟁점을 골라 주장을 마무리합니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    },
+    {
+      "id": "L2-05",
+      "slide": 5,
+      "sourceSlide": 5,
+      "title": "반대 신문식 토론의 순서",
+      "textbookPages": "201쪽",
+      "points": [
+        "네 번의 입론 뒤에는 상대측의 반대 신문이 이어집니다.",
+        "입론과 신문이 끝나면 반대측부터 반박합니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    },
+    {
+      "id": "L2-06",
+      "slide": 6,
+      "sourceSlide": 6,
+      "title": "경청과 상호 검증",
+      "textbookPages": "201쪽",
+      "points": [
+        "상대의 말을 들어야 실제 발언을 짚어 질문할 수 있습니다.",
+        "반대 신문은 의견을 서로 검증하는 협력적 의사소통이기도 합니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    },
+    {
+      "id": "L2-07",
+      "slide": 7,
+      "sourceSlide": 7,
+      "title": "반대 신문의 세 단계",
+      "textbookPages": "202~203쪽",
+      "points": [
+        "먼저 입론의 논증 요소를 찾습니다.",
+        "다음으로 비판적으로 검토하고, 그 결과에 맞는 질문을 만듭니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    },
+    {
+      "id": "L2-08",
+      "slide": 8,
+      "sourceSlide": 8,
+      "title": "주장과 이유의 연결",
+      "textbookPages": "202쪽",
+      "points": [
+        "같은 주제의 이야기라고 해서 주장을 직접 뒷받침하는 이유가 되는 것은 아닙니다.",
+        "위험하다는 이유에서 벌금이라는 대책이 어떻게 나오는지 따져 봅니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    },
+    {
+      "id": "L2-09",
+      "slide": 9,
+      "sourceSlide": 9,
+      "title": "근거 자료의 출처",
+      "textbookPages": "202쪽",
+      "points": [
+        "자료의 내용뿐 아니라 누가 언제 어떻게 만들었는지도 확인합니다.",
+        "출처를 묻는 질문으로 근거의 신뢰성을 살필 수 있습니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    },
+    {
+      "id": "L2-10",
+      "slide": 10,
+      "sourceSlide": 10,
+      "title": "이유와 근거 구분하기",
+      "textbookPages": "202쪽",
+      "points": [
+        "이유는 주장을 세운 까닭이고, 근거는 그 까닭을 받치는 정보입니다.",
+        "교과서의 수치는 제시문 속 진술로 읽고, 이번 앱의 수업용 가상 자료와 구분합니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    },
+    {
+      "id": "L2-11",
+      "slide": 11,
+      "sourceSlide": 11,
+      "title": "책임을 한쪽에만 돌리는가",
+      "textbookPages": "202쪽",
+      "points": [
+        "사고의 책임을 어느 한쪽에만 돌리는 발언인지 살핍니다.",
+        "빠뜨린 사람이나 공동체의 가치가 없는지 검토합니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    },
+    {
+      "id": "L2-12",
+      "slide": 12,
+      "sourceSlide": 12,
+      "title": "1단계: 논증 요소",
+      "textbookPages": "202쪽",
+      "points": [
+        "주장·이유·근거를 나누어 찾습니다.",
+        "각 요소를 찾은 뒤 서로 연결되는 방식도 확인합니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    },
+    {
+      "id": "L2-13",
+      "slide": 13,
+      "sourceSlide": 13,
+      "title": "2단계: 타당성",
+      "textbookPages": "203쪽",
+      "points": [
+        "근거에서 결론으로 무리하게 뛰어넘지 않았는지 살핍니다.",
+        "다른 원인이나 대책이 있을 가능성도 검토합니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    },
+    {
+      "id": "L2-14",
+      "slide": 14,
+      "sourceSlide": 14,
+      "title": "2단계: 신뢰성·공정성",
+      "textbookPages": "203쪽",
+      "points": [
+        "신뢰성은 출처의 분명함·믿을 만함·최신성을 살핍니다.",
+        "공정성은 편향 여부와 공동체의 가치를 검토합니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    },
+    {
+      "id": "L2-15",
+      "slide": 15,
+      "sourceSlide": 15,
+      "title": "3단계: 확인과 검증",
+      "textbookPages": "203쪽",
+      "points": [
+        "상대가 실제로 한 말을 먼저 확인하고 오류나 허점을 검증합니다.",
+        "논증에서 가장 중대한 오류를 우선하여 질문합니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    },
+    {
+      "id": "L2-16",
+      "slide": 16,
+      "sourceSlide": 16,
+      "title": "구체적이고 제한적인 질문",
+      "textbookPages": "203쪽",
+      "points": [
+        "답의 범위를 좁힌 폐쇄형 질문을 사용합니다.",
+        "예·아니요 외에도 출처처럼 제한된 사실을 묻는 질문이 가능합니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    },
+    {
+      "id": "L2-17",
+      "slide": 17,
+      "sourceSlide": 17,
+      "title": "㉠·㉡·㉢의 검토 기준",
+      "textbookPages": "203쪽",
+      "points": [
+        "교과서에서 ㉠은 주장과 이유의 연결, ㉡은 자료 출처, ㉢은 편파성을 살핍니다.",
+        "각각 타당성·신뢰성·공정성에 대응합니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    },
+    {
+      "id": "L2-18",
+      "slide": 18,
+      "sourceSlide": 18,
+      "title": "바탕 다지기",
+      "textbookPages": "203쪽",
+      "points": [
+        "교과서의 빈칸을 채우며 토론·반대 신문·세 단계를 연결해 봅니다.",
+        "정의의 핵심어를 외우는 데서 그치지 않고 사례와 연결합니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    },
+    {
+      "id": "L2-19",
+      "slide": 19,
+      "sourceSlide": 19,
+      "title": "정리하고 체험으로",
+      "textbookPages": "203쪽",
+      "points": [
+        "교과서에서 정리한 개념으로 내 입론의 약점을 예상합니다.",
+        "질문을 받으면 자료의 출처와 이유의 연결을 밝혀 답합니다."
+      ],
+      "adapted": true,
+      "source": "[최종] 2차시 PPT_토론.pptx",
+      "notTextbookPassage": true
+    }
+  ],
+  "learningSections": [
+    {
+      "id": "concepts",
+      "title": "토론의 개념과 절차",
+      "slides": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "id": "review",
+      "title": "논증 요소와 검토 기준",
+      "slides": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ]
+    },
+    {
+      "id": "questions",
+      "title": "질문 구성과 정리",
+      "slides": [
+        15,
+        16,
+        17,
+        18,
+        19
+      ]
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+name: 개선 요청
+description: 수업 목적과 기대하는 동작을 바탕으로 개선을 제안해 주세요.
+title: '[개선] '
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        이 양식은 개선 요청을 기록하는 창구입니다. 접수만으로 코드 변경이나 배포가 실행되지는 않습니다.
+        학생 정보·수업 원본·비밀키를 올리지 말고 필요한 예시는 가상으로 적어 주세요.
+  - type: textarea
+    id: purpose
+    attributes:
+      label: 해결하려는 수업 상황
+      description: 누구의 어떤 활동을 돕기 위한 요청인지 적어 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: 기대하는 화면·동작
+      description: 현재 동작과 바뀐 뒤의 동작을 구체적으로 적어 주세요.
+    validations:
+      required: true
+  - type: dropdown
+    id: lesson
+    attributes:
+      label: 적용 범위
+      options:
+        - 2차시 학습 자료·체험
+        - 2차시 공유·교사 화면
+        - 후속 3차시
+        - 후속 4차시
+        - 공통 운영·접근성
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 확인할 수 있는 완료 조건
+      description: 어떤 결과를 보면 요청이 반영됐다고 판단할 수 있는지 적어 주세요.
+  - type: textarea
+    id: linked
+    attributes:
+      label: 관련 요청·결정
+      description: 관련 이슈 번호나 변경된 수업 조건이 있으면 적어 주세요. 개인정보·실제 학생 답변은 제외합니다.

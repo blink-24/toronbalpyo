@@ -1,0 +1,156 @@
+{
+  "version": "5.0.0",
+  "baseline": "lessonplan-v6-webapp-v5-2026-10-26",
+  "external_state": "owner connection and repository target pending; not deployed",
+  "tests_passed": 34,
+  "files": [
+    {
+      "path": ".github/ISSUE_TEMPLATE/bug_report.yml",
+      "sha256": "7e6ff496fb20ca782874a15bd2fb0e2ad6741ec4bff3a38ce78593fbcd15d856"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/feature_request.yml",
+      "sha256": "1a3707b24156e68666215ebf822031c0bb891f52c50524d6264823bf9527c215"
+    },
+    {
+      "path": ".github/workflows/check.yml",
+      "sha256": "b937b534ba6fc2be4709d5fca9ce0e585e76925c85887230d563da4d34956800"
+    },
+    {
+      "path": ".github/workflows/pages.yml",
+      "sha256": "5c832e668186007d5e2f90d1a11d987dfc9c158063cb5648b6487b4009449b68"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "139525d30558a6658a07b85eb3adf38de606ef3fbdf11d054f0433bfc090cffe"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "9db6841f21d7baa6e0f46c98b57f0b84b5cfa08d264b8b5dec7ef676d79cea5d"
+    },
+    {
+      "path": "README.md",
+      "sha256": "983f60ed9e4a074231cb3b23dc30528b2cb0baa62cdaf6fad89324176b25d8bb"
+    },
+    {
+      "path": "assets/favicon.svg",
+      "sha256": "086fb3dcf3ce7f5e1c0d89d5b7334cdf80835c3a51889e2c1d568eb1da9ca532"
+    },
+    {
+      "path": "backend/Native.gs",
+      "sha256": "2724a6299596b3ca0641a0e42c82536e148a01fa614f6be84a05e933d2283233"
+    },
+    {
+      "path": "backend/README.md",
+      "sha256": "dac0f3f7256d3e4f1a47abb1c8e202248ff58a346fb535b466b7c12be103f64d"
+    },
+    {
+      "path": "backend/ServerBundle.gs",
+      "sha256": "493352cc01afef0c27f9e5581aaffb6f688e2a40dc0ecc065b061314335cc85e"
+    },
+    {
+      "path": "backend/appsscript.json",
+      "sha256": "5b4c2277234e3d526d5f1bfc501aef8cddcc9661778ddd8482e4570af8f04c90"
+    },
+    {
+      "path": "backend/schema.json",
+      "sha256": "fb20775c17f610c1151712ac2b1d511b96c565b6bb427b699e2cb62b795aab4c"
+    },
+    {
+      "path": "backend/service.js",
+      "sha256": "d99674d2bbce9f97cbd4c95147533a6b02a55924400f26a4c794b1279b9a8659"
+    },
+    {
+      "path": "backend/sync.mjs",
+      "sha256": "aee40df1fc25148aa056a6f038b2c20f63dec6ecbfc400a44ef2738a87b583fc"
+    },
+    {
+      "path": "config.js",
+      "sha256": "75c5a4d73b9e84e4ae0d87725d77cf8895721d3f0f8f73e0daca6ae4c04a6aa9"
+    },
+    {
+      "path": "data/content.json",
+      "sha256": "4f9493fd6eca342305204ea89868de4b3f5771e023b5586d8a8e8d9e48cd9282"
+    },
+    {
+      "path": "docs/API_CONTRACT.md",
+      "sha256": "5b37800337d435f20d45a89541a31aba66dc68acedfdcf36f2864d08aa2ad533"
+    },
+    {
+      "path": "docs/CONTENT_TRACE.md",
+      "sha256": "26de1b3644de16649148781580f48a72c3033d772c4e1fba27d8a6fa6eb0a80d"
+    },
+    {
+      "path": "docs/DEPLOYMENT_STATUS.md",
+      "sha256": "bae54243cee2e7fcb58b04beed8725cc28e829e6532a333e198946e24c37fc6b"
+    },
+    {
+      "path": "docs/MAINTENANCE.md",
+      "sha256": "67b265496c23aa69b28ea43a33d68dca09afc5778efd4618cee1e2983d03ae00"
+    },
+    {
+      "path": "docs/VALIDATION.md",
+      "sha256": "6ebbb7047a5e59309d5ce4f441c043e1add1fcb9e7a40469e70398a796a69931"
+    },
+    {
+      "path": "index.html",
+      "sha256": "19072722b7411b4f3b2e3bcf9aee1dfd9e025cd2518f5133b2921fedecb59ac0"
+    },
+    {
+      "path": "package.json",
+      "sha256": "16895c89381d32d51fb827751d43f81a0ba2f2ec03f52ff849d5bc6746666ba7"
+    },
+    {
+      "path": "scripts/build-static.mjs",
+      "sha256": "910e49e6a493d3ea619834550c97af329a7f743805a29628a779c5c55d1dab5d"
+    },
+    {
+      "path": "scripts/check-project.mjs",
+      "sha256": "94f933c75778bbd31ed91f8b4289f707c978d0c002278ca6540425ddf7475d02"
+    },
+    {
+      "path": "src/core/content.js",
+      "sha256": "eaeba3ee202d254b532914ba568ff9b636fa4aa0f3b25f2d6f96ccb8055e8227"
+    },
+    {
+      "path": "src/core/engine.js",
+      "sha256": "d94fd8db01fd6da7166436a292bec16123910b3691ccc6b4454d183f186e812d"
+    },
+    {
+      "path": "src/main.js",
+      "sha256": "7fb9cc93df9810d65ce946603b6917362fc3fc0f695423142045d871489fbeba"
+    },
+    {
+      "path": "src/network/client.js",
+      "sha256": "c031aca160525687f9f6bde39879b970018e3c7b1d88be81c52bb57621d89fbc"
+    },
+    {
+      "path": "src/network/queue.js",
+      "sha256": "69eeabe964b40c1a4dea1612c12933582b98f3141f3bbf3007326b31c3963532"
+    },
+    {
+      "path": "src/ui/state.js",
+      "sha256": "92dc7bc37960f7df2c2f459fc86d93c0dc3c7170bfdca79771516274539a2f7f"
+    },
+    {
+      "path": "styles.css",
+      "sha256": "9caeaec6873056456f5de152714739785148d4bcd5fee20c25c4e7be97339720"
+    },
+    {
+      "path": "tests/backend.test.mjs",
+      "sha256": "c312b45a5b4ac7406a5fc1baf9ebbce44e2cbea32f37597f5fed764f0734b525"
+    },
+    {
+      "path": "tests/engine.test.mjs",
+      "sha256": "4fe4bfee4a7508f078b759d90895e15631581cc36ab83420094dda0f280a655a"
+    },
+    {
+      "path": "tests/ui/network.test.mjs",
+      "sha256": "b034959a6949fdb2b936a7afd84f4dd18fc0a746075ecb7db13d6159e856d223"
+    },
+    {
+      "path": "tests/ui/service-flow.test.mjs",
+      "sha256": "05a6ec224ca1f00530947da1e10b2ebf9c8c4f33d9747d095c9a5e9331112ff7"
+    }
+  ]
+}

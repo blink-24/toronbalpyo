@@ -1,0 +1,55 @@
+# Local tools and generated public output
+node_modules/
+dist/
+coverage/
+.cache/
+.DS_Store
+Thumbs.db
+*.log
+test-results/
+playwright-report/
+artifacts/
+
+# Local settings and credentials; config.js contains public settings only.
+.env
+.env.*
+!.env.example
+*.local.js
+*.local.json
+secrets/
+.credentials/
+credentials*.json
+*service-account*.json
+*.pem
+*.key
+*.p12
+
+# Original classroom materials and exported documents are not source code.
+upload/
+uploads/
+sources/
+originals/
+final-materials/
+*.hwpx
+*.hwp
+*.pptx
+*.ppt
+*.pdf
+*.docx
+*.doc
+*.xlsx
+*.xls
+*.zip
+
+# Student records, research records, recordings and exported response rows
+student-data/
+research-data/
+recordings/
+exports/
+*.csv
+*.tsv
+*.jsonl
+*.mp4
+*.m4a
+*.mp3
+*.wav

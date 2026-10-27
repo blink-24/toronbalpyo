@@ -1,0 +1,103 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/check.yml
+    permissions:
+      contents: read
+
+  build:
+    name: Package public static files
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - name: Check out checked source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Build public files only
+        run: npm run build
+      - name: Verify Pages artifact boundary
+        run: |
+          node --input-type=module <<'JS'
+          import { readdirSync, lstatSync, existsSync, readFileSync, appendFileSync } from 'node:fs';
+          import path from 'node:path';
+          import assert from 'node:assert/strict';
+          import vm from 'node:vm';
+          const root = path.resolve('dist');
+          const roots = new Set(['index.html', 'styles.css', 'config.js', '.nojekyll', 'data/content.json']);
+          const staticExtensions = new Set(['.js', '.css', '.svg', '.png', '.jpg', '.jpeg', '.webp', '.ico', '.woff', '.woff2', '.ttf']);
+          const forbidden = /(^|\/)(backend|docs|tests|sources|originals|uploads|secrets|credentials|prompts|teacher-prompts)(\/|$)/i;
+          function walk(dir, prefix = '') {
+            for (const entry of readdirSync(dir, { withFileTypes: true })) {
+              const relative = prefix + entry.name;
+              const absolute = path.join(dir, entry.name);
+              const stat = lstatSync(absolute);
+              assert.ok(!stat.isSymbolicLink(), `Symbolic link in public output: ${relative}`);
+              assert.ok(!forbidden.test(relative), `Private path in public output: ${relative}`);
+              if (entry.isDirectory()) {
+                assert.ok(['src', 'assets', 'data'].some(name => relative === name || relative.startsWith(name + '/')), `Unexpected directory: ${relative}`);
+                walk(absolute, relative + '/');
+              } else {
+                assert.ok(roots.has(relative) || /^(src|assets)\//.test(relative) && staticExtensions.has(path.extname(relative).toLowerCase()), `Unexpected public file: ${relative}`);
+              }
+            }
+          }
+          assert.ok(existsSync(path.join(root, 'index.html')), 'Missing dist/index.html');
+          assert.ok(existsSync(path.join(root, 'config.js')), 'Missing dist/config.js');
+          walk(root);
+          const config = readFileSync(path.join(root, 'config.js'), 'utf8');
+          const settingsWindow = {};
+          vm.runInNewContext(config, { window: settingsWindow }, { timeout: 1000 });
+          const endpoint = String(settingsWindow.CLASSROOM_CONFIG?.apiUrl || '').trim();
+          const connected = /^https:\/\/script\.google\.com\/macros\/s\/[^\s'"<>]+\/exec$/.test(endpoint);
+          if (!connected) console.log('::warning::Static site is deployable, but the Apps Script endpoint is not configured. Database, sharing, and teacher functions remain unconnected.');
+          appendFileSync(process.env.GITHUB_STEP_SUMMARY, connected
+            ? 'Static artifact checked. Apps Script URL is configured; live database round-trip still requires verification.\n'
+            : 'Static artifact checked. **Function connection incomplete:** configure the Apps Script URL in config.js and verify the database round-trip before classroom use.\n');
+          JS
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload static artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    name: Publish checked static artifact
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
