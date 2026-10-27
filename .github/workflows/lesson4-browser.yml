@@ -36,6 +36,10 @@ jobs:
           node qa/lesson4-fixture.mjs > /tmp/fixture.log 2>&1 &
       - name: Test student groups and teacher lesson controls
         run: node qa/lesson4-browser.mjs
+      - name: Read-only browser connection to the real Apps Script
+        env:
+          CLASSROOM_CONNECTION_URL: http://127.0.0.1:4173/
+        run: node qa/connection-browser.mjs
       - name: Keep synthetic-only evidence
         if: always()
         uses: actions/upload-artifact@v4
