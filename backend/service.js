@@ -46,13 +46,15 @@ export function createService({ content, store, properties, clock = () => Date.n
   const prop = key => safeText(properties.get(key));
   const rows = tab => store.read(tab) || [];
   const locked = fn => store.withLock(fn);
+  function cacheGet(key) { try { return properties.get(key); } catch { return null; } }
+  function cacheSet(key, value) { try { properties.set(key, value); return true; } catch { return false; } }
   function append(tab, values) {
     const safe = {};
     for (const field of HEADERS[tab]) {
       const val = values[field] ?? '';
       const cell = typeof val === 'object' ? JSON.stringify(val) : val;
-      invariant(typeof cell !== 'string' || cell.length <= 2000, 'STORAGE_LENGTH', '기록할 입력란이 너무 깁니다.');
       safe[field] = sanitizeCell(cell);
+      invariant(typeof safe[field] !== 'string' || safe[field].length <= 2000, 'STORAGE_LENGTH', '기록할 입력란이 너무 깁니다.');
     }
     store.append(tab, safe);
   }
@@ -84,10 +86,14 @@ export function createService({ content, store, properties, clock = () => Date.n
     return { receivedAt: now(), submissionId: request.submissionId || '', studentId: actor.studentId, cls: actor.cls, groupNo: '', lesson: 2,
       clientTs: safeText(request.clientTs || ''), appVersion: safeText(request.appVersion || content.version) };
   }
-  function stateFor(sessionId) {
+  function stateRowFor(sessionId) {
     const found = rows('progress').filter(x => x.sessionId === sessionId && x.state1);
     if (!found.length) return null;
-    const latest = found[found.length - 1];
+    return found[found.length - 1];
+  }
+  function stateFor(sessionId) {
+    const latest = stateRowFor(sessionId);
+    if (!latest) return null;
     return parseJSON([1, 2, 3, 4, 5, 6, 7, 8].map(n => { const part = latest[`state${n}`] || ''; return String(part).startsWith('~') ? String(part).slice(1) : part; }).join(''));
   }
   function saveState(state, request, actor, stage) {
@@ -124,11 +130,13 @@ export function createService({ content, store, properties, clock = () => Date.n
   }
   function logTurn(state, actor, request, turn, role, text, question, mode, meta = {}) {
     const marker = `log:${state.sessionId}:${turn}:${role}`;
-    if (properties.get(marker)) return;
+    if (cacheGet(marker)) return;
+    // 속성은 가속용입니다. 기록한 로그가 있으면 캐시가 없어도 같은 차례를 다시 쓰지 않습니다.
+    if (rows('ai_log').some(row => row.sessionId === state.sessionId && Number(row.turn) === Number(turn) && row.role === role)) return;
     append('ai_log', { ...common(request, actor), sessionId: state.sessionId, turn, role, text,
       meta: { questionId: question?.id || '', criterion: question?.criterion || '', targetKey: question?.targetKey || '', helpIds: question?.helpCards?.map(x => x.id) || [], ...meta },
       mode, provider: mode === 'ai' ? prop('AI_PROVIDER') : 'none', model: mode === 'ai' ? prop('AI_MODEL') : '', latencyMs: meta.latencyMs || 0, error: meta.error || '' });
-    properties.set(marker, '1');
+    cacheSet(marker, '1');
   }
   function settings() { return { provider: prop('AI_PROVIDER'), model: prop('AI_MODEL'), key: prop('AI_API_KEY') }; }
   function aiAllowed(actor) {
@@ -137,7 +145,8 @@ export function createService({ content, store, properties, clock = () => Date.n
       const key = `rate:${actor.studentId}:${Math.floor(clock() / 3600000)}`, used = Number(prop(key) || 0), requestedMax = Number(prop('AI_RATE_PER_HOUR') || 30);
       const max = Number.isInteger(requestedMax) && requestedMax >= 1 && requestedMax <= 300 ? requestedMax : 30;
       if (used >= max) return false;
-      properties.set(key, String(used + 1)); return true;
+      // 사용량을 확정하지 못하면 AI 호출을 하지 않아 학생별 한도를 우회하지 않습니다.
+      return cacheSet(key, String(used + 1));
     });
   }
   function aiPayload(state, task, question = null) {
@@ -170,6 +179,7 @@ export function createService({ content, store, properties, clock = () => Date.n
     requireLesson(request); const actor = identity(request), sid = checkId(request.sessionId, '세션 식별자');
     const prepared = locked(() => {
       let state = buildFrom(request, actor, stateFor(sid));
+      invariant(!state.completedQuestionCount, 'SESSION_COMPLETED', '이미 제출한 체험입니다. 새 체험에서 다시 시작해 주세요.');
       const history = request.history || [];
       // 명백히 주제 밖인 짧은 답은 한 번만 같은 질문으로 돌려보냅니다.
       const last = history[history.length - 1];
@@ -206,6 +216,8 @@ export function createService({ content, store, properties, clock = () => Date.n
       }
       locked(() => {
         const current = stateFor(sid);
+        // 피드백 호출 중 로컬 대본 제출이 끝났으면 완료 기록을 그대로 보존합니다.
+        if (current.completedQuestionCount) { feedback = engine.getFeedback(current); mode = 'script'; return; }
         const next = { ...current, aiFeedback: mode === 'ai' ? compactFeedback(feedback) : null, feedbackMode: mode };
         saveState(next, request, actor, 'feedback');
         logTurn(next, actor, request, 0, 'system', '피드백을 생성했습니다.', null, mode);
@@ -226,17 +238,35 @@ export function createService({ content, store, properties, clock = () => Date.n
     });
     return { sessionId: sid, turn: generated.question.turn, question: generated.question, mode: generated.mode };
   }
+  function recoverSubmittedState(request, actor, durable) {
+    const sid = checkId(durable.sessionId, '세션 식별자'), existing = stateFor(sid);
+    if (existing?.completedQuestionCount && stateRowFor(sid)?.stage === 'submitted') return;
+    invariant(!existing || existing.studentId === actor.studentId && Number(existing.cls) === actor.cls,
+      'SESSION_OWNER_MISMATCH', '다른 학생의 세션을 사용할 수 없습니다.');
+    const data = request.data || {}, count = Number(durable.completedQuestionCount);
+    const early = durable.earlyFinish === true || durable.earlyFinish === 'true';
+    // 이미 저장된 제출의 문항 수를 사용하므로 이후 설정 변경·진행 재시도에 영향을 받지 않습니다.
+    let state = { ...engine.buildSession({ ...data, sessionId: sid, questionCount: early ? 3 : count,
+      seed: existing?.seed || data.seed || sid }), studentId: actor.studentId, cls: actor.cls,
+      reprompted: existing?.reprompted || [], questionCache: existing?.questionCache || {} };
+    const answers = Array.isArray(data.answers) && data.answers.length >= count ? data.answers : existing?.answers || [];
+    state = historyInto(state, answers.slice(0, count));
+    state = engine.finishSession(state, { reflection: data.reflection, earlyFinish: early });
+    const aiFeedback = parseJSON(durable.aiFeedback);
+    saveState({ ...state, mode: durable.mode, ...(aiFeedback ? { aiFeedback, feedbackMode: 'ai' } : {}) }, request, actor, 'submitted');
+  }
   function submit(request) {
     requireLesson(request); invariant(request.kind === 'l2_session', 'KIND_LESSON_MISMATCH', '현재는 2차시 체험 제출만 가능합니다.');
     const actor = identity(request), id = checkId(request.submissionId, '제출 식별자'), data = request.data || {};
     const fingerprint = hash(JSON.stringify({ actor: actor.studentId, lesson: 2, sessionId: request.sessionId || data.sessionId,
       stance: data.stance, reasonId: data.reasonId, reasonText: data.reasonText, cardId: data.cardId, argText: data.argText, answers: data.answers, reflection: data.reflection, earlyFinish: data.earlyFinish }));
     return locked(() => {
-      const dedupe = parseJSON(properties.get(`submission:${id}`));
+      const dedupe = parseJSON(cacheGet(`submission:${id}`));
       if (dedupe) { invariant(dedupe.fingerprint === fingerprint, 'IDEMPOTENCY_CONFLICT', '같은 제출 식별자로 다른 내용을 보낼 수 없습니다.'); return { ...dedupe.result, duplicate: true }; }
       const durable = rows('l2_sessions').find(x => x.submissionId === id);
       if (durable) {
         invariant(durable.payloadHash === fingerprint, 'IDEMPOTENCY_CONFLICT', '같은 제출 식별자로 다른 내용을 보낼 수 없습니다.');
+        recoverSubmittedState(request, actor, durable);
         return { accepted: true, submissionId: id, sessionId: durable.sessionId, completedQuestionCount: Number(durable.completedQuestionCount), duplicate: true };
       }
       const sid = checkId(request.sessionId || data.sessionId, '세션 식별자'), old = stateFor(sid);
@@ -259,7 +289,7 @@ export function createService({ content, store, properties, clock = () => Date.n
       }
       append('l2_sessions', row); saveState({ ...state, studentId: actor.studentId, cls: actor.cls, mode }, request, actor, 'submitted');
       const result = { accepted: true, submissionId: id, sessionId: sid, completedQuestionCount: state.answers.length, duplicate: false };
-      properties.set(`submission:${id}`, JSON.stringify({ fingerprint, result }));
+      cacheSet(`submission:${id}`, JSON.stringify({ fingerprint, result }));
       return result;
     });
   }

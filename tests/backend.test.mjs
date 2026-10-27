@@ -7,14 +7,16 @@ import content from '../src/core/content.js';
 import { createEngine } from '../src/core/engine.js';
 import { createService, HEADERS } from '../backend/service.js';
 const engine = createEngine(content);
-function fixture({ ai = false, providerCall = null, questionCount = 3 } = {}) {
+function fixture({ ai = false, providerCall = null, questionCount = 3, beforeAppend = null, beforePropertySet = null } = {}) {
   const db = Object.fromEntries(Object.keys(HEADERS).map(k => [k, []]));
   db.config.push({ key: 'l2Questions', value: String(questionCount) }, { key: 'acceptLessons', value: '2' });
   const props = new Map([['PASSCODE', 'test-teacher-passcode'], ['AI_PROVIDER', ai ? 'gemini' : 'none'], ['AI_MODEL', ai ? 'test-model' : ''], ['AI_API_KEY', ai ? 'not-a-real-key' : '']]);
   let held = false, lockCount = 0;
-  const store = { read: tab => db[tab], append: (tab, row) => { assert.ok(held); db[tab].push({ ...row }); },
+  const store = { read: tab => db[tab], append: (tab, row) => { assert.ok(held); if (beforeAppend) beforeAppend(tab, row); db[tab].push({ ...row }); },
     withLock: fn => { assert.equal(held, false, '잠금을 중첩하지 않는다'); held = true; lockCount++; try { return fn(); } finally { held = false; } } };
-  const service = createService({ content, store, properties: { get: key => props.get(key), set: (key, val) => props.set(key, val) },
+  const service = createService({ content, store, properties: { get: key => props.get(key), set: (key, val) => {
+    if (beforePropertySet) beforePropertySet(key, val); props.set(key, val);
+  } },
     hash: text => createHash('sha256').update(text).digest('hex'), clock: () => 1800000000000,
     providerCall: providerCall ? (...args) => { assert.equal(held, false, 'AI 호출 중에는 잠금을 유지하지 않는다'); return providerCall(...args); } : null });
   return { service, db, props, get locks() { return lockCount; } };
@@ -70,11 +72,58 @@ test('교사전용 모든 조회는 서버 인증; config는비밀을허용목�
 });
 test('수식주입 방지와 칸당2000자 제한을 모든 저장 열에 적용하고 상태도 복원한다', () => {
   const f = fixture(), data = session(); data.argText = '=HYPERLINK("https://example.com")';
+  // 진행 중 상태를 시트 조각으로 저장한 뒤 최종 제출에서 원래 입론·답변을 복원합니다.
+  assert.equal(f.service.respond('POST', turnRequest(data)).ok, true);
   const result = f.service.respond('POST', submission(data, { clientTs: '  =NOW()' })); assert.equal(result.ok, true);
   assert.ok(f.db.l2_sessions[0].argText.startsWith("'=")); assert.ok(f.db.l2_sessions[0].clientTs.startsWith("'"));
   for (const rows of Object.values(f.db)) for (const row of rows) for (const value of Object.values(row)) if (typeof value === 'string') { assert.ok(value.length <= 2000); assert.doesNotMatch(value, /^[\s\x00-\x20]*[=+\-@]/); }
-  const restored = f.service.respond('POST', turnRequest({ ...data, reasonText: content.reasons.find(x => x.id === data.reasonId).text }, { mode: 'feedback', history: data.answers }));
-  assert.equal(restored.ok, true);
+  assert.equal(f.db.progress.at(-1).stage, 'submitted'); assert.equal(f.db.l2_sessions[0].completedQuestionCount, 3);
+});
+test('수식 방지 접두사를 더한 실제 저장 문자열에도 2000자 경계를 적용한다', () => {
+  for (const clientTs of ['x'.repeat(2000), '=' + 'x'.repeat(1998)]) {
+    const f = fixture(), result = f.service.respond('POST', submission(session(), { clientTs }));
+    assert.equal(result.ok, true); assert.equal(f.db.l2_sessions[0].clientTs.length, 2000);
+    assert.doesNotMatch(f.db.l2_sessions[0].clientTs, /^[\s\x00-\x20]*[=+\-@]/);
+  }
+  const f = fixture(), result = f.service.respond('POST', submission(session(), { clientTs: '=' + 'x'.repeat(1999) }));
+  assert.equal(result.error.code, 'STORAGE_LENGTH'); assert.equal(f.db.l2_sessions.length, 0);
+});
+test('로그·제출 캐시 쓰기가 실패해도 대본 체험과 제출·시트 기반 중복 검사가 계속된다', () => {
+  const failedKeys = [], f = fixture({ beforePropertySet: key => {
+    if (/^(log:|submission:)/.test(key)) { failedKeys.push(key); throw Error('가상 캐시 쓰기 실패'); }
+  } });
+  const initial = session({}, 0), first = turnRequest(initial);
+  assert.equal(f.service.respond('POST', first).data.mode, 'script');
+  assert.equal(f.service.respond('POST', first).ok, true); assert.equal(f.db.ai_log.length, 1);
+  const second = turnRequest(initial, { turn: 2, history: session({}, 1).answers });
+  assert.equal(f.service.respond('POST', second).ok, true);
+  const request = submission(), result = f.service.respond('POST', request);
+  assert.equal(result.ok, true); assert.equal(result.data.accepted, true); assert.equal(f.db.progress.at(-1).stage, 'submitted');
+  const logs = f.db.ai_log.length;
+  assert.equal(new Set(f.db.ai_log.map(row => `${row.sessionId}:${row.turn}:${row.role}`)).size, logs);
+  assert.equal(f.service.respond('POST', request).data.duplicate, true);
+  assert.equal(f.db.l2_sessions.length, 1); assert.equal(f.db.ai_log.length, logs);
+  assert.ok(failedKeys.some(key => key.startsWith('log:'))); assert.ok(failedKeys.some(key => key.startsWith('submission:')));
+  assert.equal(f.props.has(`submission:${request.submissionId}`), false);
+});
+test('AI 한도 기록 실패는 대본으로 전환하며 학생별 사용량 한도를 우회하지 않는다', () => {
+  let failRateWrite = true, calls = 0;
+  const f = fixture({ ai: true, beforePropertySet: key => { if (key.startsWith('rate:') && failRateWrite) throw Error('가상 사용량 기록 실패'); },
+    providerCall: (_task, payload) => { calls++; return { confirm: '그 자료를 근거로 드셨지요?', verify: '다른 자료로도 확인되었습니까?', criterion: payload.plan.criterion }; } });
+  f.props.set('AI_RATE_PER_HOUR', '1');
+  assert.equal(f.service.respond('POST', turnRequest()).data.mode, 'script');
+  const s = session({}, 2);
+  assert.equal(f.service.respond('POST', turnRequest(s, { mode: 'feedback', history: s.answers })).data.mode, 'script');
+  assert.equal(f.service.respond('POST', submission(s)).ok, true); assert.equal(calls, 0);
+  failRateWrite = false;
+  const another = session({ sessionId: 'rate-failure-student-02' }, 0);
+  assert.equal(f.service.respond('POST', turnRequest(another, { studentId: '20316' })).data.mode, 'ai'); assert.equal(calls, 1);
+  const next = session({ sessionId: 'rate-failure-student-03' }, 0);
+  assert.equal(f.service.respond('POST', turnRequest(next, { studentId: '20316' })).data.mode, 'script'); assert.equal(calls, 1);
+  // 앞 학생의 실패는 다른 학생의 한도를 소모하지 않으며, 복구 뒤에는 각자 한도가 적용됩니다.
+  const original = session({ sessionId: 'rate-failure-student-01' }, 0);
+  assert.equal(f.service.respond('POST', turnRequest(original)).data.mode, 'ai'); assert.equal(calls, 2);
+  assert.equal([...f.props].filter(([key]) => key.startsWith('rate:')).length, 2);
 });
 test('2답 조기 제출과 설정2질문은 세번째 빈문항을 저장하지 않는다', () => {
   for (const questionCount of [2, 3]) {
@@ -122,6 +171,57 @@ test('늦게 온 AI 질문은 이미 로컬 대본으로 제출한 상태·질�
   assert.equal(f.db.progress.at(-1).stage, 'submitted');
   assert.equal(f.db.l2_sessions.length, 1);
   assert.doesNotMatch(f.db.l2_sessions[0].q1Text, /다른 표현/);
+});
+test('제출을 마친 세션의 피드백 재요청과 세번째 질문은 완료 상태를 바꾸지 않는다', () => {
+  const f = fixture(), s = session({}, 2);
+  assert.equal(f.service.respond('POST', submission(s)).ok, true);
+  const progress = JSON.stringify(f.db.progress), records = JSON.stringify(f.db.l2_sessions);
+  for (const extra of [{ mode: 'feedback', history: s.answers }, { turn: 3, history: s.answers }]) {
+    const result = f.service.respond('POST', turnRequest(s, extra));
+    assert.equal(result.error.code, 'SESSION_COMPLETED');
+    assert.equal(JSON.stringify(f.db.progress), progress); assert.equal(JSON.stringify(f.db.l2_sessions), records);
+  }
+  assert.equal(f.db.progress.at(-1).stage, 'submitted');
+});
+test('늦게 온 AI 피드백은 먼저 완료된 제출의 단계·판정을 덮어쓰지 않는다', () => {
+  let f, completedProgress, completedRecords;
+  const s = session({}, 2);
+  f = fixture({ ai: true, providerCall: (task, payload) => {
+    assert.equal(task, 'feedback'); assert.equal(f.service.respond('POST', submission(s)).ok, true);
+    completedProgress = JSON.stringify(f.db.progress); completedRecords = JSON.stringify(f.db.l2_sessions);
+    return { items: payload.plan.map((x, i) => ({ turn: i + 1, criterion: x.criterion, reliability: '○', validity: '○', attitude: '보통',
+      comment: '뒤늦게 생성된 AI 코멘트입니다.', better: '뒤늦게 생성된 보완 방향입니다.' })), summary: { good: '질문에 답했습니다.', improve: '근거를 살펴보세요.' } };
+  } });
+  const result = f.service.respond('POST', turnRequest(s, { mode: 'feedback', history: s.answers, earlyFinish: true }));
+  assert.equal(result.ok, true); assert.equal(result.data.mode, 'script');
+  assert.equal(result.data.feedback.items[0].reliability, result.data.ruleFeedback.items[0].reliability);
+  assert.equal(JSON.stringify(f.db.progress), completedProgress); assert.equal(JSON.stringify(f.db.l2_sessions), completedRecords);
+  assert.equal(f.db.progress.at(-1).stage, 'submitted'); assert.equal(f.db.l2_sessions[0].aiFeedback, '');
+});
+test('제출 행 뒤 진행 기록 저장이 실패해도 중복 재전송으로 원래 완료 상태를 복구한다', () => {
+  for (const questionCount of [2, 3]) {
+    let failSubmitted = true;
+    const f = fixture({ questionCount, beforeAppend: (tab, row) => {
+      if (tab === 'progress' && row.stage === 'submitted' && failSubmitted) { failSubmitted = false; throw Error('가상 진행 기록 저장 실패'); }
+    } });
+    const s = session({ questionCount }, 2), request = submission(s);
+    assert.equal(f.service.respond('POST', request).error.code, 'SERVER_ERROR');
+    assert.equal(f.db.l2_sessions.length, 1); assert.equal(f.db.progress.length, 0);
+    // 부분 저장 후 도착한 질문과 관리자의 문항 수 변경도 저장된 제출을 바꾸지 않습니다.
+    if (questionCount === 3) assert.equal(f.service.respond('POST', turnRequest(s, { turn: 3, history: s.answers })).ok, true);
+    f.db.config.find(x => x.key === 'l2Questions').value = String(questionCount === 2 ? 3 : 2);
+    const recovered = f.service.respond('POST', request);
+    assert.equal(recovered.ok, true); assert.equal(recovered.data.duplicate, true); assert.equal(recovered.data.completedQuestionCount, 2);
+    assert.equal(f.db.l2_sessions.length, 1); assert.equal(f.db.progress.at(-1).stage, 'submitted');
+    const row = f.db.progress.at(-1);
+    const state = JSON.parse([1, 2, 3, 4, 5, 6, 7, 8].map(n => String(row[`state${n}`] || '').slice(1)).join(''));
+    assert.equal(state.questionCount, questionCount); assert.equal(state.completedQuestionCount, 2); assert.equal(state.answers.length, 2);
+    assert.equal(state.reflection, s.reflection);
+    const count = f.db.progress.length;
+    assert.equal(f.service.respond('POST', request).data.duplicate, true); assert.equal(f.db.progress.length, count);
+    const teacher = f.service.respond('GET', { action: 'l2_summary', passcode: 'test-teacher-passcode' });
+    assert.equal(teacher.data.progress[0].stage, 'submitted'); assert.equal(teacher.data.completed, 1);
+  }
 });
 test('AI 피드백과 규칙 판정은 서로 분리해 저장하고 클라이언트 판정은 믿지 않는다', () => {
   const s = session({}, 2);

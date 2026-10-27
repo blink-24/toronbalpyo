@@ -1,0 +1,51 @@
+name: Classroom browser audit
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - qa/**
+      - .github/workflows/browser-audit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: classroom-browser-audit
+  cancel-in-progress: false
+
+jobs:
+  browser:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Install pinned test-only browser tools
+        run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.64.1
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Build candidate and serve only static files
+        run: |
+          npm run build
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist > /tmp/classroom-audit-http.log 2>&1 &
+          echo $! > /tmp/classroom-audit-http.pid
+      - name: Audit candidate with the real Apps Script server
+        env:
+          CLASSROOM_AUDIT_URL: http://127.0.0.1:4173/
+        run: node qa/browser-audit.mjs
+      - name: Keep synthetic test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: classroom-browser-audit
+          path: artifacts/browser-audit/
+          if-no-files-found: ignore
+          retention-days: 3

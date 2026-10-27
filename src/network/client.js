@@ -42,4 +42,4 @@ export function createApiClient({ endpoint = '', timeoutMs = 20000, fetchImpl = 
   };
 }
 
-export const mayUseLocalFallback = error => ['NETWORK', 'TIMEOUT', 'NOT_CONFIGURED', 'SERVER_ERROR', 'HTTP_429', 'INVALID_RESPONSE'].includes(error?.code) || /^HTTP_5\d\d$/.test(error?.code || '');
+export const mayUseLocalFallback = error => ['NETWORK', 'TIMEOUT', 'NOT_CONFIGURED', 'SERVER_ERROR', 'BUSY', 'HTTP_429', 'INVALID_RESPONSE'].includes(error?.code) || /^HTTP_5\d\d$/.test(error?.code || '');
