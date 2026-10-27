@@ -9,13 +9,13 @@
 | Google Sheets 스키마 | 9탭·155개 헤더와 초기 설정 준비 |
 | Google 계정 | 요청한 개인 계정 연결과 소유권 확인 완료 |
 | 실제 Google Sheet | 비공개 시트 생성. 9탭·155개 헤더·설정 8행·Asia/Seoul 확인 |
-| Apps Script 프로젝트·웹 앱 | 코드 준비. 사용자 계정에서 초기 실행·권한 승인·배포 필요 |
+| Apps Script 프로젝트·웹 앱 | 사용자가 초기 실행 완료 및 배포 /exec URL 제공. 공개 설정에 연결, GitHub 원격 접속 검사 진행 |
 | GitHub | blink-24/toronbalpyo의 PR #1 Checks 통과 후 main 병합 완료. 구현 커밋 5d6313105fcc2fe7ec6dda7db4fa6039afb7e2b5 |
 | GitHub Pages | main 검사·빌드·공개 파일 경계 검사 통과. Pages 미활성으로 Configure GitHub Pages 단계에서 Not Found, 사이트 미게시 |
 | 브라우저·학교 태블릿 | 실제 실행 검증 미실시 |
 | 3·4차시 앱·녹음 업로드 | 이번 2차시 구현의 후속 범위 |
 
-`config.js`의 `apiUrl`은 실제 `/exec` URL이 생길 때까지 비어 있다. 이 상태에서는 대담을 로컬 대본으로 진행할 수 있고 제출 기록은 전송 대기로 남는다. 시트에 제출되었다거나 교사 조회·공유 서버가 연결되었다고 표시하지 않는다.
+`config.js`의 `apiUrl`에 사용자가 제공한 실제 `/exec` URL을 반영했다. URL 설정과 실서버 검증 결과는 구분한다. 현재 실행 환경의 직접 요청은 통신 제한으로 403을 받아 서버 권한 오류 여부를 판정할 수 없으므로, GitHub의 Live API connection에서 공개 상태·설정·익명 집계·교사 무암호 거부·저장 전 잘못된 입력 거부를 확인한다. 학생 기록을 생성하지 않는 검사이며 실제 정상 제출 저장·브라우저 CORS·교사 암호 로그인은 별도 확인 대상이다.
 
 ## 연결에 필요한 정보
 
