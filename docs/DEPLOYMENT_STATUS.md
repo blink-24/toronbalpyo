@@ -4,18 +4,20 @@
 
 | 항목 | 현재 상태 |
 |---|---|
-| 2차시 학습·활동·공유 화면 | 로컬 구현 |
-| 대본 엔진·선택적 AI 어댑터 | 로컬 구현. 실제 AI 키·모델 미설정 |
+| 2차시 학습·활동·공유 화면 | 구현 및 Pages 게시. 실제 브라우저 활동 확인은 후속 |
+| 대본 엔진·선택적 AI 어댑터 | 기본 대본 모드 연결. AI 키·모델 미설정 |
 | Google Sheets 스키마 | 9탭·155개 헤더와 초기 설정 준비 |
 | Google 계정 | 요청한 개인 계정 연결과 소유권 확인 완료 |
 | 실제 Google Sheet | 비공개 시트 생성. 9탭·155개 헤더·설정 8행·Asia/Seoul 확인 |
-| Apps Script 프로젝트·웹 앱 | 사용자가 초기 실행 완료 및 배포 /exec URL 제공. 공개 설정에 연결, GitHub 원격 접속 검사 진행 |
-| GitHub | blink-24/toronbalpyo의 PR #1 Checks 통과 후 main 병합 완료. 구현 커밋 5d6313105fcc2fe7ec6dda7db4fa6039afb7e2b5 |
-| GitHub Pages | main 검사·빌드·공개 파일 경계 검사 통과. Pages 미활성으로 Configure GitHub Pages 단계에서 Not Found, 사이트 미게시 |
+| Apps Script 프로젝트·웹 앱 | 사용자 초기 실행·배포 완료. 실제 서버 접속 검사 5개 통과 |
+| GitHub | 구현 PR #1, 상태 PR #3, 실제 서버 연결 PR #4 병합 완료 |
+| GitHub Pages | 사용자 Pages 설정 후 실행 40481995416 재시도 성공. 공개 주소 https://blink-24.github.io/toronbalpyo/ |
 | 브라우저·학교 태블릿 | 실제 실행 검증 미실시 |
 | 3·4차시 앱·녹음 업로드 | 이번 2차시 구현의 후속 범위 |
 
-`config.js`의 `apiUrl`에 사용자가 제공한 실제 `/exec` URL을 반영했다. URL 설정과 실서버 검증 결과는 구분한다. 현재 실행 환경의 직접 요청은 통신 제한으로 403을 받아 서버 권한 오류 여부를 판정할 수 없으므로, GitHub의 Live API connection에서 공개 상태·설정·익명 집계·교사 무암호 거부·저장 전 잘못된 입력 거부를 확인한다. 학생 기록을 생성하지 않는 검사이며 실제 정상 제출 저장·브라우저 CORS·교사 암호 로그인은 별도 확인 대상이다.
+`config.js`에 실제 `/exec` URL을 반영했다. [Live API connection](https://github.com/blink-24/toronbalpyo/actions/runs/40481995409)에서 공개 상태·실제 시트 설정·익명 집계 허용 필드·교사 무암호 조회 거부·잘못된 POST 입력 저장 전 거부가 모두 통과했다. 학생 기록을 생성하지 않은 검사이며 정상 제출 저장·교사 암호 로그인·브라우저 CORS·학교 기기 동작은 아직 별도 확인 대상이다.
+
+공개 사이트: [채움 토론과 반대 신문](https://blink-24.github.io/toronbalpyo/). 배포 뒤 HTML·설정·메인 모듈·스타일 HTTP 확인을 수행하도록 워크플로를 추가했다. HTTP 파일 확인과 실제 브라우저 실행은 구분한다.
 
 ## 연결에 필요한 정보
 
@@ -30,7 +32,7 @@
 
 - [구현 PR #1](https://github.com/blink-24/toronbalpyo/pull/1): 자동검사 성공 후 병합 완료.
 - [Pages 실행](https://github.com/blink-24/toronbalpyo/actions/runs/40445969544): `checks / Test and validate`, 정적 빌드, 공개 파일 경계 검사 성공. `Configure GitHub Pages`는 사이트 설정을 찾지 못해 실패했으며 게시 단계는 실행하지 않았다.
-- 소유자가 Settings → Pages → Source를 GitHub Actions로 설정한 뒤 다시 실행한다. 실제 게시 URL은 성공 결과에서 확인하며 아직 확정하지 않는다.
+- 사용자가 Settings → Pages → Source를 GitHub Actions로 설정한 뒤 같은 실행 40481995416의 실패 작업만 재실행했다. 2번째 시도에서 build·deploy 성공, 배포 로그의 실제 환경 URL을 확인했다.
 - [최초 연결·수업 전 확인 이슈 #2](https://github.com/blink-24/toronbalpyo/issues/2): 남은 소유자 설정·실제 왕복·학교 기기 검증과 유지보수 요청 창구.
 
 공식 참고: [Apps Script 웹 앱](https://developers.google.com/apps-script/guides/web), [Content Service](https://developers.google.com/apps-script/guides/content), [GitHub Pages 워크플로](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
