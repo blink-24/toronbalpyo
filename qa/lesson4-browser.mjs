@@ -100,6 +100,7 @@ try {
       await l2.locator('#student-id').fill('21195'); await l2.locator('form[data-form="login"] button[type="submit"]').click(); await waitL2('dialogue');
       assert.equal((await state(l2)).activity.turn, 2); assert.equal((await state(l2)).activity.committedAnswers.length, 1);
       assert.equal(await l2.locator('#answer-text').inputValue(), '두 번째 질문에서 작성 중이던 답변입니다.');
+      assert.equal(await l2.locator('#toast').innerText(), '입장했어요.');
     }
   }
   await l2.locator('#reflection-text').fill('다음에는 자료의 출처와 정책의 적용 범위를 함께 확인하겠습니다.');
@@ -160,6 +161,7 @@ try {
         await page.locator('#l4-representative').fill('21199'); await page.locator('#l4-group-name').fill(`검토용 ${options.name}`);
         for (let n = 1; n <= 4; n++) await page.locator(`#l4-member-${n}`).fill(`211${95 + n}`);
         await page.locator('#l4-entry-submit').click(); await stage(page, 'complete');
+        assert.equal(await page.locator('#toast').innerText(), '모둠 활동에 입장했어요.');
         assert.equal((await state(page)).lesson4.submissionId, submissionId); assert.equal((await state(page)).lesson4.status, 'pending');
         ctx.apiOffline = false; await page.locator('[data-action="l4-retry"]').click();
       }

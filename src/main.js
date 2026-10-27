@@ -592,7 +592,7 @@ document.addEventListener('submit', async event => {
       state = restoreStudentDraft(storage, id, state); state.activity.committedAnswers ||= [];
     }
     const loginGeneration = requestGeneration;
-    state.activityView = 'perform'; errorMessage = ''; if (state.tab === 'activity') beginActivity(); closeDialog(); location.hash = state.tab === 'learn' ? '#/learn' : '#/lesson2'; persist(); render(); await refreshConfig();
+    state.activityView = 'perform'; errorMessage = ''; if (state.tab === 'activity') beginActivity(); closeDialog(); toast('입장했어요.'); location.hash = state.tab === 'learn' ? '#/learn' : '#/lesson2'; persist(); render(); await refreshConfig();
     if (loginGeneration !== requestGeneration || state.studentId !== id) return;
     if (!state.activity.session) state.activity.questionCount = Number(serverConfig.l2Questions) === 2 ? 2 : 3;
     persist(); render();
