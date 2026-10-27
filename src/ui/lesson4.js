@@ -154,6 +154,7 @@ export function createLesson4Controller({ api, storage, getState, setState, pers
       draft.memberEntries = [...identity.memberStudentIds, ...Array(5 - identity.memberStudentIds.length).fill('')];
       if (draft.stage === 'entry') draft.stage = 'argument';
       generation++; busy = false; error = ''; setState(draft); show();
+      toast('모둠 활동에 입장했어요.');
       if (draft.stage === 'argument') sendProgress('argument');
       if (draft.stage === 'dialogue' && !draft.remoteQuestions[draft.turn]) remote('question');
     } catch (caught) { fail(caught.message); }

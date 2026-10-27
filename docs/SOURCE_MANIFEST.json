@@ -1,7 +1,7 @@
 {
   "version": "5.1.1",
   "baseline": "lessonplan-v6-webapp-v5-user-script-first-2026-10-27",
-  "external_state": "Frontend5.1.1 local logout/resume candidate; current server5.1.0 unchanged; same-device scope chosen by user",
+  "external_state": "Frontend5.1.1 logout/resume published PR13; server5.1.0 unchanged; entry confirmation followup",
   "tests_passed": 116,
   "files": [
     {
@@ -102,7 +102,7 @@
     },
     {
       "path": "docs/DEPLOYMENT_STATUS.md",
-      "sha256": "9fd770a625ac86437ac814da7a1d7e63b53d939e076a2398ad8264b9c85ad5fb"
+      "sha256": "0a1ca1280efe346702f9ecacab3c963e924034fadb67356f09dd0bbde0a2fd92"
     },
     {
       "path": "docs/LESSON4_IMPLEMENTATION_CONTRACT.md",
@@ -122,7 +122,7 @@
     },
     {
       "path": "docs/VALIDATION.md",
-      "sha256": "d6542fc92a3a409fcd4373f174f8b88bb2a476797df069e122afa6ec9a87abc6"
+      "sha256": "e053a2600d383f66ea66173c03726d4beca6fd4fe03fec5b4bd9887deb414f9b"
     },
     {
       "path": "index.html",
@@ -142,7 +142,7 @@
     },
     {
       "path": "qa/lesson4-browser.mjs",
-      "sha256": "da52d0920a498f0aa968172593ac62ad88b6aa7922e88413c03c6c647e32fe74"
+      "sha256": "7ab75d97aae09e1f5475ddc4c4de3b3e893379be6a9dc9ac0ddf800c91810933"
     },
     {
       "path": "qa/lesson4-fixture.mjs",
@@ -178,7 +178,7 @@
     },
     {
       "path": "src/main.js",
-      "sha256": "3c87d110b718a328229a16604d5ca9a2686732a92b9956698b72a0e296b3739d"
+      "sha256": "6480994c2d339aeb10e8f88e0490f4a8a5a5a72f2c8cdb381f3f07f5ea521a1f"
     },
     {
       "path": "src/network/client.js",
@@ -198,7 +198,7 @@
     },
     {
       "path": "src/ui/lesson4.js",
-      "sha256": "c22a67c99a929364dcf00d5071707deb905e9e5447a9c4a2fbfab5c66c09e9c0"
+      "sha256": "70e041cc6201725dce4ecf9e0e25f299849941b6c6a0632e348801d611a04402"
     },
     {
       "path": "src/ui/state.js",
