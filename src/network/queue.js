@@ -11,7 +11,8 @@ export function createSubmissionQueue({ storage = globalThis.localStorage, api, 
     running = true; let sent = 0;
     try {
       for (const item of [...items]) {
-        if (item.blocked) continue;
+        if (item.blocked && !(force && item.errorCode === 'LESSON_CLOSED')) continue;
+        if (item.blocked) item.blocked = false;
         if (!force && item.nextAttemptAt > now()) continue;
         try {
           const ack = await api.post('submit', item.payload);

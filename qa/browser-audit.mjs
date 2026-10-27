@@ -25,6 +25,9 @@ async function runFlow(options) {
   const result = { name: options.name, steps: [], pageErrors: [], status: 'running' };
   report.cases.push(result);
   const context = await browser.newContext({ viewport: options.viewport, isMobile: options.mobile, hasTouch: options.mobile });
+  if (new URL(site).hostname === '127.0.0.1') {
+    await context.addInitScript(() => localStorage.setItem('chaeum:public-endpoint', 'https://example.invalid/collector'));
+  }
   const page = await context.newPage();
   page.setDefaultTimeout(35000);
   const submissions = [];
@@ -55,7 +58,10 @@ async function runFlow(options) {
     await step('synthetic student entry and stance', async () => {
       await page.locator('#tab-activity').click();
       await page.locator('#student-id').fill('21199');
+      await page.evaluate(() => dispatchEvent(new HashChangeEvent('hashchange')));
+      assert.equal(await page.locator('#student-id').inputValue(), '21199', 'entry draft disappeared after asynchronous render');
       await page.locator('form[data-form="login"] button[type="submit"]').click();
+      await waitStep(page, 'stance');
       await page.locator(`[data-action="stance"][data-value="${options.stance}"]`).click();
       await page.locator('[data-action="next"]').click();
       await waitStep(page, 'reason');
@@ -79,6 +85,12 @@ async function runFlow(options) {
       await page.locator('[data-action="next"]').click();
       await waitStep(page, 'argument');
       assert.ok((await page.locator('#arg-text').inputValue()).length <= 300);
+      const edited = (await page.locator('#arg-text').inputValue()) + '\n공동체의 안전도 함께 살피겠습니다.';
+      await page.locator('#arg-text').fill(edited);
+      await page.locator('[data-action="previous"]').click();
+      await page.locator(`[data-action="card"][data-id="${options.cardId}"]`).click();
+      await page.locator('[data-action="next"]').click();
+      assert.equal(await page.locator('#arg-text').inputValue(), edited, 'edited argument disappeared after revisiting the same card');
       if (options.offline) await context.setOffline(true);
       await page.locator('[data-action="next"]').click();
       await waitStep(page, 'dialogue');
@@ -143,7 +155,7 @@ async function runFlow(options) {
       result.duplicateAcknowledged = true;
     });
     await step('anonymous sharing and teacher access rejection', async () => {
-      await page.locator('[data-action="share"]').click();
+      await page.locator('[data-action="share"]').first().click();
       await page.locator('.share-grid').waitFor({ state: 'visible', timeout: 35000 });
       await inspect(page, `${options.name}-sharing`);
       const endpoint = await page.evaluate(() => window.CLASSROOM_CONFIG.apiUrl);
@@ -153,6 +165,7 @@ async function runFlow(options) {
       for (const key of ['records','answers','studentId','sessionId','reflection']) assert.ok(!(key in shared.data));
       await page.locator('[data-action="teacher"]').click();
       await page.locator('form[data-form="teacher-login"]').waitFor();
+      assert.equal(await page.locator('[data-action="connect-endpoint"]').count(), 0, 'public endpoint editor must not be exposed');
       const denied = await page.evaluate(async endpoint => (await fetch(endpoint + '?action=l2_summary')).json(), endpoint);
       assert.equal(denied.ok, false);
       assert.equal(denied.error.code, 'UNAUTHORIZED');

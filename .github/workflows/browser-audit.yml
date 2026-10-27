@@ -32,7 +32,14 @@ jobs:
         run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.64.1
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      - name: Audit published app with synthetic activity
+      - name: Build candidate and serve only static files
+        run: |
+          npm run build
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist > /tmp/classroom-audit-http.log 2>&1 &
+          echo $! > /tmp/classroom-audit-http.pid
+      - name: Audit candidate with the real Apps Script server
+        env:
+          CLASSROOM_AUDIT_URL: http://127.0.0.1:4173/
         run: node qa/browser-audit.mjs
       - name: Keep synthetic test evidence
         if: always()

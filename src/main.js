@@ -15,8 +15,8 @@ try { localStorage.setItem('chaeum:probe', '1'); localStorage.removeItem('chaeum
 let state = loadState(storage);
 state.activity.committedAnswers ||= [];
 const engine = createEngine(CONTENT);
-let endpointOverride = storage.getItem('chaeum:public-endpoint') || '';
-const api = createApiClient({ endpoint: endpointOverride || runtime.apiUrl || runtime.apiEndpoint || '' });
+// 배포 설정의 주소만 사용합니다. 기기에 남은 주소나 입력으로 수집 대상을 바꾸지 않습니다.
+const api = createApiClient({ endpoint: runtime.apiUrl || '' });
 let serverConfig = { grade: 2, classCount: 11, acceptLessons: [2], l2Questions: 3, aiEnabled: false, publicSharing: true };
 let busy = false;
 let errorMessage = '';
@@ -177,15 +177,35 @@ function shareView() {
 }
 
 function teacherView() {
-  if (!teacherPasscode || !teacherData) return `<div class="teacher-wrap"><div class="teacher-top"><div><div class="section-kicker">TEACHER'S DESK</div><h1>교사용 모아 보기</h1></div>${button('학생 화면으로', 'student-screen')}</div><section class="activity-panel intro-login"><h2>수업 기록을 확인합니다.</h2><p class="section-intro">교사용 암호를 확인한 뒤 기록을 불러옵니다.</p><form data-form="teacher-login"><label class="field-label" for="teacher-class">반</label><select id="teacher-class" name="cls">${Array.from({ length: 11 }, (_, i) => `<option value="${i + 1}" ${teacherClass === i + 1 ? 'selected' : ''}>${i + 1}반</option>`).join('')}</select><label class="field-label" for="teacher-passcode" style="margin-top:20px">교사용 암호</label><input id="teacher-passcode" name="passcode" type="password" autocomplete="off" required placeholder="암호 입력"><div class="action-bar"><span></span><button type="submit" class="btn primary" ${busy || !api.isConfigured() ? 'disabled' : ''}>${busy ? '확인 중…' : '확인하고 열기 →'}</button></div></form>${errorHtml()}${!api.isConfigured() ? '<p class="quiet-note">수업 기록을 연결하면 모아 보기를 열 수 있습니다.</p>' : ''}${adminSettings()}</section></div>`;
+  if (!teacherPasscode || !teacherData) return `<div class="teacher-wrap"><div class="teacher-top"><div><div class="section-kicker">TEACHER'S DESK</div><h1>교사용 모아 보기</h1></div>${button('학생 화면으로', 'student-screen')}</div><section class="activity-panel intro-login"><h2>수업 기록을 확인합니다.</h2><p class="section-intro">교사용 암호를 확인한 뒤 기록을 불러옵니다.</p><form data-form="teacher-login"><label class="field-label" for="teacher-class">반</label><select id="teacher-class" name="cls">${Array.from({ length: 11 }, (_, i) => `<option value="${i + 1}" ${teacherClass === i + 1 ? 'selected' : ''}>${i + 1}반</option>`).join('')}</select><label class="field-label" for="teacher-passcode" style="margin-top:20px">교사용 암호</label><input id="teacher-passcode" name="passcode" type="password" autocomplete="off" required placeholder="암호 입력"><div class="action-bar"><span></span><button type="submit" class="btn primary" ${busy || !api.isConfigured() ? 'disabled' : ''}>${busy ? '확인 중…' : '확인하고 열기 →'}</button></div></form>${errorHtml()}${!api.isConfigured() ? '<p class="quiet-note">수업 기록을 연결하면 모아 보기를 열 수 있습니다.</p>' : ''}</section></div>`;
   const total = Number(teacherData.total ?? teacherData.count ?? teacherRows.length);
-  return `<div class="teacher-wrap"><div class="teacher-top"><div><div class="section-kicker">TEACHER'S DESK · 2차시</div><h1>생각의 과정 모아 보기</h1></div><div>${button('학생 화면', 'student-screen')}${button('닫기', 'teacher-logout')}</div></div><div class="teacher-filters"><label for="teacher-filter">반 선택</label><select id="teacher-filter" data-input="teacher-class">${Array.from({ length: 11 }, (_, i) => `<option value="${i + 1}" ${teacherClass === i + 1 ? 'selected' : ''}>${i + 1}반</option>`).join('')}</select>${button('새로 고침', 'teacher-refresh', { className: 'small', disabled: busy })}</div><div class="share-grid"><div class="share-metric"><b>${total}</b><span>활동 기록</span></div><div class="share-metric"><b>${Number(teacherData.completed ?? total)}</b><span>제출 완료</span></div><div class="share-metric"><b>${Math.round(Number(teacherData.lowReliability?.rate || 0) * 100)}%</b><span>출처 재검토가 필요한 자료 선택</span></div></div><div class="chart-panel"><h3>근거 카드 선택 분포</h3>${bars(teacherData.cardCounts || teacherData.byCard)}</div>${teacherProgressPanel()}<div class="chart-panel"><h3>학생별 기록</h3><div class="table-scroll"><table class="teacher-table"><thead><tr><th>학생</th><th>입장</th><th>자료</th><th>진행</th><th>기록</th></tr></thead><tbody>${teacherRows.map((row, i) => `<tr><td>${h(maskStudentId(row.studentId))}</td><td>${h(row.stance || row.data?.stance || '')}</td><td>${h(row.cardId || row.data?.cardId || '')}</td><td>${h(row.stage || row.status || '제출')}</td><td><button class="text-btn" data-action="teacher-record" data-index="${i}">열기 ↗</button></td></tr>`).join('')}</tbody></table></div>${!teacherRows.length ? '<p class="share-note">아직 불러온 개별 기록이 없습니다.</p>' : ''}</div>${errorHtml()}${adminSettings()}</div>`;
+  return `<div class="teacher-wrap"><div class="teacher-top"><div><div class="section-kicker">TEACHER'S DESK · 2차시</div><h1>생각의 과정 모아 보기</h1></div><div>${button('학생 화면', 'student-screen')}${button('닫기', 'teacher-logout')}</div></div><div class="teacher-filters"><label for="teacher-filter">반 선택</label><select id="teacher-filter" data-input="teacher-class">${Array.from({ length: 11 }, (_, i) => `<option value="${i + 1}" ${teacherClass === i + 1 ? 'selected' : ''}>${i + 1}반</option>`).join('')}</select>${button('새로 고침', 'teacher-refresh', { className: 'small', disabled: busy })}</div><div class="share-grid"><div class="share-metric"><b>${total}</b><span>활동 기록</span></div><div class="share-metric"><b>${Number(teacherData.completed ?? total)}</b><span>제출 완료</span></div><div class="share-metric"><b>${Math.round(Number(teacherData.lowReliability?.rate || 0) * 100)}%</b><span>출처 재검토가 필요한 자료 선택</span></div></div><div class="chart-panel"><h3>근거 카드 선택 분포</h3>${bars(teacherData.cardCounts || teacherData.byCard)}</div>${teacherProgressPanel()}<div class="chart-panel"><h3>학생별 기록</h3><div class="table-scroll"><table class="teacher-table"><thead><tr><th>학생</th><th>입장</th><th>자료</th><th>진행</th><th>기록</th></tr></thead><tbody>${teacherRows.map((row, i) => `<tr><td>${h(maskStudentId(row.studentId))}</td><td>${h(row.stance || row.data?.stance || '')}</td><td>${h(row.cardId || row.data?.cardId || '')}</td><td>${h(row.stage || row.status || '제출')}</td><td><button class="text-btn" data-action="teacher-record" data-index="${i}">열기 ↗</button></td></tr>`).join('')}</tbody></table></div>${!teacherRows.length ? '<p class="share-note">아직 불러온 개별 기록이 없습니다.</p>' : ''}</div>${errorHtml()}</div>`;
 }
-function adminSettings() {
-  return `<details class="admin-details"><summary>연결 설정 · 관리자용</summary><p>Google Apps Script 웹 앱 배포 주소를 사용합니다. 이 주소에는 비밀 키나 교사 암호를 넣지 않습니다.</p><label for="api-endpoint">활동 기록 연결 주소<input id="api-endpoint" data-input="api-endpoint" type="url" value="${h(api.getEndpoint())}" placeholder="https://script.google.com/macros/s/…/exec"></label>${button('주소 저장하고 연결 확인', 'connect-endpoint', { className: 'small' })}<p class="field-help">AI 공급자 기본값은 none입니다. 공급자 키·교사용 암호는 Apps Script의 Script Properties에서 설정합니다. 연결되지 않은 제출은 전송 대기로 유지됩니다.</p></details>`;
+function captureEntryForm() {
+  return ['student-id', 'teacher-passcode', 'teacher-class'].flatMap(id => {
+    const field = document.getElementById(id);
+    if (!field || !app.contains(field)) return [];
+    return [{ id, value: field.value, focused: document.activeElement === field,
+      start: typeof field.selectionStart === 'number' ? field.selectionStart : null,
+      end: typeof field.selectionEnd === 'number' ? field.selectionEnd : null }];
+  });
+}
+function restoreEntryForm(fields) {
+  for (const saved of fields) {
+    const field = document.getElementById(saved.id);
+    if (!field || !app.contains(field)) continue;
+    // 암호를 포함한 입력은 HTML 속성이나 저장소에 남기지 않고 기존 DOM 값만 복원합니다.
+    field.value = saved.value;
+    if (saved.focused) {
+      field.focus({ preventScroll: true });
+      if (saved.start !== null && typeof field.setSelectionRange === 'function') field.setSelectionRange(saved.start, saved.end);
+    }
+  }
 }
 function render() {
+  const entryFields = captureEntryForm();
   app.innerHTML = `${header()}<main class="shell" ${isTeacher() ? '' : 'aria-label="수업 공간"'}>${isTeacher() ? teacherView() : `${hero()}${tabs()}<div id="main-content" role="tabpanel" aria-labelledby="tab-${state.tab}" tabindex="-1">${state.tab === 'learn' ? learningView() : activityView()}</div>`}</main>${footer()}`;
+  restoreEntryForm(entryFields);
   tickTimer();
 }
 
@@ -228,6 +248,36 @@ function switchTab(value) {
 function selectionPayload() {
   const a = state.activity;
   return { stance: a.stance, reasonId: a.reasonId, reasonText: a.reasonText, cardId: a.cardId, argText: a.argText };
+}
+function invalidateArgumentDraft(activity) {
+  activity.argText = '';
+  activity.argumentDraftReady = false;
+}
+function selectStance(value) {
+  const activity = state.activity;
+  if (activity.stance === value) return;
+  activity.stance = value;
+  activity.reasonId = ''; activity.reasonText = ''; activity.cardId = '';
+  invalidateArgumentDraft(activity);
+}
+function selectReason(id) {
+  const activity = state.activity;
+  if (activity.reasonId === id) return;
+  activity.reasonId = id;
+  activity.reasonText = id === 'RX' ? '' : CONTENT.reasons.find(reason => reason.id === id).text;
+  invalidateArgumentDraft(activity);
+}
+function selectCard(id) {
+  const activity = state.activity;
+  if (activity.cardId === id) return;
+  activity.cardId = id;
+  invalidateArgumentDraft(activity);
+}
+function updateActivityText(key, value) {
+  const activity = state.activity;
+  if (key === 'reasonText' && activity.reasonText !== value) invalidateArgumentDraft(activity);
+  activity[key] = value;
+  if (key === 'argText') activity.argumentDraftReady = true;
 }
 function turnPayload(mode) {
   return { lesson: 2, sessionId: state.activity.sessionId, studentId: state.studentId, cls: studentClass(state.studentId), mode, turn: state.activity.turn, selection: selectionPayload(), history: committed().map(a => ({ questionId: a.questionId, answer: a.answer, helpIds: a.helpIds })), earlyFinish: state.activity.earlyFinish };
@@ -284,7 +334,8 @@ async function nextStep() {
     if (containsPrivateData(a.reasonText)) return setError('이름·학번·연락처를 지우고 이유만 적어 주세요.'); a.step = 'evidence';
   } else if (a.step === 'evidence') {
     if (!a.cardId) return setError('근거 자료 한 장을 골라 주세요.');
-    a.argText = composeArgument({ ...a, card: selectedCard(), motion: CONTENT.motion }); a.step = 'argument';
+    if (!a.argumentDraftReady && !a.argText) a.argText = composeArgument({ ...a, card: selectedCard(), motion: CONTENT.motion });
+    a.argumentDraftReady = true; a.step = 'argument';
   } else if (a.step === 'argument') {
     if (!a.argText.trim() || a.argText.length > 300) return setError('나의 입론을 1~300자로 적어 주세요.');
     if (containsPrivateData(a.argText)) return setError('이름·학번·연락처를 지우고 입론만 적어 주세요.');
@@ -333,7 +384,7 @@ async function loadShared() {
   finally { shareLoading = false; render(); }
 }
 async function loadTeacher(passcode = teacherPasscode, cls = teacherClass) {
-  if (!api.isConfigured()) return setError('먼저 활동 기록 연결 주소를 설정해 주세요.');
+  if (!api.isConfigured()) return setError('활동 기록 연결이 준비되지 않았습니다. 게시 설정을 확인해 주세요.');
   busy = true; errorMessage = ''; render();
   try {
     const summary = await api.get('l2_summary', { cls, passcode });
@@ -391,9 +442,9 @@ document.addEventListener('click', async event => {
     else if (action === 'learn-slide') { state.learningIndex = Number(node.dataset.index); persist(); render(); }
     else if (action === 'learn-prev') { state.learningIndex--; persist(); render(); scrollToMain(); }
     else if (action === 'learn-next' || action === 'learn-finish') { state.learned = [...new Set([...state.learned, state.learningIndex])]; if (action === 'learn-finish') switchTab('activity'); else { state.learningIndex++; persist(); render(); scrollToMain(); } }
-    else if (action === 'stance') { if (state.activity.stance !== node.dataset.value) { state.activity.stance = node.dataset.value; state.activity.reasonId = ''; state.activity.reasonText = ''; state.activity.cardId = ''; state.activity.argText = ''; } errorMessage = ''; persist(); render(); }
-    else if (action === 'reason') { state.activity.reasonId = node.dataset.id; state.activity.reasonText = node.dataset.id === 'RX' ? '' : CONTENT.reasons.find(x => x.id === node.dataset.id).text; state.activity.argText = ''; errorMessage = ''; persist(); render(); document.querySelector('#reason-text')?.focus(); }
-    else if (action === 'card') { state.activity.cardId = node.dataset.id; state.activity.argText = ''; errorMessage = ''; persist(); render(); }
+    else if (action === 'stance') { selectStance(node.dataset.value); errorMessage = ''; persist(); render(); }
+    else if (action === 'reason') { selectReason(node.dataset.id); errorMessage = ''; persist(); render(); document.querySelector('#reason-text')?.focus(); }
+    else if (action === 'card') { selectCard(node.dataset.id); errorMessage = ''; persist(); render(); }
     else if (action === 'next') await nextStep();
     else if (action === 'previous') { const sequence = ['stance', 'reason', 'evidence', 'argument']; const index = sequence.indexOf(state.activity.step); if (index > 0) { state.activity.step = sequence[index - 1]; errorMessage = ''; persist(); render(); scrollToMain(); } }
     else if (action === 'commit-answer') await commitAnswer();
@@ -423,20 +474,12 @@ document.addEventListener('click', async event => {
     else if (action === 'teacher-refresh') await loadTeacher();
     else if (action === 'teacher-record') showTeacherRecord(Number(node.dataset.index));
     else if (action === 'project-answer') projectAnswer(Number(node.dataset.record), Number(node.dataset.answer));
-    else if (action === 'connect-endpoint') {
-      const value = document.querySelector('[data-input="api-endpoint"]').value.trim();
-      if (!/^https:\/\//.test(value)) return toast('https로 시작하는 웹 앱 배포 주소를 입력해 주세요.');
-      api.setEndpoint(value); storage.setItem('chaeum:public-endpoint', value); busy = true; render();
-      try { await api.get('ping'); await refreshConfig(); toast('활동 기록 연결을 확인했어요.'); await queue.flush({ force: true }); }
-      catch { toast('연결을 확인하지 못했어요. 배포 주소와 접근 권한을 확인해 주세요.'); }
-      finally { busy = false; render(); }
-    }
   } catch (error) { setError(error.message || '진행 내용을 확인해 주세요.'); }
 });
 
 document.addEventListener('input', event => {
   const key = event.target.dataset.input;
-  if (['reasonText', 'argText', 'reflection'].includes(key)) state.activity[key] = event.target.value;
+  if (['reasonText', 'argText', 'reflection'].includes(key)) updateActivityText(key, event.target.value);
   else if (key === 'answer') state.activity.answerDrafts[state.activity.turn] = event.target.value;
   else return;
   const count = document.querySelector(`[data-count="${key}"]`); if (count) count.textContent = String(event.target.value.length); persist();
