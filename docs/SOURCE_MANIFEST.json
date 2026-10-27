@@ -22,7 +22,7 @@
     },
     {
       "path": ".github/workflows/lesson4-browser.yml",
-      "sha256": "62cd3e0f9c039bf84f1cd4e2161a8cde7361ecb7bf0af581ce49adcb0905bcdf"
+      "sha256": "788af88ba4dc832f5f5ff79b3943e957d5fbfdbfdbc6d5d9b82035db70143925"
     },
     {
       "path": ".github/workflows/live-api.yml",
@@ -122,7 +122,7 @@
     },
     {
       "path": "docs/VALIDATION.md",
-      "sha256": "62b092949b846bacafedeccee1405f9a7cf99f078181c8cdce7be6124e0e4fa1"
+      "sha256": "2a7ebd206d60025ecd9434f06f8ca958b6a4680af44db7e3b2e2091ce33ff08a"
     },
     {
       "path": "index.html",
@@ -138,7 +138,7 @@
     },
     {
       "path": "qa/lesson4-browser.mjs",
-      "sha256": "5d30bcff67c07f38e43362a78c4f52f46509594c8474714632feba963ec5a06f"
+      "sha256": "8ae50435cd094b14d0619d775f26fc69127c0b058d064b99e4ef5f44ba3185f8"
     },
     {
       "path": "qa/lesson4-fixture.mjs",
