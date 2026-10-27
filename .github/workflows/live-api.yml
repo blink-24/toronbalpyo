@@ -1,6 +1,12 @@
 name: Live API connection
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - config.js
+      - scripts/check-live-api.mjs
+      - .github/workflows/live-api.yml
   push:
     branches: [main]
     paths:

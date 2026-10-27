@@ -6,7 +6,7 @@ import content from '../src/core/content.js';
 import lesson4Content from '../src/core/lesson4-content.js';
 
 const db = Object.fromEntries(Object.keys(HEADERS).map(name => [name, []]));
-db.config.push(...Object.entries({ grade: '2', classCount: '11', groupMax: '8', acceptLessons: '2', l2Questions: '3', l4Questions: '4', publicSharing: 'true' }).map(([key, value]) => ({ key, value })));
+db.config.push(...Object.entries({ grade: '2', classCount: '13', groupMax: '8', acceptLessons: '2', l2Questions: '3', l4Questions: '4', publicSharing: 'true' }).map(([key, value]) => ({ key, value })));
 const props = new Map([['PASSCODE', 'fixture-teacher-only'], ['AI_PROVIDER', 'none']]);
 let held = false;
 const store = {

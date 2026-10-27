@@ -1,7 +1,7 @@
 {
   "version": "5.1.0",
   "baseline": "lessonplan-v6-webapp-v5-user-script-first-2026-10-27",
-  "external_state": "GitHub feature PR9; original Apps Script server; owner update pending; deployment evidence is tracked in PR9 and issue8",
+  "external_state": "PR9 merged and Pages40495061769 published; current classCount13 preserved; Apps Script owner upgrade pending",
   "tests_passed": 109,
   "files": [
     {
@@ -22,11 +22,11 @@
     },
     {
       "path": ".github/workflows/lesson4-browser.yml",
-      "sha256": "62cd3e0f9c039bf84f1cd4e2161a8cde7361ecb7bf0af581ce49adcb0905bcdf"
+      "sha256": "788af88ba4dc832f5f5ff79b3943e957d5fbfdbfdbc6d5d9b82035db70143925"
     },
     {
       "path": ".github/workflows/live-api.yml",
-      "sha256": "5791b34c8af790b29c186e9ed4f43f932d898fb9ef6834f0acea49c2b2f9d506"
+      "sha256": "9fb6f000395fcc7d2c997dafd223434fef6f8b20e79ecdf847ee439c1124c658"
     },
     {
       "path": ".github/workflows/pages.yml",
@@ -102,7 +102,7 @@
     },
     {
       "path": "docs/DEPLOYMENT_STATUS.md",
-      "sha256": "d83c58ca18736e62f0b6c40290d77d063fc3ff29fed1b6a975d6cd72188a5674"
+      "sha256": "e142f670a3cd5a57a0cc3eebadf85ffaca9a408cf92d6de32d32888e4dc2ae60"
     },
     {
       "path": "docs/LESSON4_IMPLEMENTATION_CONTRACT.md",
@@ -122,7 +122,7 @@
     },
     {
       "path": "docs/VALIDATION.md",
-      "sha256": "ca72ee00bd4bbc801e3edc6ee85537b6acc3fd81499fc9c677ab8c443cf5e48c"
+      "sha256": "2a7ebd206d60025ecd9434f06f8ca958b6a4680af44db7e3b2e2091ce33ff08a"
     },
     {
       "path": "index.html",
@@ -138,11 +138,11 @@
     },
     {
       "path": "qa/lesson4-browser.mjs",
-      "sha256": "cb16a6484b1a2dee0bafc23ed2957e38e8bf839b47ea74014ba6b03ad1e0f989"
+      "sha256": "8ae50435cd094b14d0619d775f26fc69127c0b058d064b99e4ef5f44ba3185f8"
     },
     {
       "path": "qa/lesson4-fixture.mjs",
-      "sha256": "1b5d6ffa2a16d1e2e7eaf0d6f219da7befb90583186c4406905af77d3efc19da"
+      "sha256": "a5c5d3b0f5e9e14798ac0ad0990d108278a4c8a8b3dd0664e3634540c3b267d9"
     },
     {
       "path": "scripts/build-static.mjs",
@@ -150,7 +150,7 @@
     },
     {
       "path": "scripts/check-live-api.mjs",
-      "sha256": "e283373f63be701ec07b4f76dc9428240a91074d86e1a8c5134b4d538245f51a"
+      "sha256": "3779e58e5bf0b58cf68d32a5dd0c8019361fb9eebc362a45fe606c7b2b7fecc2"
     },
     {
       "path": "scripts/check-project.mjs",
@@ -174,7 +174,7 @@
     },
     {
       "path": "src/main.js",
-      "sha256": "e353f5551a3da60ff7d1ef3ac0e7d6d1f1a505688fb43d316cd2a988558b0dda"
+      "sha256": "ed15cc26c2e6a1f210bafd13f6d7d364fa9c99d8d9e4eba338b5de19bd53399e"
     },
     {
       "path": "src/network/client.js",
@@ -226,7 +226,7 @@
     },
     {
       "path": "tests/ui/frontend-regressions.test.mjs",
-      "sha256": "2c58b1d33c6ed347074f482a81595163c9c7bba62670b2656057ed3c53000d4d"
+      "sha256": "68469ee09694847b53f7488fa38f6c66189ff83caab3563a1d6d6fbb7bc7c53c"
     },
     {
       "path": "tests/ui/lesson4-ui.test.mjs",

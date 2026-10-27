@@ -7,7 +7,7 @@ const api = 'http://127.0.0.1:4180/exec';
 const output = new URL('../artifacts/lesson4-browser/', import.meta.url);
 await fs.mkdir(output, { recursive: true });
 const report = { syntheticOnly: true, storage: 'in-memory fixture; no Google writes', cases: [], startedAt: new Date().toISOString() };
-const browser = await chromium.launch();
+const browser = await chromium.launch({ channel: process.env.CLASSROOM_BROWSER_CHANNEL || undefined });
 async function call(action, payload = {}, method = 'POST') {
   const url = new URL(api); if (method === 'GET') for (const [key, value] of Object.entries({ ...payload, action })) url.searchParams.set(key, value);
   return (await fetch(url, method === 'POST' ? { method, body: JSON.stringify({ ...payload, action }) } : {})).json();
@@ -51,10 +51,12 @@ try {
   await teacher.locator('#lesson-tab-4').click();
   assert.equal(await teacher.locator('form[data-form="l4-entry"]').count(), 0, 'initial L4 must be closed');
   await teacher.locator('[data-action="teacher"]').click();
+  assert.equal(await teacher.locator('#teacher-class option').count(), 13);
   await teacher.locator('#teacher-class').selectOption('11');
   await teacher.locator('#teacher-passcode').fill('fixture-teacher-only');
   await teacher.locator('form[data-form="teacher-login"] button[type="submit"]').click();
   await teacher.locator('[data-action="toggle-lesson"][data-lesson="4"]').waitFor();
+  assert.equal(await teacher.locator('#teacher-filter option').count(), 13);
   await teacher.locator('[data-action="toggle-lesson"][data-lesson="4"]').click();
   await teacher.waitForFunction(() => document.querySelector('[data-action="toggle-lesson"][data-lesson="4"]')?.textContent.includes('닫기'));
   assert.deepEqual((await call('config', {}, 'GET')).data.acceptLessons, [2, 4]);
