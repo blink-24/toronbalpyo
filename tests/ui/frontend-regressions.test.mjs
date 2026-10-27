@@ -19,7 +19,7 @@ function activityFixture() {
 }
 function frontendContext(activity = activityFixture()) {
   const callbacks = new Map();
-  const context = { state: { activity }, CONTENT, composeArgument, busy: false, errorMessage: '',
+  const context = { state: { activity }, CONTENT, composeArgument, busy: false, errorMessage: '', lessonIsOpen: () => true,
     document: { addEventListener: (name, fn) => callbacks.set(name, fn), querySelector: () => null },
     selectedCard: () => CONTENT.evidenceCards.find(card => card.id === activity.cardId),
     markProgress() {}, persist() {}, render() {}, scrollToMain() {}, setError(message) { throw new Error(message); }, containsPrivateData: () => false };
@@ -124,7 +124,7 @@ test('첫 BUSY는 차단하지 않고 backoff 뒤 같은 제출 ID로 자동 복
 test('질문 요청의 BUSY는 학생을 막지 않고 기기 대본을 이어 간다', async () => {
   const context = { state: { activity: { session: {}, turn: 1, remoteQuestions: {}, mode: 'script' } }, requestGeneration: 0, busy: false,
     api: { isConfigured: () => true, async post() { throw new ApiError('서버 사용 중', 'BUSY'); } },
-    mayUseLocalFallback, render() {}, persist() {}, turnPayload: () => ({}), errorMessage: '' };
+    mayUseLocalFallback, lessonIsOpen: () => true, render() {}, persist() {}, turnPayload: () => ({}), errorMessage: '' };
   vm.runInNewContext(between('async function ensureQuestion()', 'async function showFeedback(') + ';globalThis.run=ensureQuestion;', context);
   await context.run(); assert.equal(context.state.activity.mode, 'script-local'); assert.notEqual(context.state.activity.blocked, true); assert.equal(context.busy, false);
 });

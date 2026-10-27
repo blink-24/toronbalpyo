@@ -1,0 +1,1132 @@
+/* 4차시 자체 작성 대본·가상 자료. 정본 data/lesson4.json과 함께 갱신합니다. */
+export const LESSON4_CONTENT = {
+  "version": "1.0.0",
+  "lesson": 4,
+  "motion": "인공 지능 의료 상담 도우미 서비스를 공공 의료에 도입해야 한다.",
+  "definition": "보건소 같은 공공 기관이 주민에게 이 서비스를 무료로 제공하는 정책 제안을 검토합니다.",
+  "mode": "script",
+  "aiEnabled": false,
+  "stances": [
+    "찬성",
+    "반대"
+  ],
+  "limits": {
+    "argMin": 20,
+    "argMax": 1500,
+    "answerMin": 1,
+    "answerMax": 600,
+    "reflectionMin": 10,
+    "reflectionMax": 150,
+    "questionMin": 3,
+    "questionMax": 5,
+    "questionDefault": 4,
+    "earlyFinishMin": 3,
+    "helpMin": 2,
+    "helpMax": 3
+  },
+  "labels": {
+    "virtualBadge": "수업용 가상 자료",
+    "feedbackScope": "표현에서 확인한 출처·논리 연결·응답 태도에 대한 규칙 피드백입니다. 사실 검증이나 의학적 판단, 점수 평가가 아닙니다.",
+    "scriptMode": "대본 모드",
+    "medicalBoundary": "개인의 증상·진단·치료에 답하지 않고 공공 도입 정책의 논증만 검토합니다."
+  },
+  "criterionDescriptions": {
+    "신뢰성": "자료의 원출처·대상·시점·확인 범위를 밝혔는가",
+    "타당성": "근거와 이유가 해당 정책 주장으로 이어지는 범위를 설명했는가",
+    "공정성": "혜택과 부담, 이용이 어려운 주민과 정보 보호를 함께 고려했는가"
+  },
+  "sourcePolicy": {
+    "baseline": "수업안 내부 v6 및 개선 토론문(6)",
+    "argumentBlanks": [
+      "①",
+      "⑤"
+    ],
+    "intentionalError": {
+      "scriptPart": "⑦",
+      "claim": "의료 잡지 설문의 의사 열 명 중 일곱 명",
+      "verified": false,
+      "use": "원출처를 확인하지 못한 의도적 오류. 검증된 사실이나 반대의 결정적 근거로 쓰지 않음"
+    },
+    "heldEvidenceCardIds": [
+      "5",
+      "6"
+    ],
+    "realStatisticsGenerated": false,
+    "medicalAdviceProvided": false,
+    "memberIdentifiers": "모둠명과 모든 모둠원 학번은 엔진이 받지 않으며 서버의 별도 필드에서 검증·저장함"
+  },
+  "topics": [
+    {
+      "id": "need",
+      "label": "의료 접근과 정책 효과",
+      "keywords": [
+        "응급",
+        "취약지",
+        "의료인력",
+        "의사부족",
+        "지역격차",
+        "고령인구",
+        "접근성"
+      ]
+    },
+    {
+      "id": "analogy",
+      "label": "발표 사례와 의료 상담의 차이",
+      "keywords": [
+        "보행보조",
+        "길안내",
+        "인도와차도",
+        "보행프로그램",
+        "발표문",
+        "발표사례"
+      ]
+    },
+    {
+      "id": "access",
+      "label": "이용 지원과 공정성",
+      "keywords": [
+        "스마트폰",
+        "어르신",
+        "고령",
+        "디지털",
+        "이용지원",
+        "전화",
+        "음성",
+        "장애"
+      ]
+    },
+    {
+      "id": "responsibility",
+      "label": "책임과 안전 관리 절차",
+      "keywords": [
+        "책임",
+        "고영향",
+        "기본법",
+        "오류신고",
+        "피해",
+        "허가",
+        "법률",
+        "법적",
+        "디지털의료제품법"
+      ]
+    },
+    {
+      "id": "privacy",
+      "label": "정보 수집과 보호",
+      "keywords": [
+        "개인정보",
+        "건강정보",
+        "민감정보",
+        "정보보호",
+        "수집",
+        "보관"
+      ]
+    },
+    {
+      "id": "scope",
+      "label": "자료의 대상과 해석 범위",
+      "keywords": [
+        "정확",
+        "안전성",
+        "진단",
+        "비대면진료",
+        "30.3",
+        "임상",
+        "의사",
+        "효과"
+      ]
+    },
+    {
+      "id": "sustainability",
+      "label": "경영 사건과 기술 판단",
+      "keywords": [
+        "바빌론",
+        "babylon",
+        "법정관리",
+        "파산",
+        "매각",
+        "경영",
+        "지속"
+      ]
+    },
+    {
+      "id": "source",
+      "label": "불명확한 설문의 출처",
+      "keywords": [
+        "의료잡지",
+        "열명중일곱",
+        "열명중7",
+        "10명중7",
+        "70%"
+      ]
+    },
+    {
+      "id": "alternatives",
+      "label": "정책 대안과 우선순위",
+      "keywords": [
+        "비용",
+        "예산",
+        "인력",
+        "우선",
+        "기회비용",
+        "대안",
+        "진료연결"
+      ]
+    },
+    {
+      "id": "role",
+      "label": "공공 제공의 범위와 조건",
+      "keywords": [
+        "무료",
+        "공공기관",
+        "보건소",
+        "주민",
+        "대체",
+        "의료인연결",
+        "길잡이"
+      ]
+    },
+    {
+      "id": "held",
+      "label": "사용 보류 근거의 처리",
+      "keywords": [
+        "카드5",
+        "카드6",
+        "5번카드",
+        "6번카드",
+        "카드⑤",
+        "카드⑥",
+        "5·6번"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "L4-P-NEED",
+      "stance": "찬성",
+      "criterion": "타당성",
+      "targetKey": "argument.need",
+      "topic": "need",
+      "keywords": [
+        "응급",
+        "취약지",
+        "의료인력",
+        "의사부족",
+        "지역격차",
+        "고령인구",
+        "접근성"
+      ],
+      "requiresCue": false,
+      "priority": 1,
+      "confirm": "정책이 해결하려는 문제를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "의료 접근의 어려움이 있다는 내용만으로 이 상담 도우미가 실제 진료 연결을 개선한다고 결론지을 수 있습니까?",
+      "better": "필요가 있다는 근거와 제안한 해결 방법이 효과적이라는 근거를 구분해 연결해 보세요."
+    },
+    {
+      "id": "L4-N-NEED",
+      "stance": "반대",
+      "criterion": "타당성",
+      "targetKey": "argument.need",
+      "topic": "need",
+      "keywords": [
+        "응급",
+        "취약지",
+        "의료인력",
+        "의사부족",
+        "지역격차",
+        "고령인구",
+        "접근성"
+      ],
+      "requiresCue": false,
+      "priority": 1,
+      "confirm": "정책이 해결하려는 문제를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "도입을 유보할 때 의료 접근이 어려운 주민을 도울 대안과 그 판단 기준을 함께 제시하셨습니까?",
+      "better": "필요가 있다는 근거와 제안한 해결 방법이 효과적이라는 근거를 구분해 연결해 보세요."
+    },
+    {
+      "id": "L4-P-ANALOGY",
+      "stance": "찬성",
+      "criterion": "타당성",
+      "targetKey": "argument.analogy",
+      "topic": "analogy",
+      "keywords": [
+        "보행보조",
+        "길안내",
+        "인도와차도",
+        "보행프로그램",
+        "발표문",
+        "발표사례"
+      ],
+      "requiresCue": true,
+      "priority": 1,
+      "confirm": "발표 사례의 쓰임을 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "길 안내 같은 다른 기술의 사례가 건강 상담의 정확성까지 직접 뒷받침하는 근거가 됩니까?",
+      "better": "발표 사례가 보여 주는 범위를 인정하고 의료 상담에 추가로 확인할 점을 구분해 보세요."
+    },
+    {
+      "id": "L4-N-ANALOGY",
+      "stance": "반대",
+      "criterion": "타당성",
+      "targetKey": "argument.analogy",
+      "topic": "analogy",
+      "keywords": [
+        "보행보조",
+        "길안내",
+        "인도와차도",
+        "보행프로그램",
+        "발표문",
+        "발표사례"
+      ],
+      "requiresCue": true,
+      "priority": 1,
+      "confirm": "발표 사례의 쓰임을 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "다른 기술과 의료 상담의 차이를 인정하면서도 모든 공공 활용을 같은 위험으로 판단할 수 있습니까?",
+      "better": "발표 사례가 보여 주는 범위를 인정하고 의료 상담에 추가로 확인할 점을 구분해 보세요."
+    },
+    {
+      "id": "L4-P-ACCESS",
+      "stance": "찬성",
+      "criterion": "공정성",
+      "targetKey": "argument.access",
+      "topic": "access",
+      "keywords": [
+        "스마트폰",
+        "어르신",
+        "고령",
+        "디지털",
+        "이용지원",
+        "전화",
+        "음성",
+        "장애"
+      ],
+      "requiresCue": false,
+      "priority": 1,
+      "confirm": "주민의 이용 조건을 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "기기나 글을 다루기 어려운 주민도 고르게 이용할 수 있는 지원을 구체적으로 제시하셨습니까?",
+      "better": "혜택에서 빠질 주민과 도입을 늦출 때 불편을 겪을 주민을 함께 살피고 지원 조건을 밝혀 보세요."
+    },
+    {
+      "id": "L4-N-ACCESS",
+      "stance": "반대",
+      "criterion": "공정성",
+      "targetKey": "argument.access",
+      "topic": "access",
+      "keywords": [
+        "스마트폰",
+        "어르신",
+        "고령",
+        "디지털",
+        "이용지원",
+        "전화",
+        "음성",
+        "장애"
+      ],
+      "requiresCue": false,
+      "priority": 1,
+      "confirm": "주민의 이용 조건을 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "이용 지원을 보완하는 대안이 있어도 혜택을 받을 주민의 필요를 함께 따져 보셨습니까?",
+      "better": "혜택에서 빠질 주민과 도입을 늦출 때 불편을 겪을 주민을 함께 살피고 지원 조건을 밝혀 보세요."
+    },
+    {
+      "id": "L4-P-RESPONSIBILITY",
+      "stance": "찬성",
+      "criterion": "타당성",
+      "targetKey": "argument.responsibility",
+      "topic": "responsibility",
+      "keywords": [
+        "책임",
+        "고영향",
+        "기본법",
+        "오류신고",
+        "피해",
+        "허가",
+        "법률",
+        "법적",
+        "디지털의료제품법"
+      ],
+      "requiresCue": false,
+      "priority": 1,
+      "confirm": "운영 책임을 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "법이나 제도가 있다는 사실과 이 서비스의 책임 분담·오류 대응이 마련됐다는 판단은 같은 말입니까?",
+      "better": "법의 일반 규정과 가상 서비스의 적용 판단을 구분하고 책임·대응 조건을 구체적으로 점검해 보세요."
+    },
+    {
+      "id": "L4-N-RESPONSIBILITY",
+      "stance": "반대",
+      "criterion": "타당성",
+      "targetKey": "argument.responsibility",
+      "topic": "responsibility",
+      "keywords": [
+        "책임",
+        "고영향",
+        "기본법",
+        "오류신고",
+        "피해",
+        "허가",
+        "법률",
+        "법적",
+        "디지털의료제품법"
+      ],
+      "requiresCue": false,
+      "priority": 1,
+      "confirm": "운영 책임을 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "법적 분류와 구체적 책임 분담을 확인하지 않은 채 모든 책임 기준이 없다고 단정할 수 있습니까?",
+      "better": "법의 일반 규정과 가상 서비스의 적용 판단을 구분하고 책임·대응 조건을 구체적으로 점검해 보세요."
+    },
+    {
+      "id": "L4-P-PRIVACY",
+      "stance": "찬성",
+      "criterion": "공정성",
+      "targetKey": "argument.privacy",
+      "topic": "privacy",
+      "keywords": [
+        "개인정보",
+        "건강정보",
+        "민감정보",
+        "정보보호",
+        "수집",
+        "보관"
+      ],
+      "requiresCue": false,
+      "priority": 1,
+      "confirm": "수집 정보의 범위를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "공공 제공의 편의만이 아니라 정보 수집의 필요 범위와 열람·보관·삭제 조건도 따져 보셨습니까?",
+      "better": "개인의 정보 보호와 공공 서비스의 필요를 함께 고려하고 수집·보호 조건을 구분해 보세요."
+    },
+    {
+      "id": "L4-N-PRIVACY",
+      "stance": "반대",
+      "criterion": "공정성",
+      "targetKey": "argument.privacy",
+      "topic": "privacy",
+      "keywords": [
+        "개인정보",
+        "건강정보",
+        "민감정보",
+        "정보보호",
+        "수집",
+        "보관"
+      ],
+      "requiresCue": false,
+      "priority": 1,
+      "confirm": "수집 정보의 범위를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "정보 최소화와 접근 제한 같은 보호 대안도 살핀 뒤 도입을 유보해야 한다고 판단하셨습니까?",
+      "better": "개인의 정보 보호와 공공 서비스의 필요를 함께 고려하고 수집·보호 조건을 구분해 보세요."
+    },
+    {
+      "id": "L4-P-SCOPE",
+      "stance": "찬성",
+      "criterion": "신뢰성",
+      "targetKey": "argument.scope",
+      "topic": "scope",
+      "keywords": [
+        "정확",
+        "안전성",
+        "진단",
+        "비대면진료",
+        "30.3",
+        "임상",
+        "의사",
+        "효과"
+      ],
+      "requiresCue": false,
+      "priority": 1,
+      "confirm": "인용한 자료의 범위를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "그 자료의 대상·시기·서비스 종류를 확인했고, 비대면 진료 이용을 인공 지능 상담 능력과 구분하셨습니까?",
+      "better": "출처와 조사 범위를 밝히고 자료에서 확인한 내용보다 주장을 넓히지 않았는지 살펴보세요."
+    },
+    {
+      "id": "L4-N-SCOPE",
+      "stance": "반대",
+      "criterion": "신뢰성",
+      "targetKey": "argument.scope",
+      "topic": "scope",
+      "keywords": [
+        "정확",
+        "안전성",
+        "진단",
+        "비대면진료",
+        "30.3",
+        "임상",
+        "의사",
+        "효과"
+      ],
+      "requiresCue": false,
+      "priority": 1,
+      "confirm": "인용한 자료의 범위를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "위험이나 불신을 말한 자료의 출처·대상·범위를 확인했고, 그것이 이 가상 서비스에도 적용되는지 살피셨습니까?",
+      "better": "출처와 조사 범위를 밝히고 자료에서 확인한 내용보다 주장을 넓히지 않았는지 살펴보세요."
+    },
+    {
+      "id": "L4-P-SUSTAINABILITY",
+      "stance": "찬성",
+      "criterion": "타당성",
+      "targetKey": "argument.sustainability",
+      "topic": "sustainability",
+      "keywords": [
+        "바빌론",
+        "babylon",
+        "법정관리",
+        "파산",
+        "매각",
+        "경영",
+        "지속"
+      ],
+      "requiresCue": true,
+      "priority": 1,
+      "confirm": "운영과 기술의 관계를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "운영 기업의 경영 사건과 기술의 안전성을 구분하면서 서비스가 끊길 때의 대안도 제시하셨습니까?",
+      "better": "기업 경영·서비스 지속·기술 성능에 관한 근거를 나누고 각각 무엇을 확인할지 밝혀 보세요."
+    },
+    {
+      "id": "L4-N-SUSTAINABILITY",
+      "stance": "반대",
+      "criterion": "타당성",
+      "targetKey": "argument.sustainability",
+      "topic": "sustainability",
+      "keywords": [
+        "바빌론",
+        "babylon",
+        "법정관리",
+        "파산",
+        "매각",
+        "경영",
+        "지속"
+      ],
+      "requiresCue": true,
+      "priority": 1,
+      "confirm": "운영과 기술의 관계를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "기업의 법정 관리나 매각 사실만으로 인공 지능 상담 기술 자체의 임상적 실패가 입증됩니까?",
+      "better": "기업 경영·서비스 지속·기술 성능에 관한 근거를 나누고 각각 무엇을 확인할지 밝혀 보세요."
+    },
+    {
+      "id": "L4-P-SOURCE",
+      "stance": "찬성",
+      "criterion": "신뢰성",
+      "targetKey": "argument.source",
+      "topic": "source",
+      "keywords": [
+        "의료잡지",
+        "열명중일곱",
+        "열명중7",
+        "10명중7",
+        "70%"
+      ],
+      "requiresCue": true,
+      "priority": 3,
+      "confirm": "설문의 출처를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "그 설문의 조사 기관·시기·대상·원문을 확인했으며, 제시문 ⑦의 출처 오류를 검증된 사실로 쓰지 않으셨습니까?",
+      "better": "⑦의 불명확한 설문은 사실의 근거로 채택하지 말고 원출처 확인과 인용 보류를 구분해 보세요."
+    },
+    {
+      "id": "L4-N-SOURCE",
+      "stance": "반대",
+      "criterion": "신뢰성",
+      "targetKey": "argument.source",
+      "topic": "source",
+      "keywords": [
+        "의료잡지",
+        "열명중일곱",
+        "열명중7",
+        "10명중7",
+        "70%"
+      ],
+      "requiresCue": true,
+      "priority": 3,
+      "confirm": "설문의 출처를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "그 설문의 조사 기관·시기·대상·원문을 확인했으며, 제시문 ⑦의 출처 오류를 검증된 사실로 쓰지 않으셨습니까?",
+      "better": "⑦의 불명확한 설문은 사실의 근거로 채택하지 말고 원출처 확인과 인용 보류를 구분해 보세요."
+    },
+    {
+      "id": "L4-P-ALTERNATIVES",
+      "stance": "찬성",
+      "criterion": "타당성",
+      "targetKey": "argument.alternatives",
+      "topic": "alternatives",
+      "keywords": [
+        "비용",
+        "예산",
+        "인력",
+        "우선",
+        "기회비용",
+        "대안",
+        "진료연결"
+      ],
+      "requiresCue": false,
+      "priority": 1,
+      "confirm": "다른 방안과의 비교를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "사람의 상담 창구나 진료 연결 강화 같은 대안과 비교할 기준을 제시하셨습니까?",
+      "better": "두 대안을 같은 기준으로 비교하고 우선순위를 정한 이유가 주장으로 어떻게 이어지는지 설명해 보세요."
+    },
+    {
+      "id": "L4-N-ALTERNATIVES",
+      "stance": "반대",
+      "criterion": "타당성",
+      "targetKey": "argument.alternatives",
+      "topic": "alternatives",
+      "keywords": [
+        "비용",
+        "예산",
+        "인력",
+        "우선",
+        "기회비용",
+        "대안",
+        "진료연결"
+      ],
+      "requiresCue": false,
+      "priority": 1,
+      "confirm": "다른 방안과의 비교를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "다른 대안이 더 낫다는 주장에도 같은 비용·접근·책임 기준을 적용하셨습니까?",
+      "better": "두 대안을 같은 기준으로 비교하고 우선순위를 정한 이유가 주장으로 어떻게 이어지는지 설명해 보세요."
+    },
+    {
+      "id": "L4-P-ROLE",
+      "stance": "찬성",
+      "criterion": "타당성",
+      "targetKey": "argument.role",
+      "topic": "role",
+      "keywords": [
+        "무료",
+        "공공기관",
+        "보건소",
+        "주민",
+        "대체",
+        "의료인연결",
+        "길잡이"
+      ],
+      "requiresCue": false,
+      "priority": 1,
+      "confirm": "제공하려는 서비스의 역할을 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "주민에게 무료로 제공한다는 조건만으로 의료인 연결·운영 자원·안전 조건까지 충족했다고 볼 수 있습니까?",
+      "better": "공공 무료 제공·상담 안내·의료인의 판단을 구분하고 제안을 지지하거나 유보할 조건을 밝혀 보세요."
+    },
+    {
+      "id": "L4-N-ROLE",
+      "stance": "반대",
+      "criterion": "타당성",
+      "targetKey": "argument.role",
+      "topic": "role",
+      "keywords": [
+        "무료",
+        "공공기관",
+        "보건소",
+        "주민",
+        "대체",
+        "의료인연결",
+        "길잡이"
+      ],
+      "requiresCue": false,
+      "priority": 1,
+      "confirm": "제공하려는 서비스의 역할을 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "의료인을 대신하는 진단과 사람에게 연결하는 상담 안내를 구분한 뒤에도 같은 도입 판단을 내리셨습니까?",
+      "better": "공공 무료 제공·상담 안내·의료인의 판단을 구분하고 제안을 지지하거나 유보할 조건을 밝혀 보세요."
+    },
+    {
+      "id": "L4-P-HELD",
+      "stance": "찬성",
+      "criterion": "신뢰성",
+      "targetKey": "argument.held",
+      "topic": "held",
+      "keywords": [
+        "카드5",
+        "카드6",
+        "5번카드",
+        "6번카드",
+        "카드⑤",
+        "카드⑥",
+        "5·6번"
+      ],
+      "requiresCue": true,
+      "priority": 4,
+      "confirm": "근거로 삼을 자료를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "현재 사용 보류인 근거 카드 5·6을 빼고도 입론을 뒷받침할 확인된 근거가 있습니까?",
+      "better": "카드 5·6은 근거로 사용하지 않고 확인한 자료와 아직 보류한 자료의 범위를 구분해 보세요."
+    },
+    {
+      "id": "L4-N-HELD",
+      "stance": "반대",
+      "criterion": "신뢰성",
+      "targetKey": "argument.held",
+      "topic": "held",
+      "keywords": [
+        "카드5",
+        "카드6",
+        "5번카드",
+        "6번카드",
+        "카드⑤",
+        "카드⑥",
+        "5·6번"
+      ],
+      "requiresCue": true,
+      "priority": 4,
+      "confirm": "근거로 삼을 자료를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?",
+      "verify": "현재 사용 보류인 근거 카드 5·6을 빼고도 입론을 뒷받침할 확인된 근거가 있습니까?",
+      "better": "카드 5·6은 근거로 사용하지 않고 확인한 자료와 아직 보류한 자료의 범위를 구분해 보세요."
+    }
+  ],
+  "helpCards": [
+    {
+      "id": "L4H01",
+      "topic": "need",
+      "criterion": "타당성",
+      "stance": "공통",
+      "title": "가온군 공공 상담 검토안",
+      "content": "상담 창구를 늘리는 방안과 실제 의료기관으로 연결하는 방안을 나누어 검토한다. 필요한 서비스가 있다는 사실과 특정 기술이 효과적이라는 판단은 구분한다.",
+      "source": "가온군 공공 상담 검토안(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "가온군 공공 상담 검토안(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H02",
+      "topic": "need",
+      "criterion": "타당성",
+      "stance": "공통",
+      "title": "가온보건소 연결 절차 초안",
+      "content": "상담 도우미의 안내 뒤 사람이 도움을 받을 수 있는 창구와 운영 시간을 정하는 대안이다. 이 초안은 효과가 입증된 결과가 아니다.",
+      "source": "가온보건소 연결 절차 초안(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "가온보건소 연결 절차 초안(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H03",
+      "topic": "need",
+      "criterion": "타당성",
+      "stance": "공통",
+      "title": "가온군 정책 비교 메모",
+      "content": "주민의 접근 어려움, 제안한 해결 방법, 확인할 정책 효과를 서로 다른 항목으로 기록한다. 한 항목만으로 도입 여부를 결정하지 않는다.",
+      "source": "가온군 정책 비교 메모(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "가온군 정책 비교 메모(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H04",
+      "topic": "analogy",
+      "criterion": "타당성",
+      "stance": "공통",
+      "title": "수업용 기술 비교표",
+      "content": "길 안내와 건강 상담은 다루는 정보와 오류의 영향이 다르다. 다른 기술의 성공 사례를 소개하는 일과 이 서비스의 정확성을 입증하는 일은 구분한다.",
+      "source": "수업용 기술 비교표(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "수업용 기술 비교표(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H05",
+      "topic": "analogy",
+      "criterion": "타당성",
+      "stance": "공통",
+      "title": "수업용 근거 범위 메모",
+      "content": "한 사례가 보여 주는 가능성의 범위를 적고, 새로운 분야에 적용하려면 추가로 무엇을 확인할지 별도 칸에 적는 비교 틀이다.",
+      "source": "수업용 근거 범위 메모(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "수업용 근거 범위 메모(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H06",
+      "topic": "analogy",
+      "criterion": "타당성",
+      "stance": "공통",
+      "title": "수업용 사례 연결 카드",
+      "content": "사례가 사회적 약자를 돕는 방향을 보여 준다고 말할 수는 있어도, 그 사례만으로 다른 서비스의 성능을 확정하지 않는 논증 점검안이다.",
+      "source": "수업용 사례 연결 카드(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "수업용 사례 연결 카드(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H07",
+      "topic": "access",
+      "criterion": "공정성",
+      "stance": "공통",
+      "title": "가온보건소 이용 지원안",
+      "content": "직원의 안내와 전화 창구를 함께 두는 대안이다. 이용 지원이 필요한 주민을 살피되 지원안이 있다는 이유만으로 격차가 해결됐다고 단정하지 않는다.",
+      "source": "가온보건소 이용 지원안(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "가온보건소 이용 지원안(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H08",
+      "topic": "access",
+      "criterion": "공정성",
+      "stance": "공통",
+      "title": "가온군 주민 접근 검토표",
+      "content": "기기를 다루기 어려운 사람, 이동이 어려운 사람, 음성이나 글 읽기가 어려운 사람의 이용 경로를 각각 점검하는 가상 설계표다.",
+      "source": "가온군 주민 접근 검토표(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "가온군 주민 접근 검토표(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H09",
+      "topic": "access",
+      "criterion": "공정성",
+      "stance": "공통",
+      "title": "가온군 대체 창구 논의안",
+      "content": "디지털 창구를 쓰지 않는 주민에게도 사람과 연결되는 창구를 남기는 방안이다. 필요한 운영 인력과 비용은 별도 검토 대상으로 둔다.",
+      "source": "가온군 대체 창구 논의안(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "가온군 대체 창구 논의안(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H10",
+      "topic": "responsibility",
+      "criterion": "타당성",
+      "stance": "공통",
+      "title": "가온군 책임 분담 초안",
+      "content": "개발자·운영 기관·의료인의 역할, 오류 신고, 피해 대응 담당을 구분하는 가상 운영안이다. 실제 법적 책임을 확정한 문서가 아니다.",
+      "source": "가온군 책임 분담 초안(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "가온군 책임 분담 초안(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H11",
+      "topic": "responsibility",
+      "criterion": "타당성",
+      "stance": "공통",
+      "title": "수업용 법률 적용 점검표",
+      "content": "법의 정의를 확인하는 단계와 가상 서비스가 그 정의에 해당하는지 판단하는 단계를 나눈다. 법 이름만으로 적법성이나 안전성을 단정하지 않는다.",
+      "source": "수업용 법률 적용 점검표(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "수업용 법률 적용 점검표(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H12",
+      "topic": "responsibility",
+      "criterion": "타당성",
+      "stance": "공통",
+      "title": "가온보건소 중단·대응 절차안",
+      "content": "오류가 의심되면 안내를 중단하고 담당자가 검토하도록 하는 가상 절차다. 이 절차가 임상 성능이나 법적 허가를 입증하지는 않는다.",
+      "source": "가온보건소 중단·대응 절차안(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "가온보건소 중단·대응 절차안(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H13",
+      "topic": "privacy",
+      "criterion": "공정성",
+      "stance": "공통",
+      "title": "가온군 정보 최소화 설계안",
+      "content": "수집할 정보의 목적과 필요성을 항목별로 따지고, 필요하지 않은 정보는 받지 않는 대안이다. 실제 주민 정보는 포함하지 않는다.",
+      "source": "가온군 정보 최소화 설계안(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "가온군 정보 최소화 설계안(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H14",
+      "topic": "privacy",
+      "criterion": "공정성",
+      "stance": "공통",
+      "title": "가온보건소 접근 권한 초안",
+      "content": "기록의 열람 담당, 보관 기간, 삭제 절차를 따로 정하는 가상 운영안이다. 보호 계획과 보호가 실제 작동하는지는 구분해 확인한다.",
+      "source": "가온보건소 접근 권한 초안(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "가온보건소 접근 권한 초안(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H15",
+      "topic": "privacy",
+      "criterion": "공정성",
+      "stance": "공통",
+      "title": "수업용 정보 보호 비교표",
+      "content": "서비스의 편의와 정보 노출 위험을 함께 살피고, 보호 장치가 부족할 때의 중단 기준을 논의하는 정책 비교 틀이다.",
+      "source": "수업용 정보 보호 비교표(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "수업용 정보 보호 비교표(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H16",
+      "topic": "scope",
+      "criterion": "신뢰성",
+      "stance": "공통",
+      "title": "수업용 조사 대상 비교표",
+      "content": "의료인에게 비대면 진료를 받은 사람의 자료와 인공 지능 상담 도우미를 이용한 사람의 자료는 대상이 다를 수 있다. 자료의 분모와 서비스 종류를 먼저 확인한다.",
+      "source": "수업용 조사 대상 비교표(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "수업용 조사 대상 비교표(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H17",
+      "topic": "scope",
+      "criterion": "신뢰성",
+      "stance": "공통",
+      "title": "수업용 주장 범위 점검표",
+      "content": "자료에서 실제 확인한 내용과 그 자료만으로는 알 수 없는 내용을 나누어 적는다. 이용 비율만으로 모든 주민의 이용 능력이나 서비스 성능을 확정하지 않는다.",
+      "source": "수업용 주장 범위 점검표(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "수업용 주장 범위 점검표(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H18",
+      "topic": "scope",
+      "criterion": "신뢰성",
+      "stance": "공통",
+      "title": "가온군 시범 검토 항목안",
+      "content": "대상·이용 조건·오류 대응·의료인 연결을 각각 확인할 항목으로 정한 가상 검토안이다. 실제 실험 결과나 진료 지침이 아니다.",
+      "source": "가온군 시범 검토 항목안(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "가온군 시범 검토 항목안(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H19",
+      "topic": "sustainability",
+      "criterion": "타당성",
+      "stance": "공통",
+      "title": "수업용 사건 분류표",
+      "content": "회사의 재무·경영 사건, 서비스 운영의 지속 가능성, 기술 성능에 관한 자료를 다른 칸에 기록한다. 한 종류의 사건을 다른 종류의 증거로 바꾸지 않는다.",
+      "source": "수업용 사건 분류표(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "수업용 사건 분류표(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H20",
+      "topic": "sustainability",
+      "criterion": "타당성",
+      "stance": "공통",
+      "title": "가온군 사업 지속 검토안",
+      "content": "운영 주체가 바뀔 때 기록 인계와 주민 안내를 어떻게 유지할지 논의하는 가상 계획이다. 특정 기업의 성패를 예측하는 자료가 아니다.",
+      "source": "가온군 사업 지속 검토안(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "가온군 사업 지속 검토안(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H21",
+      "topic": "sustainability",
+      "criterion": "타당성",
+      "stance": "공통",
+      "title": "수업용 원인 비교 메모",
+      "content": "사건이 함께 일어났다는 사실과 한 사건이 다른 사건의 원인임을 입증하는 일을 구별한다. 기업 사건만으로 기술의 안전·위험을 확정하지 않는다.",
+      "source": "수업용 원인 비교 메모(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "수업용 원인 비교 메모(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H22",
+      "topic": "source",
+      "criterion": "신뢰성",
+      "stance": "공통",
+      "title": "수업용 원출처 확인표",
+      "content": "조사 기관·발표 시기·조사 대상·질문 문항·원문 위치를 확인하는 점검표다. 그 정보가 없는 설문 수치를 검증된 사실로 쓰지 않는다.",
+      "source": "수업용 원출처 확인표(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "수업용 원출처 확인표(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H23",
+      "topic": "source",
+      "criterion": "신뢰성",
+      "stance": "공통",
+      "title": "수업용 설문 해석 메모",
+      "content": "누가 어떤 질문에 답했는지 모르는 설문은 해석 범위를 정하기 어렵다. 제시문 ⑦의 불명확한 설문은 출처 검토용 오류이며 사실의 근거로 채택하지 않는다.",
+      "source": "수업용 설문 해석 메모(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "수업용 설문 해석 메모(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H24",
+      "topic": "source",
+      "criterion": "신뢰성",
+      "stance": "공통",
+      "title": "수업용 인용 보류 카드",
+      "content": "원자료를 확인하지 못한 수치는 인용을 보류하거나 확인하지 못한 한계를 밝힌다. 확인 전 빈칸을 실제 통계처럼 만들어 채우지 않는다.",
+      "source": "수업용 인용 보류 카드(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "수업용 인용 보류 카드(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H25",
+      "topic": "alternatives",
+      "criterion": "타당성",
+      "stance": "공통",
+      "title": "가온군 대안 비교안",
+      "content": "상담 도우미, 사람의 상담 창구, 의료기관 연결 강화에 필요한 자원과 기대 역할을 같은 기준으로 비교하는 가상 틀이다. 실제 비용이나 효과 수치는 없다.",
+      "source": "가온군 대안 비교안(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "가온군 대안 비교안(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H26",
+      "topic": "alternatives",
+      "criterion": "타당성",
+      "stance": "공통",
+      "title": "가온보건소 단계적 검토안",
+      "content": "작은 범위의 검토와 중단 조건을 먼저 정하는 대안이다. 단계적으로 검토하자는 제안과 실제 도입 효과가 확인됐다는 주장은 구분한다.",
+      "source": "가온보건소 단계적 검토안(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "가온보건소 단계적 검토안(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H27",
+      "topic": "alternatives",
+      "criterion": "타당성",
+      "stance": "공통",
+      "title": "수업용 우선순위 논의표",
+      "content": "기다렸을 때의 불편과 서둘렀을 때의 위험을 함께 적고, 무엇을 먼저 확인할지 정하는 논증 점검표다.",
+      "source": "수업용 우선순위 논의표(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "수업용 우선순위 논의표(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H28",
+      "topic": "role",
+      "criterion": "타당성",
+      "stance": "공통",
+      "title": "가온보건소 역할 구분안",
+      "content": "상담 도우미의 안내와 의료인의 판단을 구분하고 사람에게 연결할 경로를 정하는 가상 제안이다. 이 자료는 개인 건강에 대한 조언을 제공하지 않는다.",
+      "source": "가온보건소 역할 구분안(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "가온보건소 역할 구분안(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H29",
+      "topic": "role",
+      "criterion": "타당성",
+      "stance": "공통",
+      "title": "수업용 공공 제공 조건표",
+      "content": "무료 제공 여부와 운영 자원, 이용 지원, 책임, 보호 조건을 별도 항목으로 검토한다. 무료라는 이유만으로 안전하거나 공정하다고 결론짓지 않는다.",
+      "source": "수업용 공공 제공 조건표(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "수업용 공공 제공 조건표(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H30",
+      "topic": "role",
+      "criterion": "타당성",
+      "stance": "공통",
+      "title": "가온군 도입 조건 검토안",
+      "content": "어떤 조건이면 제안을 유지하고 어떤 조건이 부족하면 유보할지 정하는 정책 논의안이다. 학생의 입론이나 답변을 대신 작성하는 예시는 아니다.",
+      "source": "가온군 도입 조건 검토안(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "가온군 도입 조건 검토안(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H31",
+      "topic": "held",
+      "criterion": "신뢰성",
+      "stance": "공통",
+      "title": "수업용 사용 보류 확인표",
+      "content": "제시문 근거 카드 5·6은 원집계·원보고서 확인 전 사용 보류다. 번호는 유지하되 현재 입론을 뒷받침하는 검증된 수치로 사용하지 않는다.",
+      "source": "수업용 사용 보류 확인표(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "수업용 사용 보류 확인표(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H32",
+      "topic": "held",
+      "criterion": "신뢰성",
+      "stance": "공통",
+      "title": "수업용 근거 선택 메모",
+      "content": "보류된 근거를 빼고도 주장을 유지할 수 있는지, 남은 근거가 실제로 무엇을 말하는지 확인하는 검토 틀이다. 빠진 수치를 만들어 넣지 않는다.",
+      "source": "수업용 근거 선택 메모(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "수업용 근거 선택 메모(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    },
+    {
+      "id": "L4H33",
+      "topic": "held",
+      "criterion": "신뢰성",
+      "stance": "공통",
+      "title": "수업용 확인 범위 기록표",
+      "content": "확인한 원문과 아직 확인하지 못한 항목을 구분한다. 확인 절차를 제안하는 것과 이미 검증을 마쳤다고 말하는 것은 다르다.",
+      "source": "수업용 확인 범위 기록표(수업용 가상 자료)",
+      "year": null,
+      "method": "수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님",
+      "citation": "수업용 확인 범위 기록표(수업용 가상 자료)",
+      "virtual": true,
+      "badge": "수업용 가상 자료"
+    }
+  ]
+};
+export default LESSON4_CONTENT;

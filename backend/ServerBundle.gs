@@ -214,8 +214,255 @@ function createEngine(content) {
 return {DomainError,invariant,normalizeStance,validateStudentId,detectPII,validateFreeText,sanitizeCell,seedHash,planQuestions,isClearlyUnrelated,validateQuestionOutput,validateFeedbackOutput,createEngine};
 })();
 var ClassroomContent = {"version":"5.0.0","lesson":2,"title":"반대 신문 체험","motion":"보행 중에 스마트폰을 사용하면 벌금을 부과해야 한다.","motionType":"정책 논제","fictionalCity":"한빛시","source":{"webappSpec":"5_발표토론연계_웹앱스펙_v5(1).md","webappSpecSha256":"b5f0ab9d260d1cbec993b3d5030fe34799f512641cbd5bde03d633994fe8eeab","lessonPlanVersion":"v6","lessonPlanSha256":"201ed842f071206e456bec60e9fc167269aae2d3e4d4b8d58a5dcafb93ab68fe","sections":["3-3","3-4","3-5","3-6","3-7","3-8"]},"stances":[{"id":"pro","value":"찬성","label":"찬성: 벌금을 부과해야 한다","claim":"보행 중에 스마트폰을 사용하면 벌금을 부과해야 한다"},{"id":"con","value":"반대","label":"반대: 부과해서는 안 된다","claim":"보행 중에 스마트폰을 사용해도 벌금을 부과해서는 안 된다"}],"limits":{"reasonMin":10,"reasonMax":120,"argumentMax":300,"answerMax":300,"reflectionMin":10,"reflectionMax":150,"defaultQuestionCount":3,"minQuestionCount":2,"helpCardsPerQuestion":2,"totalSeconds":1080,"serverTimeoutMs":20000},"steps":[{"id":"stance","label":"입장","seconds":60},{"id":"reason","label":"이유","seconds":120},{"id":"evidence","label":"근거 카드","seconds":120},{"id":"argument","label":"내 입론","seconds":120},{"id":"dialogue","label":"반대 신문","seconds":540},{"id":"feedback","label":"피드백·성찰","seconds":120}],"labels":{"virtualBadge":"수업용 가상 자료","unknown":"밝혀지지 않음","cardInstruction":"교과서 203쪽 신뢰성 기준(출처가 있는가, 믿을 만한가, 최신인가)으로 살펴보고 고르세요.","chatNotice":"챗봇의 말도 틀릴 수 있습니다. 교과서 203쪽 기준(타당성·신뢰성·공정성)으로 판단하세요.","scriptNotice":"지금은 연습용 대본으로 진행합니다.","offTopicReminder":"질문에 대한 답을 써 주세요.","earlyFeedback":"시간이 부족해요: 피드백 보기","reflectionPrompt":"반대 신문을 받아 보니, 다음에 입론을 쓸 때 ___을 하겠다.","weakCardReminder":"처음 고른 근거 카드의 출처를 다시 살펴보세요(203쪽 신뢰성 기준)."},"criteria":["신뢰성","타당성","공정성"],"criterionExplanations":{"타당성":"이유와 근거에서 주장이 무리 없이 나오는가","신뢰성":"자료의 출처가 있고 믿을 만하며 최신인가","공정성":"한쪽에 치우치지 않고 공동체의 가치를 고려했는가"},"reasons":[{"id":"RP1","stance":"찬성","stanceId":"pro","text":"보행 중 스마트폰 사용은 주변을 살피지 못하게 해 사고 위험을 높이기 때문입니다","weakness":"위험 → '벌금'이라는 해결책으로의 연결(타당성)","custom":false},{"id":"RP2","stance":"찬성","stanceId":"pro","text":"벌금을 물리면 사람들이 스마트폰을 보며 걷는 습관을 곧바로 고칠 것이기 때문입니다","weakness":"'곧바로'의 논리적 비약(타당성, 심각도 높음)","custom":false},{"id":"RP3","stance":"찬성","stanceId":"pro","text":"스마트폰을 보며 걷는 사람 때문에 다른 보행자들이 불편과 위험을 겪기 때문입니다","weakness":"불편 → 벌금의 비례성(공정성)","custom":false},{"id":"RN1","stance":"반대","stanceId":"con","text":"벌금은 길을 걷는 개인의 생활을 지나치게 간섭하는 일이기 때문입니다","weakness":"공동체 안전이라는 가치 고려 부족(공정성)","custom":false},{"id":"RN2","stance":"반대","stanceId":"con","text":"보행 중 사고는 대부분 운전자의 부주의로 일어나기 때문입니다","weakness":"운전자 쪽으로만 책임을 돌림(공정성, 심각도 높음 — 교과서 ㉢을 뒤집은 꼴)","custom":false},{"id":"RN3","stance":"반대","stanceId":"con","text":"벌금보다 안전 교육과 안내 표지가 사고를 더 잘 줄이기 때문입니다","weakness":"효과 비교 자료가 필요(타당성)","custom":false},{"id":"RX","stance":"공통","stanceId":"custom","text":"직접 쓰기(10~120자)","weakness":"AI 모드: AI가 약점 판단 / 대본: 타당성 일반 질문","custom":true}],"evidenceCards":[{"id":"PA","stance":"찬성","stanceId":"pro","source":"한빛시 교통안전연구원(가상)","year":"2025년","method":"횡단보도 3곳에서 보행자 1,200명 관찰","content":"스마트폰을 보며 건너는 보행자가 좌우를 살핀 비율은 그렇지 않은 보행자의 절반 정도였다.","reliability":"높음","weakness":"위험이 크다 ≠ 벌금이 알맞다(타당성)","virtual":true,"badge":"수업용 가상 자료"},{"id":"PB","stance":"찬성","stanceId":"pro","source":"인터넷 게시판 글(작성자 모름)","year":"밝혀지지 않음","method":"밝혀지지 않음","content":"스마트폰을 보다가 넘어지는 사람을 매일 본다.","reliability":"낮음","weakness":"출처·시기 없음(신뢰성)","virtual":true,"badge":"수업용 가상 자료"},{"id":"PC","stance":"찬성","stanceId":"pro","source":"어느 해외 신문 기사(가상)","year":"2009년","method":"밝혀지지 않음","content":"보행 중 휴대 전화 사용으로 인한 사고가 늘고 있다.","reliability":"낮음","weakness":"오래됨·다른 나라(신뢰성)","virtual":true,"badge":"수업용 가상 자료"},{"id":"PD","stance":"찬성","stanceId":"pro","source":"한빛시청 시범 사업 보고서(가상)","year":"2025년","method":"벌금 시범 구역 2곳, 6개월 전후 비교","content":"시범 구역에서 보행 중 스마트폰 사용 비율이 줄었다.","reliability":"높음","weakness":"줄어든 까닭이 벌금뿐인가(타당성)","virtual":true,"badge":"수업용 가상 자료"},{"id":"NA","stance":"반대","stanceId":"con","source":"한빛시 청소년 정책 연구 모임(가상)","year":"2025년","method":"고등학생 800명 설문","content":"응답자의 다수가 '벌금보다 안전 교육이 더 효과적'이라고 답했다.","reliability":"보통","weakness":"생각이 많다 ≠ 효과가 있다(타당성), 청소년만 조사(공정성)","virtual":true,"badge":"수업용 가상 자료"},{"id":"NB","stance":"반대","stanceId":"con","source":"출처가 밝혀지지 않은 SNS 카드 뉴스","year":"밝혀지지 않음","method":"밝혀지지 않음","content":"벌금을 도입한 도시에서 시민 불만이 폭증했다.","reliability":"낮음","weakness":"출처 없음(신뢰성)","virtual":true,"badge":"수업용 가상 자료"},{"id":"NC","stance":"반대","stanceId":"con","source":"스마트폰 판매 업체 홍보 자료(가상)","year":"2024년","method":"밝혀지지 않음","content":"보행 중 스마트폰 사용은 생각보다 위험하지 않다.","reliability":"낮음","weakness":"이해 당사자의 자료(신뢰성)","virtual":true,"badge":"수업용 가상 자료"},{"id":"ND","stance":"반대","stanceId":"con","source":"한빛시 교통안전연구원(가상)","year":"2025년","method":"보행자 사고 300건 분석","content":"보행자 사고의 원인으로 운전자의 안전 운전 의무 위반이 가장 많았다.","reliability":"높음","weakness":"'가장 많다' → '보행자는 책임 없다'로 넓히면 치우침(공정성)","virtual":true,"badge":"수업용 가상 자료"}],"helpCards":[{"id":"H1","criterion":"신뢰성","stance":"찬성","stanceId":"pro","content":"한빛시 교통안전연구원(가상), 2025년, 보행자 사고 300건 분석: 사고 직전 스마트폰을 보고 있던 보행자가 적지 않았다.","source":"한빛시 교통안전연구원(가상)","year":"2025년","citation":"한빛시 교통안전연구원(가상), 2025년","virtual":true,"badge":"수업용 가상 자료"},{"id":"H2","criterion":"신뢰성","stance":"찬성","stanceId":"pro","content":"한빛시청 시범 사업 보고서(가상), 2025년: 벌금 시범 구역 2곳에서 6개월 뒤 보행 중 스마트폰 사용 비율이 줄었다.","source":"한빛시청 시범 사업 보고서(가상)","year":"2025년","citation":"한빛시청 시범 사업 보고서(가상), 2025년","virtual":true,"badge":"수업용 가상 자료"},{"id":"H3","criterion":"신뢰성","stance":"반대","stanceId":"con","content":"한빛시 교육청(가상), 2025년: 보행 안전 교육을 한 학교 주변에서 보행 중 스마트폰 사용 비율이 줄었다.","source":"한빛시 교육청(가상)","year":"2025년","citation":"한빛시 교육청(가상), 2025년","virtual":true,"badge":"수업용 가상 자료"},{"id":"H4","criterion":"신뢰성","stance":"반대","stanceId":"con","content":"한빛시 시민 설문(가상), 2025년, 성인 1,000명, 조사 기관·방법 공개: '벌금보다 안내·교육'을 원한다는 응답이 더 많았다.","source":"한빛시 시민 설문(가상)","year":"2025년","citation":"한빛시 시민 설문(가상), 2025년","virtual":true,"badge":"수업용 가상 자료"},{"id":"H5","criterion":"타당성","stance":"찬성","stanceId":"pro","content":"같은 기간 시범 구역과 아닌 구역 비교(가상): 사용 비율이 시범 구역에서만 크게 줄었다.","source":"같은 기간 시범 구역과 아닌 구역 비교(가상)","year":null,"citation":"같은 기간 시범 구역과 아닌 구역 비교(가상)","virtual":true,"badge":"수업용 가상 자료"},{"id":"H6","criterion":"타당성","stance":"찬성","stanceId":"pro","content":"경고 안내판만 설치한 구역(가상): 6개월 동안 사용 비율에 변화가 거의 없었다.","source":"경고 안내판만 설치한 구역(가상)","year":null,"citation":"경고 안내판만 설치한 구역(가상)","virtual":true,"badge":"수업용 가상 자료"},{"id":"H7","criterion":"타당성","stance":"반대","stanceId":"con","content":"안전 교육 전후 비교(가상): 교육 뒤 3개월 동안 사용 비율이 줄었다.","source":"안전 교육 전후 비교(가상)","year":null,"citation":"안전 교육 전후 비교(가상)","virtual":true,"badge":"수업용 가상 자료"},{"id":"H8","criterion":"타당성","stance":"반대","stanceId":"con","content":"벌금 시범 구역(가상): 단속이 끝나자 사용 비율이 다시 늘었다.","source":"벌금 시범 구역(가상)","year":null,"citation":"벌금 시범 구역(가상)","virtual":true,"badge":"수업용 가상 자료"},{"id":"H9","criterion":"공정성","stance":"공통","stanceId":"all","content":"보행자와 운전자 모두의 주의 의무를 함께 다룬 한빛시 보행 안전 수칙(가상).","source":"한빛시 보행 안전 수칙(가상)","year":null,"citation":"한빛시 보행 안전 수칙(가상)","virtual":true,"badge":"수업용 가상 자료"},{"id":"H10","criterion":"공정성","stance":"찬성","stanceId":"pro","content":"시범 운영안(가상): 첫 적발은 경고, 다시 적발되면 소액 벌금, 횡단보도 주변에만 적용.","source":"시범 운영안(가상)","year":null,"citation":"시범 운영안(가상)","virtual":true,"badge":"수업용 가상 자료"},{"id":"H11","criterion":"공정성","stance":"반대","stanceId":"con","content":"사고 원인 분석(가상): 운전자 과실이 가장 많았지만 보행자의 부주의가 함께 원인이 된 사고도 있었다.","source":"사고 원인 분석(가상)","year":null,"citation":"사고 원인 분석(가상)","virtual":true,"badge":"수업용 가상 자료"},{"id":"H12","criterion":"공정성","stance":"공통","stanceId":"all","content":"한빛시 교통안전 캠페인(가상): \"어린이·노인의 보행 안전은 모두가 함께 지킵니다.\"","source":"한빛시 교통안전 캠페인(가상)","year":null,"citation":"한빛시 교통안전 캠페인(가상)","virtual":true,"badge":"수업용 가상 자료"}],"questions":[{"id":"Q-REL-PB","criterion":"신뢰성","confirm":"근거로 인터넷 게시판 글을 드셨는데요, 작성자를 확인할 수 없는 글이 맞습니까?","verify":"작성자도 날짜도 알 수 없는 글을 이 주장의 근거로 삼을 수 있습니까?","better":"출처가 약함을 인정하고, 출처·시기·조사 방법이 밝혀진 자료로 바꾸어 답한다","targetKey":"card.source"},{"id":"Q-REL-PC","criterion":"신뢰성","confirm":"근거로 2009년 해외 신문 기사를 드셨지요?","verify":"십수 년 전 다른 나라의 기사가 지금 한빛시의 상황을 보여 준다고 할 수 있습니까?","better":"최신 자료가 아님을 인정하고 최근 국내(가상) 조사로 보완한다","targetKey":"card.source"},{"id":"Q-REL-NB","criterion":"신뢰성","confirm":"근거로 든 카드 뉴스는 출처가 밝혀져 있지 않지요?","verify":"출처를 알 수 없는 카드 뉴스로 '불만 폭증'을 입증할 수 있습니까?","better":"출처 없는 자료임을 인정하고 조사 기관·방법이 공개된 설문으로 바꾼다","targetKey":"card.source"},{"id":"Q-REL-NC","criterion":"신뢰성","confirm":"근거 자료는 스마트폰 판매 업체의 홍보 자료가 맞습니까?","verify":"스마트폰을 파는 업체의 자료를 믿을 만한 근거라고 할 수 있습니까?","better":"이해 당사자의 자료라는 한계를 인정하고 중립적인 기관의 자료를 든다","targetKey":"card.source"},{"id":"Q-REL-GEN","criterion":"신뢰성","confirm":"근거로 든 자료는 {source}의 {year} 자료이지요?","verify":"그 결과가 다른 기관의 조사로도 확인되었습니까?","better":"조사 기관·방법을 다시 밝히고, 같은 결과를 보인 다른 자료가 있으면 덧붙인다","targetKey":"card.source","sourceConfirm":"근거로 든 자료는 {source}의 {year} 자료이지요?(시기가 없으면 '{source}의 자료이지요?')","confirmWithoutYear":"근거로 든 자료는 {source}의 자료이지요?"},{"id":"Q-VAL-RP2","criterion":"타당성","confirm":"벌금을 물리면 습관을 '곧바로' 고칠 것이라고 하셨지요?","verify":"벌금만으로 습관이 곧바로 바뀐다는 근거를 제시하셨습니까?","better":"'곧바로'가 지나쳤음을 인정하고, 벌금 전후 비교 자료로 '줄어든다'는 정도로 고쳐 답한다","targetKey":"reason.immediacy"},{"id":"Q-VAL-PA","criterion":"타당성","confirm":"스마트폰을 보는 보행자가 좌우를 덜 살핀다는 관찰 결과를 드셨지요?","verify":"위험이 크다는 사실만으로 벌금이 알맞은 해결책이라는 결론이 바로 나옵니까?","better":"위험 → 행동을 바꿀 강한 방법이 필요 → 벌금의 효과 자료로 이유와 주장을 잇는다","targetKey":"card.observationToPolicy"},{"id":"Q-VAL-PD","criterion":"타당성","confirm":"시범 구역에서 사용 비율이 줄었다고 하셨지요?","verify":"그 감소가 벌금 때문이고 안내판이나 홍보 같은 다른 까닭은 아니라고 확신할 수 있습니까?","better":"다른 원인 가능성을 인정하고, 시범 구역과 아닌 구역을 비교한 자료로 보완한다","targetKey":"card.causation"},{"id":"Q-VAL-NA","criterion":"타당성","confirm":"고등학생 다수가 교육이 더 효과적이라고 '답했다'는 설문을 드셨지요?","verify":"효과가 있다고 생각하는 사람이 많다는 것이 실제로 효과가 있다는 증거가 됩니까?","better":"의견과 효과를 구분하고, 교육 전후를 비교한 자료로 바꾼다","targetKey":"card.opinionToEffect"},{"id":"Q-VAL-ND","criterion":"타당성","confirm":"사고 원인으로 운전자의 의무 위반이 가장 많았다는 분석을 근거로 드셨지요?","verify":"가장 많은 원인이 운전자라고 해서 보행자의 스마트폰 사용은 사고와 관계없다고 할 수 있습니까?","better":"보행자 부주의도 원인일 수 있음을 인정하고, 그래도 벌금보다 나은 방법이 있다는 쪽으로 주장을 잇는다","targetKey":"card.causeToPolicy"},{"id":"Q-VAL-RP1","criterion":"타당성","confirm":"스마트폰 사용이 사고 위험을 높인다고 하셨지요?","verify":"위험을 줄이는 방법이 여러 가지인데 꼭 벌금이어야 하는 까닭을 말씀하셨습니까?","better":"안내·교육만으로는 부족했다는 자료로 벌금이 필요한 까닭을 보탠다","targetKey":"reason.riskToPolicy"},{"id":"Q-VAL-RN3","criterion":"타당성","confirm":"교육과 안내 표지가 벌금보다 효과적이라고 하셨지요?","verify":"두 방법의 효과를 비교한 자료를 제시하셨습니까?","better":"비교 자료가 없었음을 인정하고 교육 전후·벌금 전후 자료를 함께 든다","targetKey":"reason.effectComparison"},{"id":"Q-VAL-RX","criterion":"타당성","confirm":"'{snippet}…'처럼 말씀하셨지요?","verify":"그 이유가 '{stanceClaim}'는 주장을 직접 뒷받침한다고 할 수 있습니까?","better":"이유와 주장 사이의 연결을 '왜냐하면/따라서'로 풀어 말한다","targetKey":"reason.claimLink"},{"id":"Q-VAL-RN2","criterion":"타당성","confirm":"보행 중 사고의 원인을 들어 벌금에 반대하셨지요?","verify":"사고의 주된 원인이 누구냐는 문제와 보행 중 스마트폰 사용에 벌금을 물릴지는 서로 다른 문제 아닙니까?","better":"원인이 운전자에게 많더라도 보행자 쪽 위험을 줄이는 다른 방법(교육 등)이 낫다는 쪽으로 이유와 주장을 다시 잇는다","targetKey":"stance.policyLink"},{"id":"Q-VAL-PB","criterion":"타당성","confirm":"스마트폰을 보다가 넘어지는 사람을 매일 본다는 내용을 근거로 드셨지요?","verify":"한 사람이 본 장면으로 모든 보행자에게 벌금을 물려야 한다는 결론까지 나아갈 수 있습니까?","better":"개인의 경험을 일반화했음을 인정하고 많은 사람을 조사한 자료로 바꾼다","targetKey":"card.generalization"},{"id":"Q-VAL-PC","criterion":"타당성","confirm":"보행 중 휴대 전화 사고가 늘고 있다는 내용을 드셨지요?","verify":"사고가 늘었다는 사실만으로 벌금이 알맞은 해결책이라는 결론이 나옵니까?","better":"사고 증가 → 강한 대책 필요 → 벌금의 효과 자료로 연결을 보탠다","targetKey":"card.accidentsToPolicy"},{"id":"Q-VAL-NB","criterion":"타당성","confirm":"벌금을 도입한 도시에서 시민 불만이 폭증했다는 내용을 드셨지요?","verify":"시민의 불만이 크다는 것이 벌금이 효과가 없다는 증거가 됩니까?","better":"불만과 효과를 구분하고, 효과를 비교한 자료로 바꾼다","targetKey":"card.discontentToEffect"},{"id":"Q-VAL-NC","criterion":"타당성","confirm":"보행 중 스마트폰 사용이 생각보다 위험하지 않다는 내용을 드셨지요?","verify":"'생각보다 위험하지 않다'는 말로 벌금이 필요 없다는 결론이 바로 나옵니까?","better":"위험의 정도를 보여 주는 중립적 자료와 함께 벌금 대신 쓸 방법을 제시한다","targetKey":"card.riskToPolicy"},{"id":"Q-FAIR-RN2","criterion":"공정성","confirm":"보행 중 사고는 '대부분' 운전자의 부주의 때문이라고 하셨지요?","verify":"그것은 보행자의 책임은 빼고 운전자에게만 책임을 돌리는 치우친 주장 아닙니까?","better":"한쪽으로 치우쳤음을 인정하고 보행자·운전자 모두의 책임을 인정하는 쪽으로 고친다","targetKey":"reason.blame"},{"id":"Q-FAIR-RN1","criterion":"공정성","confirm":"벌금이 개인의 생활을 지나치게 간섭한다고 하셨지요?","verify":"다른 보행자와 운전자의 안전이라는 공동체의 가치는 고려하지 않으신 것 아닙니까?","better":"공동체 안전도 중요함을 인정하고, 간섭이 적으면서 안전을 지키는 방법을 제시한다","targetKey":"reason.freedomOnly"},{"id":"Q-FAIR-RP3","criterion":"공정성","confirm":"다른 보행자가 불편을 겪는다는 것을 이유로 드셨지요?","verify":"벌금을 내야 하는 보행자의 사정은 고려하지 않고 불편을 겪는 쪽의 입장만 내세운 주장 아닙니까?","better":"위험이 큰 장소(횡단보도 등)로 범위를 좁히거나 첫 적발은 경고로 하는 등 정도를 조정한다","targetKey":"reason.otherPedestrians"},{"id":"Q-FAIR-ND","criterion":"공정성","confirm":"운전자의 의무 위반이 가장 많다는 자료를 드셨지요?","verify":"그 자료로 보행자의 책임은 없다고 말하는 것은 한쪽에 치우친 해석 아닙니까?","better":"자료의 범위를 넘어선 해석이었음을 인정한다","targetKey":"card.exclusiveBlame"},{"id":"Q-FAIR-P","criterion":"공정성","confirm":"벌금을 부과해야 한다는 입장이시지요?","verify":"벌금을 내기 어려운 학생이나 노인의 사정은 고려하지 않은, 한쪽에 치우친 주장 아닙니까?","better":"액수·적용 범위를 조정하는 방안(경고 먼저, 소액 등)으로 공정성을 보완한다","targetKey":"stance.proportionality"},{"id":"Q-FAIR-N","criterion":"공정성","confirm":"벌금을 부과해서는 안 된다는 입장이시지요?","verify":"그렇다면 스마트폰을 보며 걷는 사람과 부딪힐 수 있는 다른 보행자의 안전은 고려하지 않으신 것 아닙니까?","better":"개인의 자유와 다른 사람의 안전을 함께 고려하는 대안을 제시한다","targetKey":"stance.otherSafety"}],"argumentTemplate":{"opening":"저는 '보행 중에 스마트폰을 사용하면 벌금을 부과해야 한다.'는 논제에 {stance}합니다.","reason":"그 이유는 {reason}.","evidence":"{source}의 {year} 자료에 따르면 '{content}'라고 합니다.","evidenceWithoutYear":"{source}에 따르면 '{content}'라고 합니다.","removeTrailingPeriodFromCard":true},"questionPlanRules":{"criteriaUnique":true,"sort":[{"field":"severity","direction":"desc"},{"criterionOrder":["신뢰성","타당성","공정성"]}],"questionCount2":"정렬된 세 질문 중 앞의 두 개","reliability":[{"cardIds":["PB","PC","NB","NC"],"questionByCardPrefix":"Q-REL-","severity":3},{"fallbackId":"Q-REL-GEN","severity":1}],"validity":[{"reasonIds":["RP2"],"fallbackId":"Q-VAL-RP2","severity":3},{"reasonIds":["RN2"],"cardIds":["NB","NC","ND"],"fallbackId":"Q-VAL-RN2","severity":2},{"cardIds":["PA","PD","NA"],"questionByCardPrefix":"Q-VAL-","severity":2},{"reasonIds":["RN1"],"cardIds":["ND"],"fallbackId":"Q-VAL-ND","severity":2},{"reasonIds":["RP1","RN3"],"questionByReasonPrefix":"Q-VAL-","severity":2},{"reasonIds":["RX"],"fallbackId":"Q-VAL-RX","severity":2},{"reasonIds":["RP3","RN1"],"cardIds":["PB","PC","NB","NC"],"questionByCardPrefix":"Q-VAL-","severity":2}],"fairness":[{"reasonIds":["RN2"],"fallbackId":"Q-FAIR-RN2","severity":3},{"reasonIds":["RN1"],"fallbackId":"Q-FAIR-RN1","severity":2},{"reasonIds":["RP3"],"fallbackId":"Q-FAIR-RP3","severity":2},{"cardIds":["ND"],"fallbackId":"Q-FAIR-ND","severity":2},{"stanceId":"pro","fallbackId":"Q-FAIR-P","severity":1},{"stanceId":"con","fallbackId":"Q-FAIR-N","severity":1}]},"feedbackRules":{"reliability":{"strong":"출처(기관·조사명·시기)를 밝히거나 도움 자료를 인용함","partial":"'조사, 자료, 통계, 수치'는 말했으나 출처가 없음","weak":"자료 없이 의견만","partialKeywords":["조사","자료","통계","수치"]},"validity":{"strong":"이유와 주장을 연결어(때문에·따라서·그러므로·왜냐하면·즉)로 잇고 40자 이상","partial":"연결어나 40자 중 하나만","weak":"둘 다 없음","connectors":["때문에","따라서","그러므로","왜냐하면","즉"],"minLength":40},"attitude":{"positive":["맞습니다","인정합니다","말씀대로","다만"],"negative":["모르겠","상관없","아무튼","그건 중요하지 않"],"shortAnswerThreshold":10,"labels":["인정함","보통","피함"]},"ratingLabels":{"●":"잘 바탕함","◐":"조금","○":"보완 필요"},"revealCriteriaAfterDialogue":true,"firstCommittedAnswerOnly":true},"feedbackExamples":[{"answer":"맞습니다. 게시판 글은 출처가 약합니다. 다만 [자료 H1] 한빛시 교통안전연구원(가상) 2025년 분석에서도 사고 직전 스마트폰을 본 보행자가 적지 않았기 때문에 위험은 분명합니다.","expected":{"reliability":"●","validity":"●","attitude":"인정함"}},{"answer":"통계를 보면 위험한 건 사실입니다.","expected":{"reliability":"◐","validity":"○","attitude":"보통"}},{"answer":"그건 중요하지 않습니다.","expected":{"reliability":"○","validity":"○","attitude":"피함"}}],"operatingRules":{"secondAnswerAllowsEarlyFeedback":true,"rebuttalAfterAnswer":false,"irrelevantAnswerReminderMax":1,"helpCitationTag":"[자료 {id}]","showCriterionBeforeFeedback":false,"studentNameCollected":false,"lesson2Recording":false,"teacherProjectionHideStudentNumber":true,"noTextbook202Passage":true},"futureLesson4":{"questionCountMin":3,"questionCountMax":5,"defaultQuestionCount":4,"helpCardsMin":2,"helpCardsMax":3,"questionBankStatus":"4차시 작업 때 확정","medicalHelpCardsStatus":"4차시 작업 때 확정","reuseLesson2Data":false},"topic":"보행 중에 스마트폰을 사용하면 벌금을 부과해야 한다.","criterionDescriptions":{"타당성":"이유와 근거에서 주장이 무리 없이 나오는가","신뢰성":"자료의 출처가 있고 믿을 만하며 최신인가","공정성":"한쪽에 치우치지 않고 공동체의 가치를 고려했는가"},"learningSlides19":[{"id":"L2-01","slide":1,"sourceSlide":1,"title":"반대 신문하며 토론하기","textbookPages":"201~203쪽","points":["같은 논제로 입론을 검토하는 방법을 익힙니다.","이번 체험에서는 내가 입론을 세우고 질문을 받습니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true},{"id":"L2-02","slide":2,"sourceSlide":2,"title":"토론의 개념","textbookPages":"201쪽","points":["찬반이 근거를 들어 주장을 설명하고 상대 논증을 살핍니다.","양측 관점을 접하고 공동체 문제를 합리적으로 검토합니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true},{"id":"L2-03","slide":3,"sourceSlide":3,"title":"논제의 유형","textbookPages":"201쪽","points":["참·거짓을 가리는 사실, 옳고 그름을 판단하는 가치, 구체적 행동을 다루는 정책을 구분합니다.","벌금 부과 여부를 묻는 이번 논제는 정책 논제입니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true},{"id":"L2-04","slide":4,"sourceSlide":4,"title":"입론·반대 신문·반박","textbookPages":"201쪽","points":["입론은 주장·이유·근거를 갖춘 논증을 제시합니다.","반대 신문은 상대 논증을 질문으로 검토하고, 반박은 쟁점을 골라 주장을 마무리합니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true},{"id":"L2-05","slide":5,"sourceSlide":5,"title":"반대 신문식 토론의 순서","textbookPages":"201쪽","points":["네 번의 입론 뒤에는 상대측의 반대 신문이 이어집니다.","입론과 신문이 끝나면 반대측부터 반박합니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true},{"id":"L2-06","slide":6,"sourceSlide":6,"title":"경청과 상호 검증","textbookPages":"201쪽","points":["상대의 말을 들어야 실제 발언을 짚어 질문할 수 있습니다.","반대 신문은 의견을 서로 검증하는 협력적 의사소통이기도 합니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true},{"id":"L2-07","slide":7,"sourceSlide":7,"title":"반대 신문의 세 단계","textbookPages":"202~203쪽","points":["먼저 입론의 논증 요소를 찾습니다.","다음으로 비판적으로 검토하고, 그 결과에 맞는 질문을 만듭니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true},{"id":"L2-08","slide":8,"sourceSlide":8,"title":"주장과 이유의 연결","textbookPages":"202쪽","points":["같은 주제의 이야기라고 해서 주장을 직접 뒷받침하는 이유가 되는 것은 아닙니다.","위험하다는 이유에서 벌금이라는 대책이 어떻게 나오는지 따져 봅니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true},{"id":"L2-09","slide":9,"sourceSlide":9,"title":"근거 자료의 출처","textbookPages":"202쪽","points":["자료의 내용뿐 아니라 누가 언제 어떻게 만들었는지도 확인합니다.","출처를 묻는 질문으로 근거의 신뢰성을 살필 수 있습니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true},{"id":"L2-10","slide":10,"sourceSlide":10,"title":"이유와 근거 구분하기","textbookPages":"202쪽","points":["이유는 주장을 세운 까닭이고, 근거는 그 까닭을 받치는 정보입니다.","교과서의 수치는 제시문 속 진술로 읽고, 이번 앱의 수업용 가상 자료와 구분합니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true},{"id":"L2-11","slide":11,"sourceSlide":11,"title":"책임을 한쪽에만 돌리는가","textbookPages":"202쪽","points":["사고의 책임을 어느 한쪽에만 돌리는 발언인지 살핍니다.","빠뜨린 사람이나 공동체의 가치가 없는지 검토합니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true},{"id":"L2-12","slide":12,"sourceSlide":12,"title":"1단계: 논증 요소","textbookPages":"202쪽","points":["주장·이유·근거를 나누어 찾습니다.","각 요소를 찾은 뒤 서로 연결되는 방식도 확인합니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true},{"id":"L2-13","slide":13,"sourceSlide":13,"title":"2단계: 타당성","textbookPages":"203쪽","points":["근거에서 결론으로 무리하게 뛰어넘지 않았는지 살핍니다.","다른 원인이나 대책이 있을 가능성도 검토합니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true},{"id":"L2-14","slide":14,"sourceSlide":14,"title":"2단계: 신뢰성·공정성","textbookPages":"203쪽","points":["신뢰성은 출처의 분명함·믿을 만함·최신성을 살핍니다.","공정성은 편향 여부와 공동체의 가치를 검토합니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true},{"id":"L2-15","slide":15,"sourceSlide":15,"title":"3단계: 확인과 검증","textbookPages":"203쪽","points":["상대가 실제로 한 말을 먼저 확인하고 오류나 허점을 검증합니다.","논증에서 가장 중대한 오류를 우선하여 질문합니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true},{"id":"L2-16","slide":16,"sourceSlide":16,"title":"구체적이고 제한적인 질문","textbookPages":"203쪽","points":["답의 범위를 좁힌 폐쇄형 질문을 사용합니다.","예·아니요 외에도 출처처럼 제한된 사실을 묻는 질문이 가능합니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true},{"id":"L2-17","slide":17,"sourceSlide":17,"title":"㉠·㉡·㉢의 검토 기준","textbookPages":"203쪽","points":["교과서에서 ㉠은 주장과 이유의 연결, ㉡은 자료 출처, ㉢은 편파성을 살핍니다.","각각 타당성·신뢰성·공정성에 대응합니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true},{"id":"L2-18","slide":18,"sourceSlide":18,"title":"바탕 다지기","textbookPages":"203쪽","points":["교과서의 빈칸을 채우며 토론·반대 신문·세 단계를 연결해 봅니다.","정의의 핵심어를 외우는 데서 그치지 않고 사례와 연결합니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true},{"id":"L2-19","slide":19,"sourceSlide":19,"title":"정리하고 체험으로","textbookPages":"203쪽","points":["교과서에서 정리한 개념으로 내 입론의 약점을 예상합니다.","질문을 받으면 자료의 출처와 이유의 연결을 밝혀 답합니다."],"adapted":true,"source":"[최종] 2차시 PPT_토론.pptx","notTextbookPassage":true}],"learningSections":[{"id":"concepts","title":"토론의 개념과 절차","slides":[1,2,3,4,5,6]},{"id":"review","title":"논증 요소와 검토 기준","slides":[7,8,9,10,11,12,13,14]},{"id":"questions","title":"질문 구성과 정리","slides":[15,16,17,18,19]}]};
+var ClassroomLesson4Content = {"version":"1.0.0","lesson":4,"motion":"인공 지능 의료 상담 도우미 서비스를 공공 의료에 도입해야 한다.","definition":"보건소 같은 공공 기관이 주민에게 이 서비스를 무료로 제공하는 정책 제안을 검토합니다.","mode":"script","aiEnabled":false,"stances":["찬성","반대"],"limits":{"argMin":20,"argMax":1500,"answerMin":1,"answerMax":600,"reflectionMin":10,"reflectionMax":150,"questionMin":3,"questionMax":5,"questionDefault":4,"earlyFinishMin":3,"helpMin":2,"helpMax":3},"labels":{"virtualBadge":"수업용 가상 자료","feedbackScope":"표현에서 확인한 출처·논리 연결·응답 태도에 대한 규칙 피드백입니다. 사실 검증이나 의학적 판단, 점수 평가가 아닙니다.","scriptMode":"대본 모드","medicalBoundary":"개인의 증상·진단·치료에 답하지 않고 공공 도입 정책의 논증만 검토합니다."},"criterionDescriptions":{"신뢰성":"자료의 원출처·대상·시점·확인 범위를 밝혔는가","타당성":"근거와 이유가 해당 정책 주장으로 이어지는 범위를 설명했는가","공정성":"혜택과 부담, 이용이 어려운 주민과 정보 보호를 함께 고려했는가"},"sourcePolicy":{"baseline":"수업안 내부 v6 및 개선 토론문(6)","argumentBlanks":["①","⑤"],"intentionalError":{"scriptPart":"⑦","claim":"의료 잡지 설문의 의사 열 명 중 일곱 명","verified":false,"use":"원출처를 확인하지 못한 의도적 오류. 검증된 사실이나 반대의 결정적 근거로 쓰지 않음"},"heldEvidenceCardIds":["5","6"],"realStatisticsGenerated":false,"medicalAdviceProvided":false,"memberIdentifiers":"모둠명과 모든 모둠원 학번은 엔진이 받지 않으며 서버의 별도 필드에서 검증·저장함"},"topics":[{"id":"need","label":"의료 접근과 정책 효과","keywords":["응급","취약지","의료인력","의사부족","지역격차","고령인구","접근성"]},{"id":"analogy","label":"발표 사례와 의료 상담의 차이","keywords":["보행보조","길안내","인도와차도","보행프로그램","발표문","발표사례"]},{"id":"access","label":"이용 지원과 공정성","keywords":["스마트폰","어르신","고령","디지털","이용지원","전화","음성","장애"]},{"id":"responsibility","label":"책임과 안전 관리 절차","keywords":["책임","고영향","기본법","오류신고","피해","허가","법률","법적","디지털의료제품법"]},{"id":"privacy","label":"정보 수집과 보호","keywords":["개인정보","건강정보","민감정보","정보보호","수집","보관"]},{"id":"scope","label":"자료의 대상과 해석 범위","keywords":["정확","안전성","진단","비대면진료","30.3","임상","의사","효과"]},{"id":"sustainability","label":"경영 사건과 기술 판단","keywords":["바빌론","babylon","법정관리","파산","매각","경영","지속"]},{"id":"source","label":"불명확한 설문의 출처","keywords":["의료잡지","열명중일곱","열명중7","10명중7","70%"]},{"id":"alternatives","label":"정책 대안과 우선순위","keywords":["비용","예산","인력","우선","기회비용","대안","진료연결"]},{"id":"role","label":"공공 제공의 범위와 조건","keywords":["무료","공공기관","보건소","주민","대체","의료인연결","길잡이"]},{"id":"held","label":"사용 보류 근거의 처리","keywords":["카드5","카드6","5번카드","6번카드","카드⑤","카드⑥","5·6번"]}],"questions":[{"id":"L4-P-NEED","stance":"찬성","criterion":"타당성","targetKey":"argument.need","topic":"need","keywords":["응급","취약지","의료인력","의사부족","지역격차","고령인구","접근성"],"requiresCue":false,"priority":1,"confirm":"정책이 해결하려는 문제를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"의료 접근의 어려움이 있다는 내용만으로 이 상담 도우미가 실제 진료 연결을 개선한다고 결론지을 수 있습니까?","better":"필요가 있다는 근거와 제안한 해결 방법이 효과적이라는 근거를 구분해 연결해 보세요."},{"id":"L4-N-NEED","stance":"반대","criterion":"타당성","targetKey":"argument.need","topic":"need","keywords":["응급","취약지","의료인력","의사부족","지역격차","고령인구","접근성"],"requiresCue":false,"priority":1,"confirm":"정책이 해결하려는 문제를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"도입을 유보할 때 의료 접근이 어려운 주민을 도울 대안과 그 판단 기준을 함께 제시하셨습니까?","better":"필요가 있다는 근거와 제안한 해결 방법이 효과적이라는 근거를 구분해 연결해 보세요."},{"id":"L4-P-ANALOGY","stance":"찬성","criterion":"타당성","targetKey":"argument.analogy","topic":"analogy","keywords":["보행보조","길안내","인도와차도","보행프로그램","발표문","발표사례"],"requiresCue":true,"priority":1,"confirm":"발표 사례의 쓰임을 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"길 안내 같은 다른 기술의 사례가 건강 상담의 정확성까지 직접 뒷받침하는 근거가 됩니까?","better":"발표 사례가 보여 주는 범위를 인정하고 의료 상담에 추가로 확인할 점을 구분해 보세요."},{"id":"L4-N-ANALOGY","stance":"반대","criterion":"타당성","targetKey":"argument.analogy","topic":"analogy","keywords":["보행보조","길안내","인도와차도","보행프로그램","발표문","발표사례"],"requiresCue":true,"priority":1,"confirm":"발표 사례의 쓰임을 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"다른 기술과 의료 상담의 차이를 인정하면서도 모든 공공 활용을 같은 위험으로 판단할 수 있습니까?","better":"발표 사례가 보여 주는 범위를 인정하고 의료 상담에 추가로 확인할 점을 구분해 보세요."},{"id":"L4-P-ACCESS","stance":"찬성","criterion":"공정성","targetKey":"argument.access","topic":"access","keywords":["스마트폰","어르신","고령","디지털","이용지원","전화","음성","장애"],"requiresCue":false,"priority":1,"confirm":"주민의 이용 조건을 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"기기나 글을 다루기 어려운 주민도 고르게 이용할 수 있는 지원을 구체적으로 제시하셨습니까?","better":"혜택에서 빠질 주민과 도입을 늦출 때 불편을 겪을 주민을 함께 살피고 지원 조건을 밝혀 보세요."},{"id":"L4-N-ACCESS","stance":"반대","criterion":"공정성","targetKey":"argument.access","topic":"access","keywords":["스마트폰","어르신","고령","디지털","이용지원","전화","음성","장애"],"requiresCue":false,"priority":1,"confirm":"주민의 이용 조건을 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"이용 지원을 보완하는 대안이 있어도 혜택을 받을 주민의 필요를 함께 따져 보셨습니까?","better":"혜택에서 빠질 주민과 도입을 늦출 때 불편을 겪을 주민을 함께 살피고 지원 조건을 밝혀 보세요."},{"id":"L4-P-RESPONSIBILITY","stance":"찬성","criterion":"타당성","targetKey":"argument.responsibility","topic":"responsibility","keywords":["책임","고영향","기본법","오류신고","피해","허가","법률","법적","디지털의료제품법"],"requiresCue":false,"priority":1,"confirm":"운영 책임을 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"법이나 제도가 있다는 사실과 이 서비스의 책임 분담·오류 대응이 마련됐다는 판단은 같은 말입니까?","better":"법의 일반 규정과 가상 서비스의 적용 판단을 구분하고 책임·대응 조건을 구체적으로 점검해 보세요."},{"id":"L4-N-RESPONSIBILITY","stance":"반대","criterion":"타당성","targetKey":"argument.responsibility","topic":"responsibility","keywords":["책임","고영향","기본법","오류신고","피해","허가","법률","법적","디지털의료제품법"],"requiresCue":false,"priority":1,"confirm":"운영 책임을 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"법적 분류와 구체적 책임 분담을 확인하지 않은 채 모든 책임 기준이 없다고 단정할 수 있습니까?","better":"법의 일반 규정과 가상 서비스의 적용 판단을 구분하고 책임·대응 조건을 구체적으로 점검해 보세요."},{"id":"L4-P-PRIVACY","stance":"찬성","criterion":"공정성","targetKey":"argument.privacy","topic":"privacy","keywords":["개인정보","건강정보","민감정보","정보보호","수집","보관"],"requiresCue":false,"priority":1,"confirm":"수집 정보의 범위를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"공공 제공의 편의만이 아니라 정보 수집의 필요 범위와 열람·보관·삭제 조건도 따져 보셨습니까?","better":"개인의 정보 보호와 공공 서비스의 필요를 함께 고려하고 수집·보호 조건을 구분해 보세요."},{"id":"L4-N-PRIVACY","stance":"반대","criterion":"공정성","targetKey":"argument.privacy","topic":"privacy","keywords":["개인정보","건강정보","민감정보","정보보호","수집","보관"],"requiresCue":false,"priority":1,"confirm":"수집 정보의 범위를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"정보 최소화와 접근 제한 같은 보호 대안도 살핀 뒤 도입을 유보해야 한다고 판단하셨습니까?","better":"개인의 정보 보호와 공공 서비스의 필요를 함께 고려하고 수집·보호 조건을 구분해 보세요."},{"id":"L4-P-SCOPE","stance":"찬성","criterion":"신뢰성","targetKey":"argument.scope","topic":"scope","keywords":["정확","안전성","진단","비대면진료","30.3","임상","의사","효과"],"requiresCue":false,"priority":1,"confirm":"인용한 자료의 범위를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"그 자료의 대상·시기·서비스 종류를 확인했고, 비대면 진료 이용을 인공 지능 상담 능력과 구분하셨습니까?","better":"출처와 조사 범위를 밝히고 자료에서 확인한 내용보다 주장을 넓히지 않았는지 살펴보세요."},{"id":"L4-N-SCOPE","stance":"반대","criterion":"신뢰성","targetKey":"argument.scope","topic":"scope","keywords":["정확","안전성","진단","비대면진료","30.3","임상","의사","효과"],"requiresCue":false,"priority":1,"confirm":"인용한 자료의 범위를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"위험이나 불신을 말한 자료의 출처·대상·범위를 확인했고, 그것이 이 가상 서비스에도 적용되는지 살피셨습니까?","better":"출처와 조사 범위를 밝히고 자료에서 확인한 내용보다 주장을 넓히지 않았는지 살펴보세요."},{"id":"L4-P-SUSTAINABILITY","stance":"찬성","criterion":"타당성","targetKey":"argument.sustainability","topic":"sustainability","keywords":["바빌론","babylon","법정관리","파산","매각","경영","지속"],"requiresCue":true,"priority":1,"confirm":"운영과 기술의 관계를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"운영 기업의 경영 사건과 기술의 안전성을 구분하면서 서비스가 끊길 때의 대안도 제시하셨습니까?","better":"기업 경영·서비스 지속·기술 성능에 관한 근거를 나누고 각각 무엇을 확인할지 밝혀 보세요."},{"id":"L4-N-SUSTAINABILITY","stance":"반대","criterion":"타당성","targetKey":"argument.sustainability","topic":"sustainability","keywords":["바빌론","babylon","법정관리","파산","매각","경영","지속"],"requiresCue":true,"priority":1,"confirm":"운영과 기술의 관계를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"기업의 법정 관리나 매각 사실만으로 인공 지능 상담 기술 자체의 임상적 실패가 입증됩니까?","better":"기업 경영·서비스 지속·기술 성능에 관한 근거를 나누고 각각 무엇을 확인할지 밝혀 보세요."},{"id":"L4-P-SOURCE","stance":"찬성","criterion":"신뢰성","targetKey":"argument.source","topic":"source","keywords":["의료잡지","열명중일곱","열명중7","10명중7","70%"],"requiresCue":true,"priority":3,"confirm":"설문의 출처를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"그 설문의 조사 기관·시기·대상·원문을 확인했으며, 제시문 ⑦의 출처 오류를 검증된 사실로 쓰지 않으셨습니까?","better":"⑦의 불명확한 설문은 사실의 근거로 채택하지 말고 원출처 확인과 인용 보류를 구분해 보세요."},{"id":"L4-N-SOURCE","stance":"반대","criterion":"신뢰성","targetKey":"argument.source","topic":"source","keywords":["의료잡지","열명중일곱","열명중7","10명중7","70%"],"requiresCue":true,"priority":3,"confirm":"설문의 출처를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"그 설문의 조사 기관·시기·대상·원문을 확인했으며, 제시문 ⑦의 출처 오류를 검증된 사실로 쓰지 않으셨습니까?","better":"⑦의 불명확한 설문은 사실의 근거로 채택하지 말고 원출처 확인과 인용 보류를 구분해 보세요."},{"id":"L4-P-ALTERNATIVES","stance":"찬성","criterion":"타당성","targetKey":"argument.alternatives","topic":"alternatives","keywords":["비용","예산","인력","우선","기회비용","대안","진료연결"],"requiresCue":false,"priority":1,"confirm":"다른 방안과의 비교를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"사람의 상담 창구나 진료 연결 강화 같은 대안과 비교할 기준을 제시하셨습니까?","better":"두 대안을 같은 기준으로 비교하고 우선순위를 정한 이유가 주장으로 어떻게 이어지는지 설명해 보세요."},{"id":"L4-N-ALTERNATIVES","stance":"반대","criterion":"타당성","targetKey":"argument.alternatives","topic":"alternatives","keywords":["비용","예산","인력","우선","기회비용","대안","진료연결"],"requiresCue":false,"priority":1,"confirm":"다른 방안과의 비교를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"다른 대안이 더 낫다는 주장에도 같은 비용·접근·책임 기준을 적용하셨습니까?","better":"두 대안을 같은 기준으로 비교하고 우선순위를 정한 이유가 주장으로 어떻게 이어지는지 설명해 보세요."},{"id":"L4-P-ROLE","stance":"찬성","criterion":"타당성","targetKey":"argument.role","topic":"role","keywords":["무료","공공기관","보건소","주민","대체","의료인연결","길잡이"],"requiresCue":false,"priority":1,"confirm":"제공하려는 서비스의 역할을 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"주민에게 무료로 제공한다는 조건만으로 의료인 연결·운영 자원·안전 조건까지 충족했다고 볼 수 있습니까?","better":"공공 무료 제공·상담 안내·의료인의 판단을 구분하고 제안을 지지하거나 유보할 조건을 밝혀 보세요."},{"id":"L4-N-ROLE","stance":"반대","criterion":"타당성","targetKey":"argument.role","topic":"role","keywords":["무료","공공기관","보건소","주민","대체","의료인연결","길잡이"],"requiresCue":false,"priority":1,"confirm":"제공하려는 서비스의 역할을 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"의료인을 대신하는 진단과 사람에게 연결하는 상담 안내를 구분한 뒤에도 같은 도입 판단을 내리셨습니까?","better":"공공 무료 제공·상담 안내·의료인의 판단을 구분하고 제안을 지지하거나 유보할 조건을 밝혀 보세요."},{"id":"L4-P-HELD","stance":"찬성","criterion":"신뢰성","targetKey":"argument.held","topic":"held","keywords":["카드5","카드6","5번카드","6번카드","카드⑤","카드⑥","5·6번"],"requiresCue":true,"priority":4,"confirm":"근거로 삼을 자료를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"현재 사용 보류인 근거 카드 5·6을 빼고도 입론을 뒷받침할 확인된 근거가 있습니까?","better":"카드 5·6은 근거로 사용하지 않고 확인한 자료와 아직 보류한 자료의 범위를 구분해 보세요."},{"id":"L4-N-HELD","stance":"반대","criterion":"신뢰성","targetKey":"argument.held","topic":"held","keywords":["카드5","카드6","5번카드","6번카드","카드⑤","카드⑥","5·6번"],"requiresCue":true,"priority":4,"confirm":"근거로 삼을 자료를 확인하겠습니다. 입론 {slot}에서 “{snippet}”라고 말씀하셨지요?","verify":"현재 사용 보류인 근거 카드 5·6을 빼고도 입론을 뒷받침할 확인된 근거가 있습니까?","better":"카드 5·6은 근거로 사용하지 않고 확인한 자료와 아직 보류한 자료의 범위를 구분해 보세요."}],"helpCards":[{"id":"L4H01","topic":"need","criterion":"타당성","stance":"공통","title":"가온군 공공 상담 검토안","content":"상담 창구를 늘리는 방안과 실제 의료기관으로 연결하는 방안을 나누어 검토한다. 필요한 서비스가 있다는 사실과 특정 기술이 효과적이라는 판단은 구분한다.","source":"가온군 공공 상담 검토안(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"가온군 공공 상담 검토안(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H02","topic":"need","criterion":"타당성","stance":"공통","title":"가온보건소 연결 절차 초안","content":"상담 도우미의 안내 뒤 사람이 도움을 받을 수 있는 창구와 운영 시간을 정하는 대안이다. 이 초안은 효과가 입증된 결과가 아니다.","source":"가온보건소 연결 절차 초안(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"가온보건소 연결 절차 초안(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H03","topic":"need","criterion":"타당성","stance":"공통","title":"가온군 정책 비교 메모","content":"주민의 접근 어려움, 제안한 해결 방법, 확인할 정책 효과를 서로 다른 항목으로 기록한다. 한 항목만으로 도입 여부를 결정하지 않는다.","source":"가온군 정책 비교 메모(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"가온군 정책 비교 메모(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H04","topic":"analogy","criterion":"타당성","stance":"공통","title":"수업용 기술 비교표","content":"길 안내와 건강 상담은 다루는 정보와 오류의 영향이 다르다. 다른 기술의 성공 사례를 소개하는 일과 이 서비스의 정확성을 입증하는 일은 구분한다.","source":"수업용 기술 비교표(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"수업용 기술 비교표(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H05","topic":"analogy","criterion":"타당성","stance":"공통","title":"수업용 근거 범위 메모","content":"한 사례가 보여 주는 가능성의 범위를 적고, 새로운 분야에 적용하려면 추가로 무엇을 확인할지 별도 칸에 적는 비교 틀이다.","source":"수업용 근거 범위 메모(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"수업용 근거 범위 메모(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H06","topic":"analogy","criterion":"타당성","stance":"공통","title":"수업용 사례 연결 카드","content":"사례가 사회적 약자를 돕는 방향을 보여 준다고 말할 수는 있어도, 그 사례만으로 다른 서비스의 성능을 확정하지 않는 논증 점검안이다.","source":"수업용 사례 연결 카드(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"수업용 사례 연결 카드(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H07","topic":"access","criterion":"공정성","stance":"공통","title":"가온보건소 이용 지원안","content":"직원의 안내와 전화 창구를 함께 두는 대안이다. 이용 지원이 필요한 주민을 살피되 지원안이 있다는 이유만으로 격차가 해결됐다고 단정하지 않는다.","source":"가온보건소 이용 지원안(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"가온보건소 이용 지원안(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H08","topic":"access","criterion":"공정성","stance":"공통","title":"가온군 주민 접근 검토표","content":"기기를 다루기 어려운 사람, 이동이 어려운 사람, 음성이나 글 읽기가 어려운 사람의 이용 경로를 각각 점검하는 가상 설계표다.","source":"가온군 주민 접근 검토표(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"가온군 주민 접근 검토표(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H09","topic":"access","criterion":"공정성","stance":"공통","title":"가온군 대체 창구 논의안","content":"디지털 창구를 쓰지 않는 주민에게도 사람과 연결되는 창구를 남기는 방안이다. 필요한 운영 인력과 비용은 별도 검토 대상으로 둔다.","source":"가온군 대체 창구 논의안(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"가온군 대체 창구 논의안(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H10","topic":"responsibility","criterion":"타당성","stance":"공통","title":"가온군 책임 분담 초안","content":"개발자·운영 기관·의료인의 역할, 오류 신고, 피해 대응 담당을 구분하는 가상 운영안이다. 실제 법적 책임을 확정한 문서가 아니다.","source":"가온군 책임 분담 초안(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"가온군 책임 분담 초안(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H11","topic":"responsibility","criterion":"타당성","stance":"공통","title":"수업용 법률 적용 점검표","content":"법의 정의를 확인하는 단계와 가상 서비스가 그 정의에 해당하는지 판단하는 단계를 나눈다. 법 이름만으로 적법성이나 안전성을 단정하지 않는다.","source":"수업용 법률 적용 점검표(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"수업용 법률 적용 점검표(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H12","topic":"responsibility","criterion":"타당성","stance":"공통","title":"가온보건소 중단·대응 절차안","content":"오류가 의심되면 안내를 중단하고 담당자가 검토하도록 하는 가상 절차다. 이 절차가 임상 성능이나 법적 허가를 입증하지는 않는다.","source":"가온보건소 중단·대응 절차안(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"가온보건소 중단·대응 절차안(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H13","topic":"privacy","criterion":"공정성","stance":"공통","title":"가온군 정보 최소화 설계안","content":"수집할 정보의 목적과 필요성을 항목별로 따지고, 필요하지 않은 정보는 받지 않는 대안이다. 실제 주민 정보는 포함하지 않는다.","source":"가온군 정보 최소화 설계안(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"가온군 정보 최소화 설계안(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H14","topic":"privacy","criterion":"공정성","stance":"공통","title":"가온보건소 접근 권한 초안","content":"기록의 열람 담당, 보관 기간, 삭제 절차를 따로 정하는 가상 운영안이다. 보호 계획과 보호가 실제 작동하는지는 구분해 확인한다.","source":"가온보건소 접근 권한 초안(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"가온보건소 접근 권한 초안(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H15","topic":"privacy","criterion":"공정성","stance":"공통","title":"수업용 정보 보호 비교표","content":"서비스의 편의와 정보 노출 위험을 함께 살피고, 보호 장치가 부족할 때의 중단 기준을 논의하는 정책 비교 틀이다.","source":"수업용 정보 보호 비교표(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"수업용 정보 보호 비교표(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H16","topic":"scope","criterion":"신뢰성","stance":"공통","title":"수업용 조사 대상 비교표","content":"의료인에게 비대면 진료를 받은 사람의 자료와 인공 지능 상담 도우미를 이용한 사람의 자료는 대상이 다를 수 있다. 자료의 분모와 서비스 종류를 먼저 확인한다.","source":"수업용 조사 대상 비교표(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"수업용 조사 대상 비교표(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H17","topic":"scope","criterion":"신뢰성","stance":"공통","title":"수업용 주장 범위 점검표","content":"자료에서 실제 확인한 내용과 그 자료만으로는 알 수 없는 내용을 나누어 적는다. 이용 비율만으로 모든 주민의 이용 능력이나 서비스 성능을 확정하지 않는다.","source":"수업용 주장 범위 점검표(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"수업용 주장 범위 점검표(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H18","topic":"scope","criterion":"신뢰성","stance":"공통","title":"가온군 시범 검토 항목안","content":"대상·이용 조건·오류 대응·의료인 연결을 각각 확인할 항목으로 정한 가상 검토안이다. 실제 실험 결과나 진료 지침이 아니다.","source":"가온군 시범 검토 항목안(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"가온군 시범 검토 항목안(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H19","topic":"sustainability","criterion":"타당성","stance":"공통","title":"수업용 사건 분류표","content":"회사의 재무·경영 사건, 서비스 운영의 지속 가능성, 기술 성능에 관한 자료를 다른 칸에 기록한다. 한 종류의 사건을 다른 종류의 증거로 바꾸지 않는다.","source":"수업용 사건 분류표(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"수업용 사건 분류표(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H20","topic":"sustainability","criterion":"타당성","stance":"공통","title":"가온군 사업 지속 검토안","content":"운영 주체가 바뀔 때 기록 인계와 주민 안내를 어떻게 유지할지 논의하는 가상 계획이다. 특정 기업의 성패를 예측하는 자료가 아니다.","source":"가온군 사업 지속 검토안(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"가온군 사업 지속 검토안(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H21","topic":"sustainability","criterion":"타당성","stance":"공통","title":"수업용 원인 비교 메모","content":"사건이 함께 일어났다는 사실과 한 사건이 다른 사건의 원인임을 입증하는 일을 구별한다. 기업 사건만으로 기술의 안전·위험을 확정하지 않는다.","source":"수업용 원인 비교 메모(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"수업용 원인 비교 메모(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H22","topic":"source","criterion":"신뢰성","stance":"공통","title":"수업용 원출처 확인표","content":"조사 기관·발표 시기·조사 대상·질문 문항·원문 위치를 확인하는 점검표다. 그 정보가 없는 설문 수치를 검증된 사실로 쓰지 않는다.","source":"수업용 원출처 확인표(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"수업용 원출처 확인표(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H23","topic":"source","criterion":"신뢰성","stance":"공통","title":"수업용 설문 해석 메모","content":"누가 어떤 질문에 답했는지 모르는 설문은 해석 범위를 정하기 어렵다. 제시문 ⑦의 불명확한 설문은 출처 검토용 오류이며 사실의 근거로 채택하지 않는다.","source":"수업용 설문 해석 메모(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"수업용 설문 해석 메모(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H24","topic":"source","criterion":"신뢰성","stance":"공통","title":"수업용 인용 보류 카드","content":"원자료를 확인하지 못한 수치는 인용을 보류하거나 확인하지 못한 한계를 밝힌다. 확인 전 빈칸을 실제 통계처럼 만들어 채우지 않는다.","source":"수업용 인용 보류 카드(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"수업용 인용 보류 카드(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H25","topic":"alternatives","criterion":"타당성","stance":"공통","title":"가온군 대안 비교안","content":"상담 도우미, 사람의 상담 창구, 의료기관 연결 강화에 필요한 자원과 기대 역할을 같은 기준으로 비교하는 가상 틀이다. 실제 비용이나 효과 수치는 없다.","source":"가온군 대안 비교안(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"가온군 대안 비교안(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H26","topic":"alternatives","criterion":"타당성","stance":"공통","title":"가온보건소 단계적 검토안","content":"작은 범위의 검토와 중단 조건을 먼저 정하는 대안이다. 단계적으로 검토하자는 제안과 실제 도입 효과가 확인됐다는 주장은 구분한다.","source":"가온보건소 단계적 검토안(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"가온보건소 단계적 검토안(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H27","topic":"alternatives","criterion":"타당성","stance":"공통","title":"수업용 우선순위 논의표","content":"기다렸을 때의 불편과 서둘렀을 때의 위험을 함께 적고, 무엇을 먼저 확인할지 정하는 논증 점검표다.","source":"수업용 우선순위 논의표(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"수업용 우선순위 논의표(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H28","topic":"role","criterion":"타당성","stance":"공통","title":"가온보건소 역할 구분안","content":"상담 도우미의 안내와 의료인의 판단을 구분하고 사람에게 연결할 경로를 정하는 가상 제안이다. 이 자료는 개인 건강에 대한 조언을 제공하지 않는다.","source":"가온보건소 역할 구분안(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"가온보건소 역할 구분안(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H29","topic":"role","criterion":"타당성","stance":"공통","title":"수업용 공공 제공 조건표","content":"무료 제공 여부와 운영 자원, 이용 지원, 책임, 보호 조건을 별도 항목으로 검토한다. 무료라는 이유만으로 안전하거나 공정하다고 결론짓지 않는다.","source":"수업용 공공 제공 조건표(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"수업용 공공 제공 조건표(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H30","topic":"role","criterion":"타당성","stance":"공통","title":"가온군 도입 조건 검토안","content":"어떤 조건이면 제안을 유지하고 어떤 조건이 부족하면 유보할지 정하는 정책 논의안이다. 학생의 입론이나 답변을 대신 작성하는 예시는 아니다.","source":"가온군 도입 조건 검토안(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"가온군 도입 조건 검토안(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H31","topic":"held","criterion":"신뢰성","stance":"공통","title":"수업용 사용 보류 확인표","content":"제시문 근거 카드 5·6은 원집계·원보고서 확인 전 사용 보류다. 번호는 유지하되 현재 입론을 뒷받침하는 검증된 수치로 사용하지 않는다.","source":"수업용 사용 보류 확인표(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"수업용 사용 보류 확인표(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H32","topic":"held","criterion":"신뢰성","stance":"공통","title":"수업용 근거 선택 메모","content":"보류된 근거를 빼고도 주장을 유지할 수 있는지, 남은 근거가 실제로 무엇을 말하는지 확인하는 검토 틀이다. 빠진 수치를 만들어 넣지 않는다.","source":"수업용 근거 선택 메모(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"수업용 근거 선택 메모(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"},{"id":"L4H33","topic":"held","criterion":"신뢰성","stance":"공통","title":"수업용 확인 범위 기록표","content":"확인한 원문과 아직 확인하지 못한 항목을 구분한다. 확인 절차를 제안하는 것과 이미 검증을 마쳤다고 말하는 것은 다르다.","source":"수업용 확인 범위 기록표(수업용 가상 자료)","year":null,"method":"수업용 정책 검토 틀이며 실제 조사·실험 결과가 아님","citation":"수업용 확인 범위 기록표(수업용 가상 자료)","virtual":true,"badge":"수업용 가상 자료"}]};
+var ClassroomLesson4 = (function(){
+/* 4차시 대본 전용 순수 엔진. 학생 입론을 완성하거나 외부 AI를 호출하지 않습니다. */
+const { invariant, normalizeStance, seedHash, validateFreeText } = ClassroomCore;
+const clone = value => JSON.parse(JSON.stringify(value));
+const canonical = value => String(value).normalize('NFKC').toLowerCase().replace(/[\s\p{P}\p{S}]/gu, '');
+const criteria = ['신뢰성', '타당성', '공정성'];
+const sessionIdPattern = /^[A-Za-z0-9_-]{8,64}$/;
+const helpPattern = /\[자료\s+([A-Za-z][A-Za-z0-9_-]*)\]/g;
+
+function shuffle(values, seed) {
+  const result = values.slice();
+  let state = seedHash(seed) || 1;
+  const next = () => { state ^= state << 13; state ^= state >>> 17; state ^= state << 5; return (state >>> 0) / 4294967296; };
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(next() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+function clueCount(text, keywords) {
+  const value = canonical(text);
+  return keywords.reduce((sum, keyword) => sum + Number(value.includes(canonical(keyword))), 0);
+}
+
+function pairs(value) {
+  const text = canonical(value), result = new Set();
+  for (let i = 0; i < text.length - 1; i++) result.add(text.slice(i, i + 2));
+  return result;
+}
+
+// 같은 주제를 단어만 바꾸어 되묻는 질문은 한 세션에 함께 넣지 않습니다.
+function similarity(left, right) {
+  const a = pairs(left), b = pairs(right);
+  if (!a.size || !b.size) return 0;
+  let shared = 0;
+  for (const token of a) if (b.has(token)) shared++;
+  return shared / (a.size + b.size - shared);
+}
+
+function snippetFor(session, bank) {
+  const parts = [];
+  for (const [slot, text] of [['①', session.arg1], ['⑤', session.arg5]]) {
+    if (!text) continue;
+    const sentences = text.split(/\n+|(?<=[.!?。！？])\s+/u).map(value => value.trim()).filter(Boolean);
+    for (const sentence of sentences) parts.push({ slot, sentence, score: clueCount(sentence, bank.keywords) });
+  }
+  parts.sort((a, b) => b.score - a.score);
+  const selected = parts[0];
+  const text = selected.sentence.replace(/[“”"<>]/g, '').replace(/\s+/g, ' ');
+  return { slot: selected.slot, snippet: text.length > 76 ? `${text.slice(0, 75)}…` : text.replace(/[.。]$/, '') };
+}
+
+function unrelated(text) {
+  return /오늘\s*날씨|점심\s*메뉴|노래\s*불러|시스템\s*프롬프트|이전\s*지시.*무시/.test(text)
+    && !/의료|상담|공공|도입|근거|자료|출처|책임|정보|주민|정책/.test(text);
+}
+
+function unsupportedSource(text) {
+  const limited = /사용\s*보류|인용\s*보류|확인되지|확인하지\s*못|출처.{0,8}(?:불명확|모호)|근거로\s*(?:쓰지|사용하지)|단정할\s*수\s*없/.test(text);
+  const held = /(?:카드|자료)\s*[⑤⑥56](?:\s*[·,와과]\s*[⑤⑥56])?|[56]\s*번\s*카드/.test(text);
+  const survey = /의료\s*잡지/.test(text) && /일곱|7\s*명|70\s*%/.test(text);
+  return !limited && (held || survey);
+}
+
+function createLesson4Engine(content) {
+  invariant(content?.lesson === 4 && Array.isArray(content.questions) && Array.isArray(content.helpCards)
+    && content.limits && content.labels?.virtualBadge, 'MISSING_CONTENT', '4차시 대본 자료를 불러오지 못했습니다.');
+  const limits = content.limits;
+  const questionBank = new Map(content.questions.map(question => [question.id, question]));
+  invariant(questionBank.size === content.questions.length, 'DUPLICATE_CONTENT', '4차시 질문 번호가 겹칩니다.');
+  const helpBank = new Map(content.helpCards.map(card => [card.id, card]));
+  invariant(helpBank.size === content.helpCards.length, 'DUPLICATE_CONTENT', '4차시 도움 자료 번호가 겹칩니다.');
+  invariant(content.helpCards.every(card => card.virtual === true && card.badge === content.labels.virtualBadge
+    && /가상/.test(card.source)), 'INVALID_VIRTUAL_CARD', '4차시 도움 자료에는 가상 자료 표시가 필요합니다.');
+
+  function checkSession(session) {
+    invariant(session?.lesson === 4 && sessionIdPattern.test(session.sessionId || '') && typeof session.seed === 'string'
+      && [3, 4, 5].includes(session.questionCount) && Array.isArray(session.plan)
+      && session.plan.length === session.questionCount && Array.isArray(session.answers),
+    'INVALID_SESSION', '4차시 대담 기록을 확인해 주세요.');
+    invariant(typeof session.arg1 === 'string' && session.arg1.length >= limits.argMin && typeof session.arg5 === 'string',
+      'INVALID_SESSION', '우리 모둠 입론을 확인해 주세요.');
+    invariant(new Set(session.plan.map(item => item.id)).size === session.questionCount
+      && new Set(session.plan.map(item => item.targetKey)).size === session.questionCount,
+    'DUPLICATE_QUESTION_TARGET', '질문 계획에 같은 검토 대상이 겹칩니다.');
+    for (const item of session.plan) {
+      const bank = questionBank.get(item.id);
+      invariant(bank && bank.stance === session.stance && bank.targetKey === item.targetKey && bank.criterion === item.criterion,
+        'INVALID_SESSION', '4차시 질문 계획을 확인해 주세요.');
+    }
+    invariant(session.answers.length <= session.questionCount && session.answers.every((entry, index) =>
+      entry.turn === index + 1 && entry.questionId === session.plan[index].id),
+    'INVALID_TURN', '확정한 답변의 차례를 확인해 주세요.');
+  }
+
+  function buildSession(input) {
+    invariant(input && typeof input === 'object', 'INVALID_SESSION', '우리 모둠 입론을 입력해 주세요.');
+    const stance = normalizeStance(input.stance);
+    invariant(sessionIdPattern.test(input.sessionId || ''), 'INVALID_SESSION_ID', '세션 식별자가 올바르지 않습니다.');
+    const questionCount = Number(input.questionCount ?? limits.questionDefault);
+    invariant(Number.isInteger(questionCount) && questionCount >= limits.questionMin && questionCount <= limits.questionMax,
+      'INVALID_QUESTION_COUNT', '4차시 질문 수는 3~5개입니다.');
+    const arg1 = validateFreeText(input.arg1, '① 입론', { min: limits.argMin, max: limits.argMax });
+    const arg5 = validateFreeText(input.arg5 ?? '', '⑤ 입론', { min: 0, max: limits.argMax });
+    invariant(['string', 'number'].includes(typeof (input.seed ?? input.sessionId)), 'INVALID_SEED', '대담 복원 정보를 확인해 주세요.');
+    const seed = String(input.seed ?? input.sessionId);
+    invariant(seed.length > 0 && seed.length <= 256, 'INVALID_SEED', '대담 복원 정보를 확인해 주세요.');
+    const text = `${arg1}\n${arg5}`;
+    const candidates = shuffle(content.questions.filter(bank => bank.stance === stance), `${seed}:questions`)
+      .map(bank => ({ bank, matches: clueCount(text, bank.keywords) }))
+      .filter(item => !item.bank.requiresCue || item.matches > 0)
+      .map(item => ({ ...item, score: item.matches * 10 + (item.matches ? item.bank.priority : 0) }))
+      .sort((a, b) => b.score - a.score);
+    const selected = [];
+    const allowed = item => !selected.some(other => other.bank.targetKey === item.bank.targetKey
+      || similarity(other.bank.verify, item.bank.verify) >= 0.67);
+    // 기준은 반복될 수 있지만, 기본 세 기준은 한 번씩 다루고 대상은 겹치지 않습니다.
+    for (const criterion of criteria) {
+      const candidate = candidates.find(item => item.bank.criterion === criterion && allowed(item));
+      invariant(candidate, 'MISSING_QUESTION', '입론에 맞는 4차시 질문이 부족합니다.');
+      selected.push(candidate);
+    }
+    for (const candidate of candidates) {
+      if (selected.length === questionCount) break;
+      if (allowed(candidate)) selected.push(candidate);
+    }
+    invariant(selected.length === questionCount, 'MISSING_QUESTION', '겹치지 않는 4차시 질문이 부족합니다.');
+    selected.sort((a, b) => b.score - a.score || candidates.indexOf(a) - candidates.indexOf(b));
+    const plan = selected.map(({ bank, score }) => ({ id: bank.id, criterion: bank.criterion,
+      targetKey: bank.targetKey, severity: score }));
+    return { version: content.version, lesson: 4, sessionId: input.sessionId, stance, arg1, arg5,
+      questionCount, seed, plan, answers: [], mode: 'script' };
+  }
+
+  function getQuestion(session, turn) {
+    checkSession(session);
+    invariant(Number.isInteger(turn) && turn >= 1 && turn <= session.questionCount, 'INVALID_TURN', '질문 순서를 확인해 주세요.');
+    const bank = questionBank.get(session.plan[turn - 1].id), selected = snippetFor(session, bank);
+    const confirm = bank.confirm.replace('{slot}', selected.slot).replace('{snippet}', selected.snippet);
+    const candidates = content.helpCards.filter(card => card.topic === bank.topic && (card.stance === '공통' || card.stance === session.stance));
+    const count = limits.helpMin + seedHash(`${session.seed}:${turn}:${bank.id}:count`) % (limits.helpMax - limits.helpMin + 1);
+    const helpCards = shuffle(candidates, `${session.seed}:${turn}:${bank.id}:cards`).slice(0, count);
+    invariant(helpCards.length === count, 'MISSING_HELP_CARDS', '현재 질문의 가상 도움 자료가 부족합니다.');
+    return { id: bank.id, criterion: bank.criterion, targetKey: bank.targetKey, confirm, verify: bank.verify,
+      helpCards: helpCards.map(card => ({ ...card })), better: bank.better, turn };
+  }
+
+  function recordAnswer(session, input) {
+    checkSession(session);
+    invariant(!session.reflection, 'SESSION_FINISHED', '제출한 대담의 답변은 바꿀 수 없습니다.');
+    const turn = Number(input?.turn);
+    invariant(Number.isInteger(turn) && turn >= 1 && turn <= session.questionCount, 'INVALID_TURN', '질문 순서를 확인해 주세요.');
+    const answer = validateFreeText(input.answer, '답변', { min: limits.answerMin, max: limits.answerMax });
+    const question = getQuestion(session, turn), ids = input.helpIds ?? [];
+    invariant(Array.isArray(ids) && ids.length <= limits.helpMax && new Set(ids).size === ids.length
+      && ids.every(id => typeof id === 'string' && question.helpCards.some(card => card.id === id)),
+    'INVALID_HELP_CARD', '현재 질문에 제시된 가상 도움 자료만 선택해 주세요.');
+    const helpIds = ids.slice().sort();
+    const quoted = [...answer.matchAll(helpPattern)].map(match => match[1]);
+    invariant(quoted.every(id => question.helpCards.some(card => card.id === id)),
+      'INVALID_HELP_CARD', '현재 질문에 제시된 자료 번호를 인용해 주세요.');
+    if (turn <= session.answers.length) {
+      const first = session.answers[turn - 1];
+      invariant(first.answer === answer && JSON.stringify(first.helpIds.slice().sort()) === JSON.stringify(helpIds),
+        'ANSWER_LOCKED', '이미 확정한 첫 답변은 바꿀 수 없습니다.');
+      return clone(session);
+    }
+    invariant(turn === session.answers.length + 1, 'INVALID_TURN', '이전 질문부터 답해 주세요.');
+    return { ...session, answers: [...session.answers, { turn, questionId: question.id, answer, helpIds }] };
+  }
+
+  function evaluate(entry, question) {
+    const text = entry.answer.trim();
+    const quoted = [...text.matchAll(helpPattern)].map(match => match[1]);
+    const citation = question.helpCards.some(card => quoted.includes(card.id) || text.includes(card.citation));
+    const unsafeSource = unsupportedSource(text);
+    const offTopic = unrelated(text);
+    const reliability = unsafeSource || offTopic ? '○' : citation ? '●'
+      : /출처|원문|자료|조사|근거|확인하지\s*못/.test(text) ? '◐' : '○';
+    const connector = /때문에|따라서|그러므로|왜냐하면|그렇기\s*때문|그러나|다만/.test(text);
+    const relevant = /의료|상담|공공|도입|주민|정책|접근|이용|책임|법률|정보\s*보호|자료|근거/.test(text);
+    const validity = offTopic ? '○' : connector && relevant && text.length >= 45 ? '●'
+      : relevant && (connector || text.length >= 35) ? '◐' : '○';
+    const admitsLimit = /인정|맞습니다|말씀대로|그\s*점은|다만|확인하지\s*못|단정할\s*수\s*없/.test(text);
+    const avoids = /상관없|아무튼|그건\s*중요하지\s*않|답할\s*필요\s*없/.test(text)
+      || (/모르겠/.test(text) && text.length < 25);
+    const attitude = offTopic || avoids || text.length < 10 ? '피함' : admitsLimit ? '인정함' : '보통';
+    return { reliability, validity, attitude, unsafeSource };
+  }
+
+  function getFeedback(session) {
+    checkSession(session);
+    const items = session.answers.map((entry, index) => {
+      const question = getQuestion(session, index + 1);
+      const { unsafeSource, ...scores } = evaluate(entry, question);
+      const comment = unsafeSource ? '사용 보류 카드나 원출처가 불명확한 설문을 확인된 사실로 쓰지 마세요.'
+        : scores.attitude === '피함' ? '질문이 겨냥한 부분에 직접 답하고 확인하지 못한 점은 솔직히 밝혀 보세요.'
+        : scores.reliability !== '●' ? '현재 제공된 가상 자료의 출처나 번호를 밝히고 확인 범위를 구분해 보세요.'
+        : scores.validity !== '●' ? '인용한 자료가 이유와 정책 주장으로 이어지는 범위를 설명해 보세요.'
+        : '출처와 논리 연결을 표현했습니다. 가상 자료의 한계와 유지할 조건도 점검해 보세요.';
+      return { turn: index + 1, questionId: question.id, criterion: question.criterion,
+        criterionDescription: content.criterionDescriptions[question.criterion], confirm: question.confirm,
+        verify: question.verify, answer: entry.answer, ...scores, comment, better: question.better };
+    });
+    const reliabilityGood = items.filter(item => item.reliability === '●').length;
+    const validityGood = items.filter(item => item.validity === '●').length;
+    const unsafe = session.answers.some(entry => unsupportedSource(entry.answer));
+    const weakest = ['reliability', 'validity', 'attitude'].map((key, index) => ({ key, index,
+      score: items.reduce((sum, item) => sum + ({ '●': 2, '◐': 1, '○': 0, 인정함: 2, 보통: 1, 피함: 0 }[item[key]]), 0) }))
+      .sort((a, b) => a.score - b.score || a.index - b.index)[0].key;
+    return { items, summary: { reliabilityGood, validityGood,
+      good: reliabilityGood ? '가상 자료의 출처나 번호를 밝혀 답변을 뒷받침했습니다.'
+        : validityGood ? '의료 공공 도입의 이유와 근거를 연결해 설명했습니다.' : '모둠 입론에 대한 반대 신문을 읽고 답변을 남겼습니다.',
+      improve: weakest === 'reliability' ? '확인한 출처와 가상 자료의 한계를 구분해 밝혀 보세요.'
+        : weakest === 'validity' ? '자료가 해당 정책 주장으로 이어지는 이유와 조건을 풀어 설명해 보세요.'
+          : '인정할 한계와 유지할 주장을 구별하고 질문에 직접 답해 보세요.',
+      cardWarning: unsafe ? '제시문 ⑦의 불명확한 설문과 사용 보류 카드 5·6을 검증된 사실로 쓰지 않습니다.' : '' } };
+  }
+
+  function finishSession(session, options = {}) {
+    checkSession(session);
+    invariant(options.earlyFinish === undefined || typeof options.earlyFinish === 'boolean',
+      'INVALID_EARLY_FINISH', '조기 종료 여부를 확인해 주세요.');
+    const actual = session.answers.length;
+    invariant(actual >= limits.earlyFinishMin && (actual === session.questionCount || options.earlyFinish === true),
+      'NOT_ENOUGH_ANSWERS', '세 번째 답까지 마친 뒤 피드백과 성찰을 제출해 주세요.');
+    const reflection = validateFreeText(options.reflection, '성찰', { min: limits.reflectionMin, max: limits.reflectionMax });
+    if (session.reflection) {
+      invariant(session.reflection === reflection && session.earlyFinish === (actual < session.questionCount),
+        'SESSION_FINISHED', '제출한 대담의 성찰은 바꿀 수 없습니다.');
+      return clone(session);
+    }
+    return { ...session, reflection, earlyFinish: actual < session.questionCount,
+      completedQuestionCount: actual, feedback: getFeedback(session) };
+  }
+
+  return { buildSession, getQuestion, recordAnswer, getFeedback, finishSession };
+}
+
+return {createLesson4Engine};
+})();
 var ClassroomService = (function(){
-const { createEngine, DomainError, invariant, normalizeStance, validateStudentId, validateFreeText, sanitizeCell, detectPII, validateQuestionOutput, validateFeedbackOutput, isClearlyUnrelated } = ClassroomCore;
+const { createEngine, DomainError, invariant, normalizeStance, validateStudentId, validateFreeText, sanitizeCell,
+  detectPII, validateQuestionOutput, validateFeedbackOutput, isClearlyUnrelated } = ClassroomCore;
+const { createLesson4Engine } = ClassroomLesson4;
+const LESSON4_CONTENT = {LESSON4_CONTENT:ClassroomLesson4Content,default:ClassroomLesson4Content}.default;
+const VERSION = '5.1.0';
 const COMMON_HEADERS = ['receivedAt', 'submissionId', 'studentId', 'cls', 'groupNo', 'lesson', 'clientTs', 'appVersion'];
 const HEADERS = {
   config: ['key', 'value', 'note'],
@@ -224,7 +471,8 @@ const HEADERS = {
     'feedback', 'reflection', 'mode', 'durationSec', 'ruleFeedback', 'aiFeedback', 'earlyFinish', 'completedQuestionCount', 'payloadHash'],
   ai_log: [...COMMON_HEADERS, 'sessionId', 'turn', 'role', 'text', 'meta', 'mode', 'provider', 'model', 'latencyMs', 'error'],
   l3_args: [...COMMON_HEADERS, 'arg1', 'cards1', 'arg5', 'cards5', 'sources', 'chk1', 'chk2', 'chk3', 'chk4', 'chk5'],
-  l4_sessions: [...COMMON_HEADERS, 'sessionId', 'part', ...[1, 2, 3, 4, 5].flatMap(n => [`q${n}`, `a${n}`, `help${n}`]), 'feedback', 'reflection', 'mode'],
+  l4_sessions: [...COMMON_HEADERS, 'sessionId', 'part', ...[1, 2, 3, 4, 5].flatMap(n => [`q${n}`, `a${n}`, `help${n}`]), 'feedback', 'reflection', 'mode',
+    'groupName', 'groupKey', 'memberStudentIds', 'stance', 'arg1', 'arg5', 'completedQuestionCount', 'earlyFinish', 'durationSec', 'ruleFeedback', 'payloadHash'],
   recordings: [...COMMON_HEADERS, 'members', 'mp4Url', 'txtUrl', 'mp4Name', 'txtName'],
   uploads: [...COMMON_HEADERS, 'uploadId', 'fileName', 'mimeType', 'bytes', 'fileId', 'fileUrl'],
   log: ['ts', 'level', 'action', 'submissionId', 'message'],
@@ -243,11 +491,11 @@ function collectLimits(value, depth = 0) {
   else if (Array.isArray(value)) { invariant(value.length <= 40, 'INVALID_PAYLOAD', '입력 목록이 너무 깁니다.'); value.forEach(x => collectLimits(x, depth + 1)); }
   else if (value && typeof value === 'object') { invariant(Object.keys(value).length <= 80, 'INVALID_PAYLOAD', '입력 항목이 너무 많습니다.'); Object.values(value).forEach(x => collectLimits(x, depth + 1)); }
 }
-function compactFeedback(feedback) {
+function compactFeedback(feedback, textLimit = 100) {
   if (!feedback) return null;
   return { items: feedback.items.map(x => ({ turn: x.turn, criterion: x.criterion, reliability: x.reliability, validity: x.validity,
-    attitude: x.attitude, comment: x.comment.slice(0, 100), better: x.better.slice(0, 100) })),
-    summary: { good: feedback.summary.good.slice(0, 100), improve: feedback.summary.improve.slice(0, 100) } };
+    attitude: x.attitude, comment: x.comment.slice(0, textLimit), better: x.better.slice(0, textLimit) })),
+    summary: { good: feedback.summary.good.slice(0, textLimit), improve: feedback.summary.improve.slice(0, textLimit) } };
 }
 function constantEqual(a, b) {
   if (!a || !b) return false;
@@ -255,8 +503,9 @@ function constantEqual(a, b) {
   for (let i = 0; i < Math.max(a.length, b.length); i++) diff |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
   return diff === 0;
 }
-function createService({ content, store, properties, clock = () => Date.now(), hash, providerCall = null }) {
+function createService({ content, lesson4Content = LESSON4_CONTENT, store, properties, clock = () => Date.now(), hash, providerCall = null }) {
   const engine = createEngine(content);
+  const lesson4Engine = createLesson4Engine(lesson4Content);
   const now = () => new Date(clock()).toISOString();
   const prop = key => safeText(properties.get(key));
   const rows = tab => store.read(tab) || [];
@@ -276,12 +525,13 @@ function createService({ content, store, properties, clock = () => Date.now(), h
   function config() {
     const source = Object.fromEntries(rows('config').map(x => [x.key, x.value]));
     const integer = (key, base, low, high) => { const n = Number(source[key] || base); return Number.isInteger(n) && n >= low && n <= high ? n : base; };
-    const accepts = safeText(source.acceptLessons || '2').split(',').map(Number).filter(x => x === 2);
+    const accepts = [...new Set(safeText(source.acceptLessons == null ? '2' : source.acceptLessons).split(',').map(Number).filter(x => x === 2 || x === 4))];
     const provider = prop('AI_PROVIDER');
     return { grade: integer('grade', 2, 1, 3), classCount: integer('classCount', 11, 1, 99), groupMax: integer('groupMax', 8, 1, 20),
       acceptLessons: accepts, l2Questions: integer('l2Questions', 3, 2, 3), aiEnabled: ['anthropic', 'gemini'].includes(provider) && Boolean(prop('AI_MODEL') && prop('AI_API_KEY')),
-      publicSharing: safeText(source.publicSharing || 'true') === 'true', appVersion: content.version,
-      lessons: { 2: { enabled: accepts.includes(2) }, 3: { enabled: false, reason: '아직 열리지 않음' }, 4: { enabled: false, reason: '아직 열리지 않음' } } };
+      publicSharing: safeText(source.publicSharing || 'true') === 'true', appVersion: VERSION, implementedLessons: [2, 4],
+      l4Questions: integer('l4Questions', 4, 3, 5), l4AiEnabled: false,
+      lessons: { 2: { enabled: accepts.includes(2) }, 3: { enabled: false, reason: '아직 열리지 않음' }, 4: { enabled: accepts.includes(4), mode: 'script' } } };
   }
   function teacher(request) {
     invariant(prop('PASSCODE'), 'AUTH_NOT_CONFIGURED', '교사 화면 암호가 아직 설정되지 않았습니다.');
@@ -293,27 +543,33 @@ function createService({ content, store, properties, clock = () => Date.now(), h
     invariant(request.cls === undefined || Number(request.cls) === result.cls, 'INVALID_CLASS', '학번의 반과 입력한 반이 다릅니다.');
     return result;
   }
-  function requireLesson(request) {
-    invariant(Number(request.lesson || 2) === 2, 'LESSON_NOT_IMPLEMENTED', '현재는 2차시 체험만 열려 있습니다.');
-    invariant(config().acceptLessons.includes(2), 'LESSON_CLOSED', '아직 2차시 활동이 열리지 않았습니다.');
+  function requireLesson(request, lesson = 2) {
+    invariant(Number(request.lesson || 2) === lesson && [2, 4].includes(lesson), 'LESSON_NOT_IMPLEMENTED', '현재는 2차시·4차시 체험만 지원합니다.');
+    invariant(config().acceptLessons.includes(lesson), 'LESSON_CLOSED', `아직 ${lesson}차시 활동이 열리지 않았습니다.`);
   }
   function common(request, actor) {
-    return { receivedAt: now(), submissionId: request.submissionId || '', studentId: actor.studentId, cls: actor.cls, groupNo: '', lesson: 2,
-      clientTs: safeText(request.clientTs || ''), appVersion: safeText(request.appVersion || content.version) };
+    return { receivedAt: now(), submissionId: request.submissionId || '', studentId: actor.studentId, cls: actor.cls, groupNo: '', lesson: Number(request.lesson || 2),
+      clientTs: safeText(request.clientTs || ''), appVersion: safeText(request.appVersion || VERSION) };
   }
-  function stateRowFor(sessionId) {
-    const found = rows('progress').filter(x => x.sessionId === sessionId && x.state1);
+  function stateRowFor(sessionId, lesson = 2) {
+    const found = rows('progress').filter(x => x.sessionId === sessionId && Number(x.lesson || 2) === lesson && x.state1);
     if (!found.length) return null;
     return found[found.length - 1];
   }
-  function stateFor(sessionId) {
-    const latest = stateRowFor(sessionId);
+  function stateFromRow(latest) {
     if (!latest) return null;
     return parseJSON([1, 2, 3, 4, 5, 6, 7, 8].map(n => { const part = latest[`state${n}`] || ''; return String(part).startsWith('~') ? String(part).slice(1) : part; }).join(''));
   }
-  function saveState(state, request, actor, stage) {
-    const text = JSON.stringify(state);
+  function stateFor(sessionId, lesson = 2) { return stateFromRow(stateRowFor(sessionId, lesson)); }
+  function stateText(state) {
+    // 4차시 피드백은 엔진으로 다시 계산할 수 있으므로 긴 입론·답변을 상태에 중복 저장하지 않습니다.
+    const snapshot = Number(state.lesson) === 4 ? Object.fromEntries(Object.entries(state).filter(([key]) => !['feedback', 'questionCache'].includes(key))) : state;
+    const text = JSON.stringify(snapshot);
     invariant(text.length <= 15992, 'STORAGE_LENGTH', '세션 기록이 너무 깁니다.');
+    return text;
+  }
+  function saveState(state, request, actor, stage) {
+    const text = stateText(state);
     const value = { ...common(request, actor), sessionId: state.sessionId, stage };
     for (let n = 1; n <= 8; n++) { const part = text.slice((n - 1) * 1999, n * 1999); value[`state${n}`] = part ? `~${part}` : ''; }
     append('progress', value);
@@ -333,21 +589,21 @@ function createService({ content, store, properties, clock = () => Date.now(), h
     invariant(['stance', 'reasonId', 'reasonText', 'cardId', 'argText'].every(k => fresh[k] === existing[k]), 'SESSION_LOCKED', '대담을 시작한 입론은 새 세션에서 변경해 주세요.');
     return existing;
   }
-  function historyInto(state, history = []) {
+  function historyInto(state, history = [], sessionEngine = engine) {
     invariant(Array.isArray(history) && history.length <= state.questionCount, 'INVALID_HISTORY', '대담 기록을 확인해 주세요.');
     let next = state;
     for (let i = 0; i < history.length; i++) {
-      const value = history[i], question = engine.getQuestion(next, i + 1);
+      const value = history[i], question = sessionEngine.getQuestion(next, i + 1);
       invariant(!value.questionId || value.questionId === question.id, 'QUESTION_MISMATCH', '질문 계획과 기록이 다릅니다.');
-      next = engine.recordAnswer(next, { turn: i + 1, answer: value.answer ?? value.a, helpIds: value.helpIds || value.help || [] });
+      next = sessionEngine.recordAnswer(next, { turn: i + 1, answer: value.answer ?? value.a, helpIds: value.helpIds || value.help || [] });
     }
     return next;
   }
   function logTurn(state, actor, request, turn, role, text, question, mode, meta = {}) {
-    const marker = `log:${state.sessionId}:${turn}:${role}`;
+    const lesson = Number(request.lesson || 2), marker = `log:${lesson === 4 ? '4:' : ''}${state.sessionId}:${turn}:${role}`;
     if (cacheGet(marker)) return;
     // 속성은 가속용입니다. 기록한 로그가 있으면 캐시가 없어도 같은 차례를 다시 쓰지 않습니다.
-    if (rows('ai_log').some(row => row.sessionId === state.sessionId && Number(row.turn) === Number(turn) && row.role === role)) return;
+    if (rows('ai_log').some(row => Number(row.lesson || 2) === lesson && row.sessionId === state.sessionId && Number(row.turn) === Number(turn) && row.role === role)) return;
     append('ai_log', { ...common(request, actor), sessionId: state.sessionId, turn, role, text,
       meta: { questionId: question?.id || '', criterion: question?.criterion || '', targetKey: question?.targetKey || '', helpIds: question?.helpCards?.map(x => x.id) || [], ...meta },
       mode, provider: mode === 'ai' ? prop('AI_PROVIDER') : 'none', model: mode === 'ai' ? prop('AI_MODEL') : '', latencyMs: meta.latencyMs || 0, error: meta.error || '' });
@@ -393,6 +649,7 @@ function createService({ content, store, properties, clock = () => Date.now(), h
   function handleTurn(request) {
     requireLesson(request); const actor = identity(request), sid = checkId(request.sessionId, '세션 식별자');
     const prepared = locked(() => {
+      requireLesson(request);
       let state = buildFrom(request, actor, stateFor(sid));
       invariant(!state.completedQuestionCount, 'SESSION_COMPLETED', '이미 제출한 체험입니다. 새 체험에서 다시 시작해 주세요.');
       const history = request.history || [];
@@ -430,6 +687,7 @@ function createService({ content, store, properties, clock = () => Date.now(), h
         } catch { feedback = ruleFeedback; }
       }
       locked(() => {
+        requireLesson(request);
         const current = stateFor(sid);
         // 피드백 호출 중 로컬 대본 제출이 끝났으면 완료 기록을 그대로 보존합니다.
         if (current.completedQuestionCount) { feedback = engine.getFeedback(current); mode = 'script'; return; }
@@ -441,6 +699,7 @@ function createService({ content, store, properties, clock = () => Date.now(), h
     }
     const generated = makeQuestion(state, actor, request.forceMode);
     locked(() => {
+      requireLesson(request);
       const current = stateFor(sid), turn = generated.question.turn, cached = current.questionCache && current.questionCache[turn];
       // 브라우저가 20초 뒤 로컬 대본으로 답한 경우, 늦은 AI 응답으로 기록·단계를 되돌리지 않습니다.
       if (current.answers.length >= turn || current.completedQuestionCount) {
@@ -476,9 +735,10 @@ function createService({ content, store, properties, clock = () => Date.now(), h
     const fingerprint = hash(JSON.stringify({ actor: actor.studentId, lesson: 2, sessionId: request.sessionId || data.sessionId,
       stance: data.stance, reasonId: data.reasonId, reasonText: data.reasonText, cardId: data.cardId, argText: data.argText, answers: data.answers, reflection: data.reflection, earlyFinish: data.earlyFinish }));
     return locked(() => {
+      requireLesson(request);
       const dedupe = parseJSON(cacheGet(`submission:${id}`));
       if (dedupe) { invariant(dedupe.fingerprint === fingerprint, 'IDEMPOTENCY_CONFLICT', '같은 제출 식별자로 다른 내용을 보낼 수 없습니다.'); return { ...dedupe.result, duplicate: true }; }
-      const durable = rows('l2_sessions').find(x => x.submissionId === id);
+      const durable = [...rows('l2_sessions'), ...rows('l4_sessions')].find(x => x.submissionId === id);
       if (durable) {
         invariant(durable.payloadHash === fingerprint, 'IDEMPOTENCY_CONFLICT', '같은 제출 식별자로 다른 내용을 보낼 수 없습니다.');
         recoverSubmittedState(request, actor, durable);
@@ -508,9 +768,152 @@ function createService({ content, store, properties, clock = () => Date.now(), h
       return result;
     });
   }
-  function latest(tab, cls) {
+  function groupIdentity(request) {
+    const actor = identity(request);
+    invariant(typeof request.groupName === 'string', 'INVALID_GROUP', '모둠명을 입력해 주세요.');
+    const groupName = validateFreeText(request.groupName.normalize('NFKC').trim().replace(/\s+/g, ' '), '모둠명', { min: 1, max: 30 });
+    invariant(Array.isArray(request.memberStudentIds) && request.memberStudentIds.length >= 4 && request.memberStudentIds.length <= 5,
+      'INVALID_MEMBERS', '대표를 포함한 모둠원 4~5명의 학번을 입력해 주세요.');
+    const members = request.memberStudentIds.map(value => {
+      invariant(typeof value === 'string', 'INVALID_MEMBERS', '모둠원 학번은 숫자 5자리로 입력해 주세요.');
+      const member = validateStudentId(value, config());
+      invariant(member.cls === actor.cls, 'INVALID_MEMBERS', '모둠원은 모두 같은 반이어야 합니다.'); return member.studentId;
+    });
+    invariant(new Set(members).size === members.length && members.includes(actor.studentId), 'INVALID_MEMBERS', '학번의 중복을 없애고 대표 학번도 포함해 주세요.');
+    return { ...actor, groupName, groupKey: `${actor.cls}:${groupName.toLowerCase()}`, memberStudentIds: members.slice().sort() };
+  }
+  function groupMeta(actor) {
+    return { studentId: actor.studentId, cls: actor.cls, groupName: actor.groupName, groupKey: actor.groupKey, memberStudentIds: actor.memberStudentIds };
+  }
+  function assertGroupOwner(state, actor) {
+    invariant(Number(state.cls) === actor.cls && state.groupKey === actor.groupKey
+      && JSON.stringify(state.memberStudentIds) === JSON.stringify(actor.memberStudentIds),
+    'SESSION_OWNER_MISMATCH', '다른 대표·모둠원의 세션을 사용할 수 없습니다.');
+  }
+  function buildLesson4From(request, actor, existing = null, questionCount = null) {
+    const supplied = request.selection || request.data || {}, sid = checkId(request.sessionId || supplied.sessionId, '세션 식별자');
+    if (existing) assertGroupOwner(existing, actor);
+    const fresh = lesson4Engine.buildSession({ stance: supplied.stance, arg1: supplied.arg1, arg5: supplied.arg5,
+      sessionId: sid, questionCount: questionCount || existing?.questionCount || config().l4Questions,
+      seed: existing?.seed || supplied.seed || request.seed || sid });
+    if (!existing || existing.draft) return { ...fresh, ...groupMeta(actor) };
+    invariant(['stance', 'arg1', 'arg5'].every(key => fresh[key] === existing[key]), 'SESSION_LOCKED', '대담을 시작한 입론은 새 세션에서 변경해 주세요.');
+    return { ...existing, studentId: actor.studentId };
+  }
+  function handleLesson4Turn(request) {
+    requireLesson(request, 4); const actor = groupIdentity(request), sid = checkId(request.sessionId, '세션 식별자');
+    invariant(['question', 'feedback'].includes(request.mode), 'INVALID_MODE', '질문 또는 피드백 요청을 확인해 주세요.');
+    return locked(() => {
+      requireLesson(request, 4);
+      let state = buildLesson4From(request, actor, stateFor(sid, 4));
+      invariant(!state.completedQuestionCount, 'SESSION_COMPLETED', '이미 제출한 체험입니다. 새 체험에서 다시 시작해 주세요.');
+      const before = state.answers.length; state = historyInto(state, request.history || [], lesson4Engine);
+      stateText(state);
+      if (request.mode === 'feedback') invariant(state.answers.length >= 3, 'NOT_ENOUGH_ANSWERS', '세 번째 답까지 마친 뒤 피드백을 볼 수 있습니다.');
+      else invariant(Number(request.turn) === state.answers.length + 1 && Number(request.turn) <= state.questionCount, 'INVALID_TURN', '질문 순서를 확인해 주세요.');
+      for (let i = before; i < state.answers.length; i++) {
+        const q = lesson4Engine.getQuestion(state, i + 1); logTurn(state, actor, request, i + 1, 'student', state.answers[i].answer, q, 'script');
+      }
+      if (request.mode === 'feedback') {
+        const feedback = lesson4Engine.getFeedback(state);
+        saveState(state, request, actor, 'feedback'); logTurn(state, actor, request, 0, 'system', '피드백을 생성했습니다.', null, 'script');
+        return { sessionId: sid, feedback, ruleFeedback: feedback, mode: 'script' };
+      }
+      const question = lesson4Engine.getQuestion(state, Number(request.turn));
+      saveState(state, request, actor, `question${request.turn}`);
+      logTurn(state, actor, request, question.turn, 'ai', `${question.confirm} ${question.verify}`, question, 'script');
+      return { sessionId: sid, turn: question.turn, question, mode: 'script' };
+    });
+  }
+  function recoverLesson4Submitted(request, actor, durable) {
+    const sid = checkId(durable.sessionId, '세션 식별자'), existing = stateFor(sid, 4);
+    if (existing) assertGroupOwner(existing, actor);
+    if (existing?.completedQuestionCount && stateRowFor(sid, 4)?.stage === 'submitted') return;
+    const count = Number(durable.completedQuestionCount), data = request.data || {}, early = durable.earlyFinish === true || durable.earlyFinish === 'true';
+    const questionCount = Number(parseJSON(durable.feedback)?.questionCount) || existing?.questionCount || (early ? Math.min(5, count + 1) : count);
+    let state = buildLesson4From({ ...request, selection: { ...data, seed: existing?.seed || data.seed || sid } }, actor, null, questionCount);
+    const answers = Array.isArray(data.answers) && data.answers.length >= count ? data.answers : existing?.answers || [];
+    state = historyInto(state, answers.slice(0, count), lesson4Engine);
+    state = lesson4Engine.finishSession(state, { reflection: data.reflection, earlyFinish: early });
+    saveState({ ...state, mode: 'script' }, request, actor, 'submitted');
+  }
+  function submitLesson4(request) {
+    requireLesson(request, 4); invariant(request.kind === 'l4_session', 'KIND_LESSON_MISMATCH', '4차시 모둠 체험 제출 형식을 확인해 주세요.');
+    const actor = groupIdentity(request), id = checkId(request.submissionId, '제출 식별자'), data = request.data || {};
+    const sid = checkId(request.sessionId || data.sessionId, '세션 식별자');
+    const fingerprint = hash(JSON.stringify({ actor: actor.studentId, lesson: 4, sessionId: sid, groupKey: actor.groupKey,
+      memberStudentIds: actor.memberStudentIds, stance: data.stance, arg1: data.arg1, arg5: data.arg5,
+      answers: data.answers, reflection: data.reflection, earlyFinish: data.earlyFinish }));
+    return locked(() => {
+      requireLesson(request, 4);
+      const dedupe = parseJSON(cacheGet(`submission:${id}`));
+      if (dedupe) { invariant(dedupe.fingerprint === fingerprint, 'IDEMPOTENCY_CONFLICT', '같은 제출 식별자로 다른 내용을 보낼 수 없습니다.'); return { ...dedupe.result, duplicate: true }; }
+      const durable = [...rows('l2_sessions'), ...rows('l4_sessions')].find(row => row.submissionId === id);
+      if (durable) {
+        invariant(durable.payloadHash === fingerprint, 'IDEMPOTENCY_CONFLICT', '같은 제출 식별자로 다른 내용을 보낼 수 없습니다.');
+        recoverLesson4Submitted(request, actor, durable);
+        return { accepted: true, submissionId: id, sessionId: sid, completedQuestionCount: Number(durable.completedQuestionCount), duplicate: true };
+      }
+      let state = buildLesson4From({ ...request, sessionId: sid, selection: data }, actor, stateFor(sid, 4));
+      invariant(!state.completedQuestionCount, 'SESSION_COMPLETED', '이미 제출한 체험입니다. 새 체험에서 다시 시작해 주세요.');
+      const before = state.answers.length;
+      state = historyInto(state, data.answers || [], lesson4Engine);
+      state = lesson4Engine.finishSession(state, { reflection: data.reflection, earlyFinish: data.earlyFinish });
+      stateText(state); // 저장 크기 초과를 로그·제출 행을 쓰기 전에 거부합니다.
+      const feedback = compactFeedback(state.feedback, 60);
+      const row = { ...common(request, actor), sessionId: sid, part: data.arg5 ? '1,5' : '1', ...groupMeta(actor), stance: state.stance,
+        arg1: state.arg1, arg5: state.arg5, completedQuestionCount: state.answers.length, earlyFinish: state.earlyFinish,
+        durationSec: Math.max(0, Math.min(86400, Number(data.durationSec) || 0)), mode: 'script', reflection: state.reflection,
+        feedback: { ...feedback, questionCount: state.questionCount }, ruleFeedback: feedback, payloadHash: fingerprint };
+      for (let i = 0; i < state.answers.length; i++) {
+        const q = lesson4Engine.getQuestion(state, i + 1), a = state.answers[i], n = i + 1;
+        row[`q${n}`] = `${q.confirm} ${q.verify}`; row[`a${n}`] = a.answer; row[`help${n}`] = a.helpIds;
+        if (i >= before) logTurn(state, actor, request, n, 'student', a.answer, q, 'script');
+        logTurn(state, actor, request, n, 'ai', row[`q${n}`], q, 'script');
+      }
+      append('l4_sessions', row); saveState({ ...state, mode: 'script' }, request, actor, 'submitted');
+      const result = { accepted: true, submissionId: id, sessionId: sid, completedQuestionCount: state.answers.length, duplicate: false };
+      cacheSet(`submission:${id}`, JSON.stringify({ fingerprint, result })); return result;
+    });
+  }
+  function progressLesson4(request) {
+    requireLesson(request, 4); const actor = groupIdentity(request), sid = checkId(request.sessionId, '세션 식별자');
+    invariant(['entry', 'argument'].includes(request.stage), 'INVALID_STAGE', '진행 단계를 확인해 주세요.');
+    const saved = locked(() => {
+      requireLesson(request, 4);
+      const existing = stateFor(sid, 4);
+      if (existing) {
+        assertGroupOwner(existing, actor);
+        if (!existing.draft || existing.stage === 'argument' || existing.stage === request.stage) return false;
+      }
+      saveState({ lesson: 4, sessionId: sid, ...groupMeta(actor), draft: true, stage: request.stage, mode: 'script' }, request, actor, request.stage); return true;
+    });
+    return { saved, ignored: !saved, stage: request.stage };
+  }
+  function latestGroups(tab, cls) {
+    const map = new Map();
+    for (const row of rows(tab).filter(value => Number(value.lesson) === 4 && (!cls || Number(value.cls) === cls))) {
+      const state = tab === 'progress' ? stateFromRow(row) : null, groupKey = row.groupKey || state?.groupKey;
+      if (groupKey) map.set(groupKey, tab === 'progress' ? { ...row, ...groupMeta(state) } : row);
+    }
+    return [...map.values()];
+  }
+  function summaryLesson4(cls) {
+    const completed = latestGroups('l4_sessions', cls), progress = latestGroups('progress', cls);
+    const stanceCounts = { 찬성: 0, 반대: 0 }, feedbackCounts = { reliability: { '●': 0, '◐': 0, '○': 0 }, validity: { '●': 0, '◐': 0, '○': 0 }, attitude: { 인정함: 0, 보통: 0, 피함: 0 } };
+    let items = 0;
+    for (const row of completed) {
+      stanceCounts[row.stance] = (stanceCounts[row.stance] || 0) + 1;
+      for (const item of parseJSON(row.ruleFeedback, { items: [] }).items || []) {
+        items++; for (const key of ['reliability', 'validity', 'attitude']) if (Object.prototype.hasOwnProperty.call(feedbackCounts[key], item[key])) feedbackCounts[key][item[key]]++;
+      }
+    }
+    return { count: completed.length, total: new Set([...completed, ...progress].map(row => row.groupKey)).size, completed: completed.length,
+      stanceCounts, feedbackCounts, metrics: { answerCount: items, reliabilityGoodRate: items ? feedbackCounts.reliability['●'] / items : 0, validityGoodRate: items ? feedbackCounts.validity['●'] / items : 0 } };
+  }
+  function latest(tab, cls, lesson = 2) {
     const map = {};
-    for (const row of rows(tab).filter(x => !cls || Number(x.cls) === cls)) map[row.studentId || row.sessionId] = row;
+    for (const row of rows(tab).filter(x => Number(x.lesson || 2) === lesson && (!cls || Number(x.cls) === cls))) map[row.studentId || row.sessionId] = row;
     return Object.values(map);
   }
   function summary(cls) {
@@ -534,10 +937,12 @@ function createService({ content, store, properties, clock = () => Date.now(), h
   }
   function handleGet(request = {}) {
     const action = request.action || 'ping';
-    if (action === 'ping') return { status: 'ok', version: content.version, implementedLessons: [2] };
+    if (action === 'ping') return { status: 'ok', version: VERSION, implementedLessons: [2, 4] };
     if (action === 'config') return config();
     if (action === 'public_summary' || action === 'shared_summary') {
-      invariant(config().publicSharing, 'SHARING_DISABLED', '공개 활동 공유가 열리지 않았습니다.'); return summary(classFilter(request.cls));
+      const lesson = Number(request.lesson || 2); requireLesson(request, lesson);
+      invariant(config().publicSharing, 'SHARING_DISABLED', '공개 활동 공유가 열리지 않았습니다.');
+      return lesson === 4 ? summaryLesson4(classFilter(request.cls)) : summary(classFilter(request.cls));
     }
     teacher(request);
     const cls = classFilter(request.cls);
@@ -546,21 +951,40 @@ function createService({ content, store, properties, clock = () => Date.now(), h
       const answers = records.flatMap(row => [1, 2, 3].filter(n => row[`q${n}Id`]).map(n => ({ questionId: row[`q${n}Id`], answer: row[`a${n}Text`], masked: `${String(row.studentId).slice(0, 3)}**`, sessionId: row.sessionId })));
       return { ...summary(cls), records, progress, answers };
     }
+    if (action === 'l4_summary') {
+      const records = latestGroups('l4_sessions', cls).map(row => ({ ...row, memberStudentIds: parseJSON(row.memberStudentIds, []) }));
+      const progress = latestGroups('progress', cls).map(row => ({ studentId: row.studentId, masked: `${String(row.studentId).slice(0, 3)}**`,
+        cls: row.cls, groupName: row.groupName, groupKey: row.groupKey, memberStudentIds: row.memberStudentIds,
+        stage: row.stage, receivedAt: row.receivedAt, mode: 'script' }));
+      const answers = records.flatMap(row => [1, 2, 3, 4, 5].filter(n => row[`q${n}`]).map(n => ({ questionId: `L4-${n}`,
+        questionText: row[`q${n}`], answer: row[`a${n}`], groupName: row.groupName, sessionId: row.sessionId })));
+      return { ...summaryLesson4(cls), records, progress, answers };
+    }
     if (action === 'list') {
       invariant(['l2_sessions', 'ai_log', 'l3_args', 'l4_sessions', 'recordings', 'uploads', 'progress'].includes(request.tab), 'INVALID_TAB', '조회할 탭을 확인해 주세요.');
-      return { rows: request.latest === '1' || request.latest === 1 ? latest(request.tab, cls) : rows(request.tab).filter(x => !cls || Number(x.cls) === cls).slice(-2000) };
+      return { rows: request.latest === '1' || request.latest === 1 ? (request.tab === 'l4_sessions' ? latestGroups(request.tab, cls) : latest(request.tab, cls, Number(request.lesson || 2))) : rows(request.tab).filter(x => !cls || Number(x.cls) === cls).slice(-2000) };
     }
     if (action === 'status') return { rows: rows('recordings').filter(x => !cls || Number(x.cls) === cls) };
     throw new DomainError('UNKNOWN_ACTION', '지원하지 않는 조회입니다.');
   }
   function handlePost(request = {}) {
     collectLimits(request);
-    if (request.action === 'turn') return handleTurn(request);
-    if (request.action === 'submit') return submit(request);
+    if (request.action === 'set_lessons') {
+      teacher(request);
+      invariant(Array.isArray(request.acceptLessons) && request.acceptLessons.length <= 2
+        && new Set(request.acceptLessons).size === request.acceptLessons.length && request.acceptLessons.every(value => value === 2 || value === 4),
+      'INVALID_LESSONS', '개방할 차시는 2차시·4차시 중에서 선택해 주세요.');
+      invariant(typeof store.writeConfig === 'function', 'CONFIG_NOT_SUPPORTED', '차시 설정을 지원하는 서버로 갱신해 주세요.');
+      locked(() => store.writeConfig('acceptLessons', request.acceptLessons.slice().sort().join(','))); return config();
+    }
+    if (request.action === 'turn') return Number(request.lesson || 2) === 4 ? handleLesson4Turn(request) : handleTurn(request);
+    if (request.action === 'submit') return Number(request.lesson || 2) === 4 ? submitLesson4(request) : submit(request);
     if (request.action === 'progress') {
+      if (Number(request.lesson || 2) === 4) return progressLesson4(request);
       requireLesson(request); const actor = identity(request), sid = checkId(request.sessionId, '세션 식별자');
       invariant(['entry', 'reason', 'card', 'argument'].includes(request.stage), 'INVALID_STAGE', '진행 단계를 확인해 주세요.');
       const saved = locked(() => {
+        requireLesson(request);
         const existing = stateFor(sid);
         if (existing) {
           invariant(existing.studentId === actor.studentId, 'SESSION_OWNER_MISMATCH', '다른 학생의 세션을 사용할 수 없습니다.');
@@ -576,10 +1000,10 @@ function createService({ content, store, properties, clock = () => Date.now(), h
     try { return { ok: true, data: method === 'GET' ? handleGet(request) : handlePost(request) }; }
     catch (error) { return { ok: false, error: { code: error instanceof DomainError ? error.code : 'SERVER_ERROR', message: error instanceof DomainError ? error.message : '서버 연결을 확인한 뒤 다시 시도해 주세요.' } }; }
   }
-  return { respond, handleGet, handlePost, config, engine, headers: HEADERS };
+  return { respond, handleGet, handlePost, config, engine, lesson4Engine, headers: HEADERS };
 }
 
-return {createService, HEADERS};
+return {VERSION,COMMON_HEADERS,HEADERS,createService};
 })();
 /* 이 파일은 Apps Script 전용입니다. 설정·키는 Script Properties에만 둡니다. */
 function classroomSpreadsheet_() {
@@ -595,11 +1019,13 @@ function classroomHeaders_(sheet, expected) {
   var width = sheet.getLastColumn();
   var old = width ? sheet.getRange(1, 1, 1, width).getValues()[0].map(String) : [];
   if (!old.length || old.every(function(v) { return !v; })) {
+    if (sheet.getMaxColumns() < expected.length) sheet.insertColumnsAfter(sheet.getMaxColumns(), expected.length - sheet.getMaxColumns());
     sheet.getRange(1, 1, 1, expected.length).setValues([expected]);
     sheet.setFrozenRows(1); return expected.slice();
   }
   if (new Set(old).size !== old.length) throw new Error('시트 머리글에 중복된 이름이 있습니다: ' + sheet.getName());
   var additions = expected.filter(function(name) { return old.indexOf(name) < 0; });
+  if (sheet.getMaxColumns() < old.length + additions.length) sheet.insertColumnsAfter(sheet.getMaxColumns(), old.length + additions.length - sheet.getMaxColumns());
   if (additions.length) sheet.getRange(1, old.length + 1, 1, additions.length).setValues([additions]);
   return old.concat(additions);
 }
@@ -614,8 +1040,8 @@ function setupDB() {
   var all = config.getDataRange().getValues();
   var known = new Set(all.slice(1).map(function(row) { return String(row[0]); }));
   [['grade', '2', '학년'], ['classCount', '11', '반 수'], ['groupMax', '8', '후속 차시용 모둠 최대'],
-    ['acceptLessons', '2', '현재 구현은 2차시만 지원'], ['l2Questions', '3', '2 또는 3'],
-    ['l4Questions', '4', '후속 차시용, 현재 미개방'], ['publicSharing', 'true', '익명 집계 공개'],
+    ['acceptLessons', '2', '교사 화면에서 2·4차시 개방 설정'], ['l2Questions', '3', '2 또는 3'],
+    ['l4Questions', '4', '4차시 질문 수 3·4·5'], ['publicSharing', 'true', '익명 집계 공개'],
     ['recordingFallbackUrl', '', '3·4차시 구현 때 설정']].forEach(function(row) { if (!known.has(row[0])) config.appendRow(row); });
   var props = PropertiesService.getScriptProperties();
   if (!props.getProperty('AI_PROVIDER')) props.setProperty('AI_PROVIDER', 'none');
@@ -660,6 +1086,22 @@ function classroomService_() {
       var db = classroomSpreadsheet_(), sheet = db.getSheetByName(tab) || db.insertSheet(tab);
       var header = classroomHeaders_(sheet, ClassroomService.HEADERS[tab]);
       sheet.appendRow(header.map(function(name) { return ClassroomCore.sanitizeCell(values[name]); }));
+    },
+    writeConfig: function(key, value) {
+      if (key !== 'acceptLessons') throw new ClassroomCore.DomainError('INVALID_CONFIG', '변경할 수 없는 설정입니다.');
+      var sheet = classroomSpreadsheet_().getSheetByName('config');
+      if (!sheet) throw new ClassroomCore.DomainError('DATABASE_NOT_CONFIGURED', '먼저 초기 설정을 실행해 주세요.');
+      var header = classroomHeaders_(sheet, ClassroomService.HEADERS.config);
+      var keyColumn = header.indexOf('key'), valueColumn = header.indexOf('value');
+      var data = sheet.getDataRange().getValues(), found = false;
+      for (var i = 1; i < data.length; i++) {
+        if (String(data[i][keyColumn]) === key) {
+          sheet.getRange(i + 1, valueColumn + 1).setValue(String(value)); found = true;
+        }
+      }
+      if (!found) sheet.appendRow(header.map(function(name) {
+        return name === 'key' ? key : name === 'value' ? String(value) : name === 'note' ? '교사 화면 차시 개방 설정' : '';
+      }));
     },
     withLock: function(fn) {
       var lock = LockService.getScriptLock();

@@ -26,6 +26,8 @@ jobs:
       - name: Run tests
         run: npm test
       - name: Check project and generated server
-        run: npm run check
+        run: |
+          npm run check
+          node backend/sync.mjs --check
       - name: Build static files
         run: npm run build

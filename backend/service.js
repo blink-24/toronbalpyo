@@ -1,6 +1,9 @@
 import { createEngine, DomainError, invariant, normalizeStance, validateStudentId, validateFreeText, sanitizeCell,
   detectPII, validateQuestionOutput, validateFeedbackOutput, isClearlyUnrelated } from '../src/core/engine.js';
+import { createLesson4Engine } from '../src/core/lesson4.js';
+import LESSON4_CONTENT from '../src/core/lesson4-content.js';
 
+export const VERSION = '5.1.0';
 export const COMMON_HEADERS = ['receivedAt', 'submissionId', 'studentId', 'cls', 'groupNo', 'lesson', 'clientTs', 'appVersion'];
 export const HEADERS = {
   config: ['key', 'value', 'note'],
@@ -9,7 +12,8 @@ export const HEADERS = {
     'feedback', 'reflection', 'mode', 'durationSec', 'ruleFeedback', 'aiFeedback', 'earlyFinish', 'completedQuestionCount', 'payloadHash'],
   ai_log: [...COMMON_HEADERS, 'sessionId', 'turn', 'role', 'text', 'meta', 'mode', 'provider', 'model', 'latencyMs', 'error'],
   l3_args: [...COMMON_HEADERS, 'arg1', 'cards1', 'arg5', 'cards5', 'sources', 'chk1', 'chk2', 'chk3', 'chk4', 'chk5'],
-  l4_sessions: [...COMMON_HEADERS, 'sessionId', 'part', ...[1, 2, 3, 4, 5].flatMap(n => [`q${n}`, `a${n}`, `help${n}`]), 'feedback', 'reflection', 'mode'],
+  l4_sessions: [...COMMON_HEADERS, 'sessionId', 'part', ...[1, 2, 3, 4, 5].flatMap(n => [`q${n}`, `a${n}`, `help${n}`]), 'feedback', 'reflection', 'mode',
+    'groupName', 'groupKey', 'memberStudentIds', 'stance', 'arg1', 'arg5', 'completedQuestionCount', 'earlyFinish', 'durationSec', 'ruleFeedback', 'payloadHash'],
   recordings: [...COMMON_HEADERS, 'members', 'mp4Url', 'txtUrl', 'mp4Name', 'txtName'],
   uploads: [...COMMON_HEADERS, 'uploadId', 'fileName', 'mimeType', 'bytes', 'fileId', 'fileUrl'],
   log: ['ts', 'level', 'action', 'submissionId', 'message'],
@@ -28,11 +32,11 @@ function collectLimits(value, depth = 0) {
   else if (Array.isArray(value)) { invariant(value.length <= 40, 'INVALID_PAYLOAD', '입력 목록이 너무 깁니다.'); value.forEach(x => collectLimits(x, depth + 1)); }
   else if (value && typeof value === 'object') { invariant(Object.keys(value).length <= 80, 'INVALID_PAYLOAD', '입력 항목이 너무 많습니다.'); Object.values(value).forEach(x => collectLimits(x, depth + 1)); }
 }
-function compactFeedback(feedback) {
+function compactFeedback(feedback, textLimit = 100) {
   if (!feedback) return null;
   return { items: feedback.items.map(x => ({ turn: x.turn, criterion: x.criterion, reliability: x.reliability, validity: x.validity,
-    attitude: x.attitude, comment: x.comment.slice(0, 100), better: x.better.slice(0, 100) })),
-    summary: { good: feedback.summary.good.slice(0, 100), improve: feedback.summary.improve.slice(0, 100) } };
+    attitude: x.attitude, comment: x.comment.slice(0, textLimit), better: x.better.slice(0, textLimit) })),
+    summary: { good: feedback.summary.good.slice(0, textLimit), improve: feedback.summary.improve.slice(0, textLimit) } };
 }
 function constantEqual(a, b) {
   if (!a || !b) return false;
@@ -40,8 +44,9 @@ function constantEqual(a, b) {
   for (let i = 0; i < Math.max(a.length, b.length); i++) diff |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
   return diff === 0;
 }
-export function createService({ content, store, properties, clock = () => Date.now(), hash, providerCall = null }) {
+export function createService({ content, lesson4Content = LESSON4_CONTENT, store, properties, clock = () => Date.now(), hash, providerCall = null }) {
   const engine = createEngine(content);
+  const lesson4Engine = createLesson4Engine(lesson4Content);
   const now = () => new Date(clock()).toISOString();
   const prop = key => safeText(properties.get(key));
   const rows = tab => store.read(tab) || [];
@@ -61,12 +66,13 @@ export function createService({ content, store, properties, clock = () => Date.n
   function config() {
     const source = Object.fromEntries(rows('config').map(x => [x.key, x.value]));
     const integer = (key, base, low, high) => { const n = Number(source[key] || base); return Number.isInteger(n) && n >= low && n <= high ? n : base; };
-    const accepts = safeText(source.acceptLessons || '2').split(',').map(Number).filter(x => x === 2);
+    const accepts = [...new Set(safeText(source.acceptLessons == null ? '2' : source.acceptLessons).split(',').map(Number).filter(x => x === 2 || x === 4))];
     const provider = prop('AI_PROVIDER');
     return { grade: integer('grade', 2, 1, 3), classCount: integer('classCount', 11, 1, 99), groupMax: integer('groupMax', 8, 1, 20),
       acceptLessons: accepts, l2Questions: integer('l2Questions', 3, 2, 3), aiEnabled: ['anthropic', 'gemini'].includes(provider) && Boolean(prop('AI_MODEL') && prop('AI_API_KEY')),
-      publicSharing: safeText(source.publicSharing || 'true') === 'true', appVersion: content.version,
-      lessons: { 2: { enabled: accepts.includes(2) }, 3: { enabled: false, reason: '아직 열리지 않음' }, 4: { enabled: false, reason: '아직 열리지 않음' } } };
+      publicSharing: safeText(source.publicSharing || 'true') === 'true', appVersion: VERSION, implementedLessons: [2, 4],
+      l4Questions: integer('l4Questions', 4, 3, 5), l4AiEnabled: false,
+      lessons: { 2: { enabled: accepts.includes(2) }, 3: { enabled: false, reason: '아직 열리지 않음' }, 4: { enabled: accepts.includes(4), mode: 'script' } } };
   }
   function teacher(request) {
     invariant(prop('PASSCODE'), 'AUTH_NOT_CONFIGURED', '교사 화면 암호가 아직 설정되지 않았습니다.');
@@ -78,27 +84,33 @@ export function createService({ content, store, properties, clock = () => Date.n
     invariant(request.cls === undefined || Number(request.cls) === result.cls, 'INVALID_CLASS', '학번의 반과 입력한 반이 다릅니다.');
     return result;
   }
-  function requireLesson(request) {
-    invariant(Number(request.lesson || 2) === 2, 'LESSON_NOT_IMPLEMENTED', '현재는 2차시 체험만 열려 있습니다.');
-    invariant(config().acceptLessons.includes(2), 'LESSON_CLOSED', '아직 2차시 활동이 열리지 않았습니다.');
+  function requireLesson(request, lesson = 2) {
+    invariant(Number(request.lesson || 2) === lesson && [2, 4].includes(lesson), 'LESSON_NOT_IMPLEMENTED', '현재는 2차시·4차시 체험만 지원합니다.');
+    invariant(config().acceptLessons.includes(lesson), 'LESSON_CLOSED', `아직 ${lesson}차시 활동이 열리지 않았습니다.`);
   }
   function common(request, actor) {
-    return { receivedAt: now(), submissionId: request.submissionId || '', studentId: actor.studentId, cls: actor.cls, groupNo: '', lesson: 2,
-      clientTs: safeText(request.clientTs || ''), appVersion: safeText(request.appVersion || content.version) };
+    return { receivedAt: now(), submissionId: request.submissionId || '', studentId: actor.studentId, cls: actor.cls, groupNo: '', lesson: Number(request.lesson || 2),
+      clientTs: safeText(request.clientTs || ''), appVersion: safeText(request.appVersion || VERSION) };
   }
-  function stateRowFor(sessionId) {
-    const found = rows('progress').filter(x => x.sessionId === sessionId && x.state1);
+  function stateRowFor(sessionId, lesson = 2) {
+    const found = rows('progress').filter(x => x.sessionId === sessionId && Number(x.lesson || 2) === lesson && x.state1);
     if (!found.length) return null;
     return found[found.length - 1];
   }
-  function stateFor(sessionId) {
-    const latest = stateRowFor(sessionId);
+  function stateFromRow(latest) {
     if (!latest) return null;
     return parseJSON([1, 2, 3, 4, 5, 6, 7, 8].map(n => { const part = latest[`state${n}`] || ''; return String(part).startsWith('~') ? String(part).slice(1) : part; }).join(''));
   }
-  function saveState(state, request, actor, stage) {
-    const text = JSON.stringify(state);
+  function stateFor(sessionId, lesson = 2) { return stateFromRow(stateRowFor(sessionId, lesson)); }
+  function stateText(state) {
+    // 4차시 피드백은 엔진으로 다시 계산할 수 있으므로 긴 입론·답변을 상태에 중복 저장하지 않습니다.
+    const snapshot = Number(state.lesson) === 4 ? Object.fromEntries(Object.entries(state).filter(([key]) => !['feedback', 'questionCache'].includes(key))) : state;
+    const text = JSON.stringify(snapshot);
     invariant(text.length <= 15992, 'STORAGE_LENGTH', '세션 기록이 너무 깁니다.');
+    return text;
+  }
+  function saveState(state, request, actor, stage) {
+    const text = stateText(state);
     const value = { ...common(request, actor), sessionId: state.sessionId, stage };
     for (let n = 1; n <= 8; n++) { const part = text.slice((n - 1) * 1999, n * 1999); value[`state${n}`] = part ? `~${part}` : ''; }
     append('progress', value);
@@ -118,21 +130,21 @@ export function createService({ content, store, properties, clock = () => Date.n
     invariant(['stance', 'reasonId', 'reasonText', 'cardId', 'argText'].every(k => fresh[k] === existing[k]), 'SESSION_LOCKED', '대담을 시작한 입론은 새 세션에서 변경해 주세요.');
     return existing;
   }
-  function historyInto(state, history = []) {
+  function historyInto(state, history = [], sessionEngine = engine) {
     invariant(Array.isArray(history) && history.length <= state.questionCount, 'INVALID_HISTORY', '대담 기록을 확인해 주세요.');
     let next = state;
     for (let i = 0; i < history.length; i++) {
-      const value = history[i], question = engine.getQuestion(next, i + 1);
+      const value = history[i], question = sessionEngine.getQuestion(next, i + 1);
       invariant(!value.questionId || value.questionId === question.id, 'QUESTION_MISMATCH', '질문 계획과 기록이 다릅니다.');
-      next = engine.recordAnswer(next, { turn: i + 1, answer: value.answer ?? value.a, helpIds: value.helpIds || value.help || [] });
+      next = sessionEngine.recordAnswer(next, { turn: i + 1, answer: value.answer ?? value.a, helpIds: value.helpIds || value.help || [] });
     }
     return next;
   }
   function logTurn(state, actor, request, turn, role, text, question, mode, meta = {}) {
-    const marker = `log:${state.sessionId}:${turn}:${role}`;
+    const lesson = Number(request.lesson || 2), marker = `log:${lesson === 4 ? '4:' : ''}${state.sessionId}:${turn}:${role}`;
     if (cacheGet(marker)) return;
     // 속성은 가속용입니다. 기록한 로그가 있으면 캐시가 없어도 같은 차례를 다시 쓰지 않습니다.
-    if (rows('ai_log').some(row => row.sessionId === state.sessionId && Number(row.turn) === Number(turn) && row.role === role)) return;
+    if (rows('ai_log').some(row => Number(row.lesson || 2) === lesson && row.sessionId === state.sessionId && Number(row.turn) === Number(turn) && row.role === role)) return;
     append('ai_log', { ...common(request, actor), sessionId: state.sessionId, turn, role, text,
       meta: { questionId: question?.id || '', criterion: question?.criterion || '', targetKey: question?.targetKey || '', helpIds: question?.helpCards?.map(x => x.id) || [], ...meta },
       mode, provider: mode === 'ai' ? prop('AI_PROVIDER') : 'none', model: mode === 'ai' ? prop('AI_MODEL') : '', latencyMs: meta.latencyMs || 0, error: meta.error || '' });
@@ -178,6 +190,7 @@ export function createService({ content, store, properties, clock = () => Date.n
   function handleTurn(request) {
     requireLesson(request); const actor = identity(request), sid = checkId(request.sessionId, '세션 식별자');
     const prepared = locked(() => {
+      requireLesson(request);
       let state = buildFrom(request, actor, stateFor(sid));
       invariant(!state.completedQuestionCount, 'SESSION_COMPLETED', '이미 제출한 체험입니다. 새 체험에서 다시 시작해 주세요.');
       const history = request.history || [];
@@ -215,6 +228,7 @@ export function createService({ content, store, properties, clock = () => Date.n
         } catch { feedback = ruleFeedback; }
       }
       locked(() => {
+        requireLesson(request);
         const current = stateFor(sid);
         // 피드백 호출 중 로컬 대본 제출이 끝났으면 완료 기록을 그대로 보존합니다.
         if (current.completedQuestionCount) { feedback = engine.getFeedback(current); mode = 'script'; return; }
@@ -226,6 +240,7 @@ export function createService({ content, store, properties, clock = () => Date.n
     }
     const generated = makeQuestion(state, actor, request.forceMode);
     locked(() => {
+      requireLesson(request);
       const current = stateFor(sid), turn = generated.question.turn, cached = current.questionCache && current.questionCache[turn];
       // 브라우저가 20초 뒤 로컬 대본으로 답한 경우, 늦은 AI 응답으로 기록·단계를 되돌리지 않습니다.
       if (current.answers.length >= turn || current.completedQuestionCount) {
@@ -261,9 +276,10 @@ export function createService({ content, store, properties, clock = () => Date.n
     const fingerprint = hash(JSON.stringify({ actor: actor.studentId, lesson: 2, sessionId: request.sessionId || data.sessionId,
       stance: data.stance, reasonId: data.reasonId, reasonText: data.reasonText, cardId: data.cardId, argText: data.argText, answers: data.answers, reflection: data.reflection, earlyFinish: data.earlyFinish }));
     return locked(() => {
+      requireLesson(request);
       const dedupe = parseJSON(cacheGet(`submission:${id}`));
       if (dedupe) { invariant(dedupe.fingerprint === fingerprint, 'IDEMPOTENCY_CONFLICT', '같은 제출 식별자로 다른 내용을 보낼 수 없습니다.'); return { ...dedupe.result, duplicate: true }; }
-      const durable = rows('l2_sessions').find(x => x.submissionId === id);
+      const durable = [...rows('l2_sessions'), ...rows('l4_sessions')].find(x => x.submissionId === id);
       if (durable) {
         invariant(durable.payloadHash === fingerprint, 'IDEMPOTENCY_CONFLICT', '같은 제출 식별자로 다른 내용을 보낼 수 없습니다.');
         recoverSubmittedState(request, actor, durable);
@@ -293,9 +309,152 @@ export function createService({ content, store, properties, clock = () => Date.n
       return result;
     });
   }
-  function latest(tab, cls) {
+  function groupIdentity(request) {
+    const actor = identity(request);
+    invariant(typeof request.groupName === 'string', 'INVALID_GROUP', '모둠명을 입력해 주세요.');
+    const groupName = validateFreeText(request.groupName.normalize('NFKC').trim().replace(/\s+/g, ' '), '모둠명', { min: 1, max: 30 });
+    invariant(Array.isArray(request.memberStudentIds) && request.memberStudentIds.length >= 4 && request.memberStudentIds.length <= 5,
+      'INVALID_MEMBERS', '대표를 포함한 모둠원 4~5명의 학번을 입력해 주세요.');
+    const members = request.memberStudentIds.map(value => {
+      invariant(typeof value === 'string', 'INVALID_MEMBERS', '모둠원 학번은 숫자 5자리로 입력해 주세요.');
+      const member = validateStudentId(value, config());
+      invariant(member.cls === actor.cls, 'INVALID_MEMBERS', '모둠원은 모두 같은 반이어야 합니다.'); return member.studentId;
+    });
+    invariant(new Set(members).size === members.length && members.includes(actor.studentId), 'INVALID_MEMBERS', '학번의 중복을 없애고 대표 학번도 포함해 주세요.');
+    return { ...actor, groupName, groupKey: `${actor.cls}:${groupName.toLowerCase()}`, memberStudentIds: members.slice().sort() };
+  }
+  function groupMeta(actor) {
+    return { studentId: actor.studentId, cls: actor.cls, groupName: actor.groupName, groupKey: actor.groupKey, memberStudentIds: actor.memberStudentIds };
+  }
+  function assertGroupOwner(state, actor) {
+    invariant(Number(state.cls) === actor.cls && state.groupKey === actor.groupKey
+      && JSON.stringify(state.memberStudentIds) === JSON.stringify(actor.memberStudentIds),
+    'SESSION_OWNER_MISMATCH', '다른 대표·모둠원의 세션을 사용할 수 없습니다.');
+  }
+  function buildLesson4From(request, actor, existing = null, questionCount = null) {
+    const supplied = request.selection || request.data || {}, sid = checkId(request.sessionId || supplied.sessionId, '세션 식별자');
+    if (existing) assertGroupOwner(existing, actor);
+    const fresh = lesson4Engine.buildSession({ stance: supplied.stance, arg1: supplied.arg1, arg5: supplied.arg5,
+      sessionId: sid, questionCount: questionCount || existing?.questionCount || config().l4Questions,
+      seed: existing?.seed || supplied.seed || request.seed || sid });
+    if (!existing || existing.draft) return { ...fresh, ...groupMeta(actor) };
+    invariant(['stance', 'arg1', 'arg5'].every(key => fresh[key] === existing[key]), 'SESSION_LOCKED', '대담을 시작한 입론은 새 세션에서 변경해 주세요.');
+    return { ...existing, studentId: actor.studentId };
+  }
+  function handleLesson4Turn(request) {
+    requireLesson(request, 4); const actor = groupIdentity(request), sid = checkId(request.sessionId, '세션 식별자');
+    invariant(['question', 'feedback'].includes(request.mode), 'INVALID_MODE', '질문 또는 피드백 요청을 확인해 주세요.');
+    return locked(() => {
+      requireLesson(request, 4);
+      let state = buildLesson4From(request, actor, stateFor(sid, 4));
+      invariant(!state.completedQuestionCount, 'SESSION_COMPLETED', '이미 제출한 체험입니다. 새 체험에서 다시 시작해 주세요.');
+      const before = state.answers.length; state = historyInto(state, request.history || [], lesson4Engine);
+      stateText(state);
+      if (request.mode === 'feedback') invariant(state.answers.length >= 3, 'NOT_ENOUGH_ANSWERS', '세 번째 답까지 마친 뒤 피드백을 볼 수 있습니다.');
+      else invariant(Number(request.turn) === state.answers.length + 1 && Number(request.turn) <= state.questionCount, 'INVALID_TURN', '질문 순서를 확인해 주세요.');
+      for (let i = before; i < state.answers.length; i++) {
+        const q = lesson4Engine.getQuestion(state, i + 1); logTurn(state, actor, request, i + 1, 'student', state.answers[i].answer, q, 'script');
+      }
+      if (request.mode === 'feedback') {
+        const feedback = lesson4Engine.getFeedback(state);
+        saveState(state, request, actor, 'feedback'); logTurn(state, actor, request, 0, 'system', '피드백을 생성했습니다.', null, 'script');
+        return { sessionId: sid, feedback, ruleFeedback: feedback, mode: 'script' };
+      }
+      const question = lesson4Engine.getQuestion(state, Number(request.turn));
+      saveState(state, request, actor, `question${request.turn}`);
+      logTurn(state, actor, request, question.turn, 'ai', `${question.confirm} ${question.verify}`, question, 'script');
+      return { sessionId: sid, turn: question.turn, question, mode: 'script' };
+    });
+  }
+  function recoverLesson4Submitted(request, actor, durable) {
+    const sid = checkId(durable.sessionId, '세션 식별자'), existing = stateFor(sid, 4);
+    if (existing) assertGroupOwner(existing, actor);
+    if (existing?.completedQuestionCount && stateRowFor(sid, 4)?.stage === 'submitted') return;
+    const count = Number(durable.completedQuestionCount), data = request.data || {}, early = durable.earlyFinish === true || durable.earlyFinish === 'true';
+    const questionCount = Number(parseJSON(durable.feedback)?.questionCount) || existing?.questionCount || (early ? Math.min(5, count + 1) : count);
+    let state = buildLesson4From({ ...request, selection: { ...data, seed: existing?.seed || data.seed || sid } }, actor, null, questionCount);
+    const answers = Array.isArray(data.answers) && data.answers.length >= count ? data.answers : existing?.answers || [];
+    state = historyInto(state, answers.slice(0, count), lesson4Engine);
+    state = lesson4Engine.finishSession(state, { reflection: data.reflection, earlyFinish: early });
+    saveState({ ...state, mode: 'script' }, request, actor, 'submitted');
+  }
+  function submitLesson4(request) {
+    requireLesson(request, 4); invariant(request.kind === 'l4_session', 'KIND_LESSON_MISMATCH', '4차시 모둠 체험 제출 형식을 확인해 주세요.');
+    const actor = groupIdentity(request), id = checkId(request.submissionId, '제출 식별자'), data = request.data || {};
+    const sid = checkId(request.sessionId || data.sessionId, '세션 식별자');
+    const fingerprint = hash(JSON.stringify({ actor: actor.studentId, lesson: 4, sessionId: sid, groupKey: actor.groupKey,
+      memberStudentIds: actor.memberStudentIds, stance: data.stance, arg1: data.arg1, arg5: data.arg5,
+      answers: data.answers, reflection: data.reflection, earlyFinish: data.earlyFinish }));
+    return locked(() => {
+      requireLesson(request, 4);
+      const dedupe = parseJSON(cacheGet(`submission:${id}`));
+      if (dedupe) { invariant(dedupe.fingerprint === fingerprint, 'IDEMPOTENCY_CONFLICT', '같은 제출 식별자로 다른 내용을 보낼 수 없습니다.'); return { ...dedupe.result, duplicate: true }; }
+      const durable = [...rows('l2_sessions'), ...rows('l4_sessions')].find(row => row.submissionId === id);
+      if (durable) {
+        invariant(durable.payloadHash === fingerprint, 'IDEMPOTENCY_CONFLICT', '같은 제출 식별자로 다른 내용을 보낼 수 없습니다.');
+        recoverLesson4Submitted(request, actor, durable);
+        return { accepted: true, submissionId: id, sessionId: sid, completedQuestionCount: Number(durable.completedQuestionCount), duplicate: true };
+      }
+      let state = buildLesson4From({ ...request, sessionId: sid, selection: data }, actor, stateFor(sid, 4));
+      invariant(!state.completedQuestionCount, 'SESSION_COMPLETED', '이미 제출한 체험입니다. 새 체험에서 다시 시작해 주세요.');
+      const before = state.answers.length;
+      state = historyInto(state, data.answers || [], lesson4Engine);
+      state = lesson4Engine.finishSession(state, { reflection: data.reflection, earlyFinish: data.earlyFinish });
+      stateText(state); // 저장 크기 초과를 로그·제출 행을 쓰기 전에 거부합니다.
+      const feedback = compactFeedback(state.feedback, 60);
+      const row = { ...common(request, actor), sessionId: sid, part: data.arg5 ? '1,5' : '1', ...groupMeta(actor), stance: state.stance,
+        arg1: state.arg1, arg5: state.arg5, completedQuestionCount: state.answers.length, earlyFinish: state.earlyFinish,
+        durationSec: Math.max(0, Math.min(86400, Number(data.durationSec) || 0)), mode: 'script', reflection: state.reflection,
+        feedback: { ...feedback, questionCount: state.questionCount }, ruleFeedback: feedback, payloadHash: fingerprint };
+      for (let i = 0; i < state.answers.length; i++) {
+        const q = lesson4Engine.getQuestion(state, i + 1), a = state.answers[i], n = i + 1;
+        row[`q${n}`] = `${q.confirm} ${q.verify}`; row[`a${n}`] = a.answer; row[`help${n}`] = a.helpIds;
+        if (i >= before) logTurn(state, actor, request, n, 'student', a.answer, q, 'script');
+        logTurn(state, actor, request, n, 'ai', row[`q${n}`], q, 'script');
+      }
+      append('l4_sessions', row); saveState({ ...state, mode: 'script' }, request, actor, 'submitted');
+      const result = { accepted: true, submissionId: id, sessionId: sid, completedQuestionCount: state.answers.length, duplicate: false };
+      cacheSet(`submission:${id}`, JSON.stringify({ fingerprint, result })); return result;
+    });
+  }
+  function progressLesson4(request) {
+    requireLesson(request, 4); const actor = groupIdentity(request), sid = checkId(request.sessionId, '세션 식별자');
+    invariant(['entry', 'argument'].includes(request.stage), 'INVALID_STAGE', '진행 단계를 확인해 주세요.');
+    const saved = locked(() => {
+      requireLesson(request, 4);
+      const existing = stateFor(sid, 4);
+      if (existing) {
+        assertGroupOwner(existing, actor);
+        if (!existing.draft || existing.stage === 'argument' || existing.stage === request.stage) return false;
+      }
+      saveState({ lesson: 4, sessionId: sid, ...groupMeta(actor), draft: true, stage: request.stage, mode: 'script' }, request, actor, request.stage); return true;
+    });
+    return { saved, ignored: !saved, stage: request.stage };
+  }
+  function latestGroups(tab, cls) {
+    const map = new Map();
+    for (const row of rows(tab).filter(value => Number(value.lesson) === 4 && (!cls || Number(value.cls) === cls))) {
+      const state = tab === 'progress' ? stateFromRow(row) : null, groupKey = row.groupKey || state?.groupKey;
+      if (groupKey) map.set(groupKey, tab === 'progress' ? { ...row, ...groupMeta(state) } : row);
+    }
+    return [...map.values()];
+  }
+  function summaryLesson4(cls) {
+    const completed = latestGroups('l4_sessions', cls), progress = latestGroups('progress', cls);
+    const stanceCounts = { 찬성: 0, 반대: 0 }, feedbackCounts = { reliability: { '●': 0, '◐': 0, '○': 0 }, validity: { '●': 0, '◐': 0, '○': 0 }, attitude: { 인정함: 0, 보통: 0, 피함: 0 } };
+    let items = 0;
+    for (const row of completed) {
+      stanceCounts[row.stance] = (stanceCounts[row.stance] || 0) + 1;
+      for (const item of parseJSON(row.ruleFeedback, { items: [] }).items || []) {
+        items++; for (const key of ['reliability', 'validity', 'attitude']) if (Object.prototype.hasOwnProperty.call(feedbackCounts[key], item[key])) feedbackCounts[key][item[key]]++;
+      }
+    }
+    return { count: completed.length, total: new Set([...completed, ...progress].map(row => row.groupKey)).size, completed: completed.length,
+      stanceCounts, feedbackCounts, metrics: { answerCount: items, reliabilityGoodRate: items ? feedbackCounts.reliability['●'] / items : 0, validityGoodRate: items ? feedbackCounts.validity['●'] / items : 0 } };
+  }
+  function latest(tab, cls, lesson = 2) {
     const map = {};
-    for (const row of rows(tab).filter(x => !cls || Number(x.cls) === cls)) map[row.studentId || row.sessionId] = row;
+    for (const row of rows(tab).filter(x => Number(x.lesson || 2) === lesson && (!cls || Number(x.cls) === cls))) map[row.studentId || row.sessionId] = row;
     return Object.values(map);
   }
   function summary(cls) {
@@ -319,10 +478,12 @@ export function createService({ content, store, properties, clock = () => Date.n
   }
   function handleGet(request = {}) {
     const action = request.action || 'ping';
-    if (action === 'ping') return { status: 'ok', version: content.version, implementedLessons: [2] };
+    if (action === 'ping') return { status: 'ok', version: VERSION, implementedLessons: [2, 4] };
     if (action === 'config') return config();
     if (action === 'public_summary' || action === 'shared_summary') {
-      invariant(config().publicSharing, 'SHARING_DISABLED', '공개 활동 공유가 열리지 않았습니다.'); return summary(classFilter(request.cls));
+      const lesson = Number(request.lesson || 2); requireLesson(request, lesson);
+      invariant(config().publicSharing, 'SHARING_DISABLED', '공개 활동 공유가 열리지 않았습니다.');
+      return lesson === 4 ? summaryLesson4(classFilter(request.cls)) : summary(classFilter(request.cls));
     }
     teacher(request);
     const cls = classFilter(request.cls);
@@ -331,21 +492,40 @@ export function createService({ content, store, properties, clock = () => Date.n
       const answers = records.flatMap(row => [1, 2, 3].filter(n => row[`q${n}Id`]).map(n => ({ questionId: row[`q${n}Id`], answer: row[`a${n}Text`], masked: `${String(row.studentId).slice(0, 3)}**`, sessionId: row.sessionId })));
       return { ...summary(cls), records, progress, answers };
     }
+    if (action === 'l4_summary') {
+      const records = latestGroups('l4_sessions', cls).map(row => ({ ...row, memberStudentIds: parseJSON(row.memberStudentIds, []) }));
+      const progress = latestGroups('progress', cls).map(row => ({ studentId: row.studentId, masked: `${String(row.studentId).slice(0, 3)}**`,
+        cls: row.cls, groupName: row.groupName, groupKey: row.groupKey, memberStudentIds: row.memberStudentIds,
+        stage: row.stage, receivedAt: row.receivedAt, mode: 'script' }));
+      const answers = records.flatMap(row => [1, 2, 3, 4, 5].filter(n => row[`q${n}`]).map(n => ({ questionId: `L4-${n}`,
+        questionText: row[`q${n}`], answer: row[`a${n}`], groupName: row.groupName, sessionId: row.sessionId })));
+      return { ...summaryLesson4(cls), records, progress, answers };
+    }
     if (action === 'list') {
       invariant(['l2_sessions', 'ai_log', 'l3_args', 'l4_sessions', 'recordings', 'uploads', 'progress'].includes(request.tab), 'INVALID_TAB', '조회할 탭을 확인해 주세요.');
-      return { rows: request.latest === '1' || request.latest === 1 ? latest(request.tab, cls) : rows(request.tab).filter(x => !cls || Number(x.cls) === cls).slice(-2000) };
+      return { rows: request.latest === '1' || request.latest === 1 ? (request.tab === 'l4_sessions' ? latestGroups(request.tab, cls) : latest(request.tab, cls, Number(request.lesson || 2))) : rows(request.tab).filter(x => !cls || Number(x.cls) === cls).slice(-2000) };
     }
     if (action === 'status') return { rows: rows('recordings').filter(x => !cls || Number(x.cls) === cls) };
     throw new DomainError('UNKNOWN_ACTION', '지원하지 않는 조회입니다.');
   }
   function handlePost(request = {}) {
     collectLimits(request);
-    if (request.action === 'turn') return handleTurn(request);
-    if (request.action === 'submit') return submit(request);
+    if (request.action === 'set_lessons') {
+      teacher(request);
+      invariant(Array.isArray(request.acceptLessons) && request.acceptLessons.length <= 2
+        && new Set(request.acceptLessons).size === request.acceptLessons.length && request.acceptLessons.every(value => value === 2 || value === 4),
+      'INVALID_LESSONS', '개방할 차시는 2차시·4차시 중에서 선택해 주세요.');
+      invariant(typeof store.writeConfig === 'function', 'CONFIG_NOT_SUPPORTED', '차시 설정을 지원하는 서버로 갱신해 주세요.');
+      locked(() => store.writeConfig('acceptLessons', request.acceptLessons.slice().sort().join(','))); return config();
+    }
+    if (request.action === 'turn') return Number(request.lesson || 2) === 4 ? handleLesson4Turn(request) : handleTurn(request);
+    if (request.action === 'submit') return Number(request.lesson || 2) === 4 ? submitLesson4(request) : submit(request);
     if (request.action === 'progress') {
+      if (Number(request.lesson || 2) === 4) return progressLesson4(request);
       requireLesson(request); const actor = identity(request), sid = checkId(request.sessionId, '세션 식별자');
       invariant(['entry', 'reason', 'card', 'argument'].includes(request.stage), 'INVALID_STAGE', '진행 단계를 확인해 주세요.');
       const saved = locked(() => {
+        requireLesson(request);
         const existing = stateFor(sid);
         if (existing) {
           invariant(existing.studentId === actor.studentId, 'SESSION_OWNER_MISMATCH', '다른 학생의 세션을 사용할 수 없습니다.');
@@ -361,5 +541,5 @@ export function createService({ content, store, properties, clock = () => Date.n
     try { return { ok: true, data: method === 'GET' ? handleGet(request) : handlePost(request) }; }
     catch (error) { return { ok: false, error: { code: error instanceof DomainError ? error.code : 'SERVER_ERROR', message: error instanceof DomainError ? error.message : '서버 연결을 확인한 뒤 다시 시도해 주세요.' } }; }
   }
-  return { respond, handleGet, handlePost, config, engine, headers: HEADERS };
+  return { respond, handleGet, handlePost, config, engine, lesson4Engine, headers: HEADERS };
 }
