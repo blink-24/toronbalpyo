@@ -12,11 +12,13 @@ function classroomHeaders_(sheet, expected) {
   var width = sheet.getLastColumn();
   var old = width ? sheet.getRange(1, 1, 1, width).getValues()[0].map(String) : [];
   if (!old.length || old.every(function(v) { return !v; })) {
+    if (sheet.getMaxColumns() < expected.length) sheet.insertColumnsAfter(sheet.getMaxColumns(), expected.length - sheet.getMaxColumns());
     sheet.getRange(1, 1, 1, expected.length).setValues([expected]);
     sheet.setFrozenRows(1); return expected.slice();
   }
   if (new Set(old).size !== old.length) throw new Error('시트 머리글에 중복된 이름이 있습니다: ' + sheet.getName());
   var additions = expected.filter(function(name) { return old.indexOf(name) < 0; });
+  if (sheet.getMaxColumns() < old.length + additions.length) sheet.insertColumnsAfter(sheet.getMaxColumns(), old.length + additions.length - sheet.getMaxColumns());
   if (additions.length) sheet.getRange(1, old.length + 1, 1, additions.length).setValues([additions]);
   return old.concat(additions);
 }
@@ -31,8 +33,8 @@ function setupDB() {
   var all = config.getDataRange().getValues();
   var known = new Set(all.slice(1).map(function(row) { return String(row[0]); }));
   [['grade', '2', '학년'], ['classCount', '11', '반 수'], ['groupMax', '8', '후속 차시용 모둠 최대'],
-    ['acceptLessons', '2', '현재 구현은 2차시만 지원'], ['l2Questions', '3', '2 또는 3'],
-    ['l4Questions', '4', '후속 차시용, 현재 미개방'], ['publicSharing', 'true', '익명 집계 공개'],
+    ['acceptLessons', '2', '교사 화면에서 2·4차시 개방 설정'], ['l2Questions', '3', '2 또는 3'],
+    ['l4Questions', '4', '4차시 질문 수 3·4·5'], ['publicSharing', 'true', '익명 집계 공개'],
     ['recordingFallbackUrl', '', '3·4차시 구현 때 설정']].forEach(function(row) { if (!known.has(row[0])) config.appendRow(row); });
   var props = PropertiesService.getScriptProperties();
   if (!props.getProperty('AI_PROVIDER')) props.setProperty('AI_PROVIDER', 'none');
@@ -77,6 +79,22 @@ function classroomService_() {
       var db = classroomSpreadsheet_(), sheet = db.getSheetByName(tab) || db.insertSheet(tab);
       var header = classroomHeaders_(sheet, ClassroomService.HEADERS[tab]);
       sheet.appendRow(header.map(function(name) { return ClassroomCore.sanitizeCell(values[name]); }));
+    },
+    writeConfig: function(key, value) {
+      if (key !== 'acceptLessons') throw new ClassroomCore.DomainError('INVALID_CONFIG', '변경할 수 없는 설정입니다.');
+      var sheet = classroomSpreadsheet_().getSheetByName('config');
+      if (!sheet) throw new ClassroomCore.DomainError('DATABASE_NOT_CONFIGURED', '먼저 초기 설정을 실행해 주세요.');
+      var header = classroomHeaders_(sheet, ClassroomService.HEADERS.config);
+      var keyColumn = header.indexOf('key'), valueColumn = header.indexOf('value');
+      var data = sheet.getDataRange().getValues(), found = false;
+      for (var i = 1; i < data.length; i++) {
+        if (String(data[i][keyColumn]) === key) {
+          sheet.getRange(i + 1, valueColumn + 1).setValue(String(value)); found = true;
+        }
+      }
+      if (!found) sheet.appendRow(header.map(function(name) {
+        return name === 'key' ? key : name === 'value' ? String(value) : name === 'note' ? '교사 화면 차시 개방 설정' : '';
+      }));
     },
     withLock: function(fn) {
       var lock = LockService.getScriptLock();

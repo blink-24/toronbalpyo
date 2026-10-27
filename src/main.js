@@ -3,27 +3,36 @@ import { createEngine } from './core/engine.js';
 import { createApiClient, mayUseLocalFallback } from './network/client.js';
 import { createSubmissionQueue } from './network/queue.js';
 import { STATE_KEY, uid, validateStudentId, maskStudentId, studentClass, escapeHtml as h, containsPrivateData, freshActivity, initialState, loadState, saveState, composeArgument, publicCard } from './ui/state.js';
+import { createLesson4Controller } from './ui/lesson4.js';
+import { freshLesson4 } from './ui/lesson4-state.js';
+import { normalizeLessonConfig, lessonAccess } from './ui/lesson-policy.js';
 
 const app = document.querySelector('#app');
 const dialogRoot = document.querySelector('#dialog-root');
 const runtime = globalThis.CLASSROOM_CONFIG || globalThis.APP_CONFIG || {};
-const APP_VERSION = runtime.appVersion || '5.0.0';
+const APP_VERSION = runtime.appVersion || '5.1.0';
 const memory = new Map();
 const memoryStorage = { getItem: key => memory.get(key) || null, setItem: (key, value) => memory.set(key, String(value)), removeItem: key => memory.delete(key) };
 let storage;
 try { localStorage.setItem('chaeum:probe', '1'); localStorage.removeItem('chaeum:probe'); storage = localStorage; } catch { storage = memoryStorage; }
 let state = loadState(storage);
 state.activity.committedAnswers ||= [];
+state.lesson4 ||= freshLesson4();
 const engine = createEngine(CONTENT);
 // 배포 설정의 주소만 사용합니다. 기기에 남은 주소나 입력으로 수집 대상을 바꾸지 않습니다.
 const api = createApiClient({ endpoint: runtime.apiUrl || '' });
-let serverConfig = { grade: 2, classCount: 11, acceptLessons: [2], l2Questions: 3, aiEnabled: false, publicSharing: true };
+const publicConfigKey = 'chaeum:v5:public-config';
+let savedPublicConfig = safeParse(storage.getItem(publicConfigKey));
+let serverConfig = normalizeLessonConfig(savedPublicConfig || { acceptLessons: [2] });
+let configResolved = Boolean(savedPublicConfig);
+let configRequest = null;
 let busy = false;
 let errorMessage = '';
 let teacherPasscode = '';
 let teacherClass = state.studentId ? studentClass(state.studentId) : 1;
 let teacherData = null;
 let teacherRows = [];
+let teacherLesson = 2;
 let sharedData = null;
 let shareLoading = false;
 let toastTimer;
@@ -42,7 +51,7 @@ function persist() {
   const label = document.querySelector('[data-save-label]'); if (label) label.textContent = storage === memoryStorage ? '이 창에서 이어 하기' : '저장됨 · 방금';
 }
 
-const queue = createSubmissionQueue({ storage, api, onChange(items) {
+const queue = createSubmissionQueue({ storage, api: { ...api, isConfigured: () => api.isConfigured() && lessonIsOpen(2) }, onChange(items) {
   const pendingIds = new Set(items.map(item => item.payload.submissionId));
   for (const delivered of previouslyQueuedPayloads.filter(payload => !pendingIds.has(payload.submissionId))) {
     if (delivered.studentId && delivered.studentId !== state.studentId) {
@@ -60,6 +69,9 @@ const queue = createSubmissionQueue({ storage, api, onChange(items) {
   const pending = document.querySelector('[data-pending-count]'); if (pending) pending.textContent = String(items.length);
 }});
 previouslyQueuedPayloads = queue.getItems().map(item => item.payload);
+const lesson4 = createLesson4Controller({ api, storage, getState: () => state.lesson4, setState: value => { state.lesson4 = value; },
+  persist, render, toast, getConfig: () => serverConfig, getAccess: () => lessonAccess(serverConfig, 4, configResolved),
+  closedView: closedLessonView, getAppVersion: () => APP_VERSION, downloadFile });
 
 function toast(message) {
   const node = document.querySelector('#toast'); node.textContent = message; node.classList.add('show');
@@ -68,6 +80,21 @@ function toast(message) {
 function scrollToMain() { const main = document.querySelector('#main-content'); main?.scrollIntoView({ block: 'start', behavior: 'instant' }); main?.focus({ preventScroll: true }); }
 function setError(message) { errorMessage = message; render(); document.querySelector('.error-message')?.scrollIntoView({ block: 'nearest' }); }
 function isTeacher() { return location.hash.startsWith('#/teacher'); }
+function lessonIsOpen(lesson) { return lessonAccess(serverConfig, lesson, configResolved).allowed; }
+function closedLessonView(lesson) {
+  const access = lessonAccess(serverConfig, lesson, configResolved);
+  const heading = access.reason === 'preparing' ? '4차시를 준비하고 있어요.' : access.reason === 'loading' ? '차시 개방 상태를 확인하고 있어요.' : `${lesson}차시는 지금 닫혀 있어요.`;
+  const description = access.reason === 'preparing' ? '선생님이 준비를 마치면 이곳에서 모둠 활동을 시작할 수 있습니다.' : access.reason === 'loading' ? '연결을 확인한 뒤 선생님의 안내에 따라 시작해 주세요.' : '선생님이 다시 열면 이어서 할 수 있어요. 입력한 초안은 보관됩니다.';
+  return `<div class="empty-box lesson-locked" data-lesson-locked="${lesson}"><div class="section-kicker">${lesson}차시 · ${h(access.label)}</div><h2>${heading}</h2><p>${description}</p>${button('개방 상태 다시 확인', 'refresh-config')}</div>`;
+}
+function lessonTabs() {
+  return `<nav class="lesson-tabs" role="tablist" aria-label="차시 선택">${[2, 4].map(lesson => { const access = lessonAccess(serverConfig, lesson, configResolved); return `<button id="lesson-tab-${lesson}" type="button" role="tab" aria-selected="${Number(state.lesson || 2) === lesson}" data-action="lesson" data-value="${lesson}" class="lesson-tab ${Number(state.lesson || 2) === lesson ? 'active' : ''}"><span>${lesson}차시</span><small>${lesson === 2 ? '개념 학습 · 개인 체험' : '모둠 반대 신문'}</small><span class="lesson-status ${access.allowed ? 'open' : ''}">${h(access.label)}</span></button>`; }).join('')}</nav>`;
+}
+function selectLesson(value) {
+  state.lesson = Number(value) === 4 ? 4 : 2; errorMessage = ''; persist();
+  location.hash = state.lesson === 4 ? '#/lesson4' : state.tab === 'learn' ? '#/learn' : '#/lesson2'; render();
+  refreshConfig().then(() => { if (state.lesson === 4) lesson4.recover(); });
+}
 function entered() { return validateStudentId(state.studentId, serverConfig); }
 function selectedCard() { return CONTENT.evidenceCards.find(card => card.id === state.activity.cardId); }
 function committed() { return state.activity.committedAnswers || []; }
@@ -81,9 +108,9 @@ function button(label, action, { primary = false, disabled = false, extra = '', 
   return `<button type="button" class="btn ${primary ? 'primary' : ''} ${className}" data-action="${action}" ${disabled ? 'disabled' : ''} ${extra}>${label}</button>`;
 }
 function header() {
-  return `<div class="top-rule"><header class="topbar"><a href="#/learn" class="brand" aria-label="채움 학습 홈"><span class="brand-icon" aria-hidden="true">◒</span><span class="wordmark">채움<span>·</span></span><span class="brand-sub">화법과 언어<br>생각을 나누는 교실</span></a><div class="top-actions">${entered() ? `<button type="button" class="text-btn identity" data-action="identity" aria-label="학생 입장 정보 변경">${h(maskStudentId(state.studentId))} · ${studentClass(state.studentId)}반</button>` : `<button class="text-btn" data-action="login-dialog">학생 입장</button>`}<button class="text-btn" data-action="teacher">교사용</button></div></header></div>`;
+  return `<div class="top-rule"><header class="topbar"><a href="#/learn" class="brand" aria-label="채움 학습 홈"><span class="brand-icon" aria-hidden="true">◒</span><span class="wordmark">채움<span>·</span></span><span class="brand-sub">화법과 언어<br>생각을 나누는 교실</span></a><div class="top-actions">${state.lesson === 4 ? '<span class="identity">4차시 · 모둠 활동</span>' : entered() ? `<button type="button" class="text-btn identity" data-action="identity" aria-label="학생 입장 정보 변경">${h(maskStudentId(state.studentId))} · ${studentClass(state.studentId)}반</button>` : `<button class="text-btn" data-action="login-dialog">학생 입장</button>`}<button class="text-btn" data-action="teacher">교사용</button></div></header></div>${isTeacher() ? '' : lessonTabs()}`;
 }
-function footer() { return `<footer class="page-footer"><span>채움 · 화법과 언어 &nbsp; / &nbsp; 2차시 발표와 토론</span><span>교과서 201~203쪽 · 토론과 반대 신문</span></footer>`; }
+function footer() { return `<footer class="page-footer"><span>채움 · 화법과 언어 &nbsp; / &nbsp; ${state.lesson === 4 ? '4차시 모둠 반대 신문' : '2차시 발표와 토론'}</span><span>교과서 201~203쪽 · 토론과 반대 신문</span></footer>`; }
 function hero() {
   return `<section class="hero" aria-label="수업 소개"><div><div class="eyebrow">화법과 언어 · LESSON 02</div><h1>반대 신문으로<br><em>입론을 점검해요.</em></h1><p>토론의 개념을 익히고, 내 입론을 검토하는 질문에 답해 보세요.</p></div><div class="hero-art" aria-hidden="true"><span class="hero-letter">생각</span><span>+</span><span class="hero-letter">질문</span></div></section>`;
 }
@@ -101,6 +128,7 @@ function conceptExtra(slide) {
   return '';
 }
 function learningView() {
+  if (!lessonIsOpen(2)) return closedLessonView(2);
   const slides = learningSlides19 || CONTENT.learningSlides19 || [];
   if (!slides.length) return `<div class="empty-box"><h2>학습 자료를 준비하고 있어요.</h2></div>`;
   state.learningIndex = Math.min(slides.length - 1, Math.max(0, state.learningIndex));
@@ -146,7 +174,7 @@ function argumentView() {
 function dialogueView() {
   const q = currentQuestion(); const a = state.activity;
   if (!q) return `<h2>질문을 준비하고 있어요.</h2><p class="busy-note"><span class="spinner"></span>잠시만 기다려 주세요.</p>`;
-  return `<div class="section-kicker">STEP 05 · 반대 신문</div><h2>질문을 듣고, 답해 보세요.</h2><p class="section-intro">내 입론의 어떤 부분을 묻는지 살펴보고 자료와 함께 답해요.</p><div class="chat-notice">${h(CONTENT.labels.chatNotice)}</div>${a.mode !== 'ai' ? `<div class="script-notice">${h(CONTENT.labels.scriptNotice)}</div>` : ''}<div class="chat-person"><span class="bot-avatar" aria-hidden="true">?</span>반대측 토론자<span class="tiny-label" style="margin:0 0 0 auto">질문 ${a.turn} / ${a.questionCount || 3}</span></div><div class="question-bubble" aria-live="polite"><span class="question-index">확인하고, 검증하기</span><p>${h(q.confirm)}</p><p>${h(q.verify)}</p></div>${busy ? '<p class="busy-note"><span class="spinner"></span>질문을 확인하고 있어요.</p>' : ''}<div class="help-heading"><strong>답변에 활용할 도움 자료</strong><span>필요한 자료만 인용해요.</span></div><div class="evidence-grid help-cards">${(q.helpCards || []).map(card => cardHtml(card, { kind: 'help', citation: true })).join('')}</div><div class="answer-field"><label class="field-label" for="answer-text">나의 답변</label><textarea id="answer-text" data-input="answer" maxlength="300" rows="5" placeholder="인정할 것은 인정하고, 내 주장을 지킬 근거를 덧붙여 보세요.">${h(a.answerDrafts[a.turn] || '')}</textarea><div class="char-count"><span data-count="answer">${(a.answerDrafts[a.turn] || '').length}</span> / 300자</div><p class="field-help">다음 질문으로 넘어간 뒤에는 이 답을 고칠 수 없어요.</p></div>${errorHtml()}${actionBar({ previous: false, nextLabel: a.turn >= a.questionCount ? '답변 마치고 피드백 보기 →' : '답변 보내고 다음 질문 →', nextAction: 'commit-answer' })}${committed().length >= 2 && a.turn <= a.questionCount ? `<div class="early-exit"><button data-action="early-feedback">${h(CONTENT.labels.earlyFeedback)}</button></div>` : ''}`;
+  return `<div class="section-kicker">STEP 05 · 반대 신문</div><h2>질문을 듣고, 답해 보세요.</h2><p class="section-intro">내 입론의 어떤 부분을 묻는지 살펴보고 자료와 함께 답해요.</p><div class="chat-notice">${h(CONTENT.labels.chatNotice)}</div>${a.mode !== 'ai' ? `<div class="script-notice">${h(CONTENT.labels.scriptNotice)}</div>` : ''}<div class="chat-person"><span class="bot-avatar" aria-hidden="true">?</span>${a.stance === '반대' ? '찬성' : '반대'}측 토론자<span class="tiny-label" style="margin:0 0 0 auto">질문 ${a.turn} / ${a.questionCount || 3}</span></div><div class="question-bubble" aria-live="polite"><span class="question-index">확인하고, 검증하기</span><p>${h(q.confirm)}</p><p>${h(q.verify)}</p></div>${busy ? '<p class="busy-note"><span class="spinner"></span>질문을 확인하고 있어요.</p>' : ''}<div class="help-heading"><strong>답변에 활용할 도움 자료</strong><span>필요한 자료만 인용해요.</span></div><div class="evidence-grid help-cards">${(q.helpCards || []).map(card => cardHtml(card, { kind: 'help', citation: true })).join('')}</div><div class="answer-field"><label class="field-label" for="answer-text">나의 답변</label><textarea id="answer-text" data-input="answer" maxlength="300" rows="5" placeholder="인정할 것은 인정하고, 내 주장을 지킬 근거를 덧붙여 보세요.">${h(a.answerDrafts[a.turn] || '')}</textarea><div class="char-count"><span data-count="answer">${(a.answerDrafts[a.turn] || '').length}</span> / 300자</div><p class="field-help">다음 질문으로 넘어간 뒤에는 이 답을 고칠 수 없어요.</p></div>${errorHtml()}${actionBar({ previous: false, nextLabel: a.turn >= a.questionCount ? '답변 마치고 피드백 보기 →' : '답변 보내고 다음 질문 →', nextAction: 'commit-answer' })}${committed().length >= 2 && a.turn <= a.questionCount ? `<div class="early-exit"><button data-action="early-feedback">${h(CONTENT.labels.earlyFeedback)}</button></div>` : ''}`;
 }
 const ratingLabel = symbol => CONTENT.feedbackRules.ratingLabels[symbol] || '확인 중';
 function feedbackView() {
@@ -162,6 +190,7 @@ function completeView() {
   return `<div class="complete-symbol" aria-hidden="true">✓</div><div class="section-kicker">오늘의 활동 기록</div><h2>활동 기록과 성찰</h2><p class="section-intro">나의 입론과 답변, 마지막 성찰을 함께 돌아보세요.</p><div class="status-banner ${a.status === 'sent' ? 'sent' : failed ? 'error' : ''}" role="status">${a.status === 'sent' ? '<b>선생님께 전달했어요.</b><br>활동 기록이 제출되었습니다.' : failed ? '<b>제출 내용을 확인해야 해요.</b><br>기록은 기기에 보관 중이에요. 선생님께 알려 주세요.' : '<b>전송 대기 중이에요.</b><br>기기에 기록을 보관했어요. 연결이 준비되면 자동으로 다시 보냅니다. 이 기기의 기록을 지우지 말아 주세요.'}</div><label class="field-label">내가 남긴 성찰</label><div class="my-answer">${h(a.reflection)}</div><div class="action-bar">${button('피드백 다시 보기', 'review-feedback')}<div class="trailing">${a.status !== 'sent' ? button('다시 전송', 'retry-submit') : ''}${button('결과 공유 보기 →', 'share', { primary: true })}</div></div><p class="ack-note">제출 여부와 관계없이 학습 탭에서 개념을 다시 볼 수 있어요.</p>`;
 }
 function activityView() {
+  if (!lessonIsOpen(2)) return closedLessonView(2);
   return `<div class="activity-switch" aria-label="활동과 결과"><button class="${state.activityView !== 'share' ? 'active' : ''}" data-action="perform">활동 수행</button><button class="${state.activityView === 'share' ? 'active' : ''}" data-action="share">결과 공유</button></div>${state.activityView === 'share' ? shareView() : !entered() ? loginView() : !serverConfig.acceptLessons.map(Number).includes(2) ? '<div class="empty-box"><h2>아직 열리지 않은 활동이에요.</h2><p>선생님의 안내를 기다려 주세요.</p></div>' : `<div class="activity-topline"><span class="save-status"><span class="save-dot"></span><span data-save-label>${storage === memoryStorage ? '이 창에서 이어 하기' : '저장됨 · 방금'}</span></span><div class="activity-meta">${state.activity.startedAt && state.activity.step !== 'complete' ? '<span class="timer" data-timer>안내 18:00</span>' : ''}<button class="chip" data-action="textbook">교과서 볼 곳 ↗</button></div></div>${stepper()}<div class="activity-layout"><section class="activity-panel">${({ stance: stanceView, reason: reasonView, evidence: evidenceView, argument: argumentView, dialogue: dialogueView, feedback: feedbackView, complete: completeView }[state.activity.step] || stanceView)()}</section>${aside()}</div>`}`;
 }
 function bars(counts, labels = {}) {
@@ -178,11 +207,31 @@ function shareView() {
 
 function teacherView() {
   if (!teacherPasscode || !teacherData) return `<div class="teacher-wrap"><div class="teacher-top"><div><div class="section-kicker">TEACHER'S DESK</div><h1>교사용 모아 보기</h1></div>${button('학생 화면으로', 'student-screen')}</div><section class="activity-panel intro-login"><h2>수업 기록을 확인합니다.</h2><p class="section-intro">교사용 암호를 확인한 뒤 기록을 불러옵니다.</p><form data-form="teacher-login"><label class="field-label" for="teacher-class">반</label><select id="teacher-class" name="cls">${Array.from({ length: 11 }, (_, i) => `<option value="${i + 1}" ${teacherClass === i + 1 ? 'selected' : ''}>${i + 1}반</option>`).join('')}</select><label class="field-label" for="teacher-passcode" style="margin-top:20px">교사용 암호</label><input id="teacher-passcode" name="passcode" type="password" autocomplete="off" required placeholder="암호 입력"><div class="action-bar"><span></span><button type="submit" class="btn primary" ${busy || !api.isConfigured() ? 'disabled' : ''}>${busy ? '확인 중…' : '확인하고 열기 →'}</button></div></form>${errorHtml()}${!api.isConfigured() ? '<p class="quiet-note">수업 기록을 연결하면 모아 보기를 열 수 있습니다.</p>' : ''}</section></div>`;
-  const total = Number(teacherData.total ?? teacherData.count ?? teacherRows.length);
-  return `<div class="teacher-wrap"><div class="teacher-top"><div><div class="section-kicker">TEACHER'S DESK · 2차시</div><h1>생각의 과정 모아 보기</h1></div><div>${button('학생 화면', 'student-screen')}${button('닫기', 'teacher-logout')}</div></div><div class="teacher-filters"><label for="teacher-filter">반 선택</label><select id="teacher-filter" data-input="teacher-class">${Array.from({ length: 11 }, (_, i) => `<option value="${i + 1}" ${teacherClass === i + 1 ? 'selected' : ''}>${i + 1}반</option>`).join('')}</select>${button('새로 고침', 'teacher-refresh', { className: 'small', disabled: busy })}</div><div class="share-grid"><div class="share-metric"><b>${total}</b><span>활동 기록</span></div><div class="share-metric"><b>${Number(teacherData.completed ?? total)}</b><span>제출 완료</span></div><div class="share-metric"><b>${Math.round(Number(teacherData.lowReliability?.rate || 0) * 100)}%</b><span>출처 재검토가 필요한 자료 선택</span></div></div><div class="chart-panel"><h3>근거 카드 선택 분포</h3>${bars(teacherData.cardCounts || teacherData.byCard)}</div>${teacherProgressPanel()}<div class="chart-panel"><h3>학생별 기록</h3><div class="table-scroll"><table class="teacher-table"><thead><tr><th>학생</th><th>입장</th><th>자료</th><th>진행</th><th>기록</th></tr></thead><tbody>${teacherRows.map((row, i) => `<tr><td>${h(maskStudentId(row.studentId))}</td><td>${h(row.stance || row.data?.stance || '')}</td><td>${h(row.cardId || row.data?.cardId || '')}</td><td>${h(row.stage || row.status || '제출')}</td><td><button class="text-btn" data-action="teacher-record" data-index="${i}">열기 ↗</button></td></tr>`).join('')}</tbody></table></div>${!teacherRows.length ? '<p class="share-note">아직 불러온 개별 기록이 없습니다.</p>' : ''}</div>${errorHtml()}</div>`;
+  const total = Number(teacherData.total ?? teacherData.count ?? teacherRows.length), groupMode = teacherLesson === 4;
+  return `<div class="teacher-wrap"><div class="teacher-top"><div><div class="section-kicker">TEACHER'S DESK · ${teacherLesson}차시</div><h1>생각의 과정 모아 보기</h1></div><div>${button('학생 화면', 'student-screen')}${button('닫기', 'teacher-logout')}</div></div>${teacherLessonControls()}<div class="teacher-filters"><label for="teacher-lesson">차시</label><select id="teacher-lesson" data-input="teacher-lesson"><option value="2" ${teacherLesson === 2 ? 'selected' : ''}>2차시 · 개인</option><option value="4" ${teacherLesson === 4 ? 'selected' : ''} ${serverConfig.implementedLessons.includes(4) ? '' : 'disabled'}>4차시 · 모둠</option></select><label for="teacher-filter">반</label><select id="teacher-filter" data-input="teacher-class">${Array.from({ length: 11 }, (_, i) => `<option value="${i + 1}" ${teacherClass === i + 1 ? 'selected' : ''}>${i + 1}반</option>`).join('')}</select>${button('새로 고침', 'teacher-refresh', { className: 'small', disabled: busy })}</div><div class="share-grid"><div class="share-metric"><b>${total}</b><span>${groupMode ? '참여 모둠' : '활동 기록'}</span></div><div class="share-metric"><b>${Number(teacherData.completed ?? total)}</b><span>제출 완료${groupMode ? ' 모둠' : ''}</span></div><div class="share-metric"><b>${groupMode ? teacherRows.reduce((sum, row) => sum + Number(row.completedQuestionCount || 0), 0) : Math.round(Number(teacherData.lowReliability?.rate || 0) * 100) + '%'}</b><span>${groupMode ? '확정한 답변 수' : '출처 재검토가 필요한 자료 선택'}</span></div></div>${groupMode ? '' : `<div class="chart-panel"><h3>근거 카드 선택 분포</h3>${bars(teacherData.cardCounts || teacherData.byCard)}</div>`}${teacherProgressPanel()}<div class="chart-panel"><h3>${groupMode ? '모둠별 기록' : '학생별 기록'}</h3><div class="table-scroll"><table class="teacher-table"><thead><tr><th>${groupMode ? '모둠' : '학생'}</th><th>입장</th><th>${groupMode ? '모둠원' : '자료'}</th><th>진행</th><th>기록</th></tr></thead><tbody>${teacherRows.map((row, i) => `<tr><td>${h(groupMode ? row.groupName || '모둠' : maskStudentId(row.studentId))}</td><td>${h(row.stance || row.data?.stance || '')}</td><td>${h(groupMode ? `${memberList(row).length}명` : row.cardId || row.data?.cardId || '')}</td><td>${h(row.stage || row.status || '제출')}</td><td><button class="text-btn" data-action="teacher-record" data-index="${i}">열기 ↗</button></td></tr>`).join('')}</tbody></table></div>${!teacherRows.length ? '<p class="share-note">아직 불러온 개별 기록이 없습니다.</p>' : ''}</div>${errorHtml()}</div>`;
+}
+function teacherLessonControls() {
+  const supported = serverConfig.implementedLessons.includes(4);
+  return `<section class="teacher-lesson-controls"><div><h2>차시별 개방 설정</h2><p>${supported ? '열기·닫기를 누르면 학생 화면에도 반영됩니다. 초안은 지우지 않습니다.' : '교사 기능 업데이트 필요: 새 서버 적용 후 2·4차시를 독립적으로 열고 닫을 수 있습니다.'}</p></div><div class="teacher-lesson-buttons">${[2, 4].map(lesson => { const open = serverConfig.acceptLessons.includes(lesson); return button(`${lesson}차시 ${open ? '닫기' : '열기'}`, 'toggle-lesson', { disabled: busy || !supported, extra: `data-lesson="${lesson}" aria-pressed="${open}"` }); }).join('')}</div></section>`;
+}
+function memberList(record) {
+  const value = record?.memberStudentIds;
+  return Array.isArray(value) ? value : typeof value === 'string' ? safeParse(value) || [] : [];
+}
+async function toggleLesson(lesson) {
+  if (!teacherPasscode || !teacherData || !serverConfig.implementedLessons.includes(4) || ![2, 4].includes(lesson)) return;
+  const opened = new Set(serverConfig.acceptLessons); if (opened.has(lesson)) opened.delete(lesson); else opened.add(lesson);
+  busy = true; errorMessage = ''; render();
+  try {
+    const { data } = await api.post('set_lessons', { passcode: teacherPasscode, acceptLessons: [...opened].sort() });
+    serverConfig = normalizeLessonConfig(data); configResolved = true; storage.setItem(publicConfigKey, JSON.stringify(serverConfig));
+    if (!lessonIsOpen(2)) requestGeneration++;
+    lesson4.onConfigChanged(); toast(`${lesson}차시를 ${opened.has(lesson) ? '열었습니다.' : '닫았습니다.'}`);
+  } catch (error) { errorMessage = error.message; }
+  finally { busy = false; render(); }
 }
 function captureEntryForm() {
-  return ['student-id', 'teacher-passcode', 'teacher-class'].flatMap(id => {
+  return ['student-id', 'teacher-passcode', 'teacher-class', 'l4-representative', 'l4-group-name', ...Array.from({ length: 5 }, (_, i) => `l4-member-${i + 1}`)].flatMap(id => {
     const field = document.getElementById(id);
     if (!field || !app.contains(field)) return [];
     return [{ id, value: field.value, focused: document.activeElement === field,
@@ -204,17 +253,26 @@ function restoreEntryForm(fields) {
 }
 function render() {
   const entryFields = captureEntryForm();
-  app.innerHTML = `${header()}<main class="shell" ${isTeacher() ? '' : 'aria-label="수업 공간"'}>${isTeacher() ? teacherView() : `${hero()}${tabs()}<div id="main-content" role="tabpanel" aria-labelledby="tab-${state.tab}" tabindex="-1">${state.tab === 'learn' ? learningView() : activityView()}</div>`}</main>${footer()}`;
+  app.innerHTML = `${header()}<main class="shell" ${isTeacher() ? '' : 'aria-label="수업 공간"'}>${isTeacher() ? teacherView() : state.lesson === 4 ? lesson4.render() : `${hero()}${tabs()}<div id="main-content" role="tabpanel" aria-labelledby="tab-${state.tab}" tabindex="-1">${state.tab === 'learn' ? learningView() : activityView()}</div>`}</main>${footer()}`;
   restoreEntryForm(entryFields);
   tickTimer();
 }
 
 async function refreshConfig() {
   if (!api.isConfigured()) return;
-  try {
+  if (configRequest) return configRequest;
+  configRequest = (async () => { try {
     const { data } = await api.get('config');
-    serverConfig = { ...serverConfig, ...data, acceptLessons: Array.isArray(data.acceptLessons) ? data.acceptLessons : String(data.acceptLessons || '2').split(',').map(Number) };
+    const previous = JSON.stringify(serverConfig), wasResolved = configResolved;
+    serverConfig = normalizeLessonConfig(data); configResolved = true;
+    storage.setItem(publicConfigKey, JSON.stringify(serverConfig));
+    if (!lessonIsOpen(2)) { requestGeneration++; busy = false; }
+    lesson4.onConfigChanged();
+    if (!wasResolved || previous !== JSON.stringify(serverConfig)) render();
+    queue.flush(); lesson4.recover();
   } catch (error) { if (!mayUseLocalFallback(error)) toast(error.message); }
+  finally { configRequest = null; } })();
+  return configRequest;
 }
 function beginActivity() {
   if (!state.activity.startedAt) state.activity.startedAt = Date.now();
@@ -223,12 +281,12 @@ function beginActivity() {
   if (stage) markProgress(stage);
 }
 function markProgress(stage) {
-  if (!entered()) return;
+  if (!entered() || !lessonIsOpen(2)) return;
   progressQueue[state.activity.sessionId] = { lesson: 2, studentId: state.studentId, cls: studentClass(state.studentId), sessionId: state.activity.sessionId, stage, clientTs: new Date().toISOString(), appVersion: APP_VERSION };
   storage.setItem(progressStorageKey, JSON.stringify(progressQueue)); flushProgress();
 }
 async function flushProgress() {
-  if (progressSending || !api.isConfigured() || navigator.onLine === false) return;
+  if (progressSending || !api.isConfigured() || !lessonIsOpen(2) || navigator.onLine === false) return;
   progressSending = true;
   try {
     for (const [id, payload] of Object.entries(progressQueue)) {
@@ -241,6 +299,8 @@ async function flushProgress() {
   } finally { progressSending = false; }
 }
 function switchTab(value) {
+  if (!lessonIsOpen(2)) { render(); return; }
+  state.lesson = 2;
   state.tab = value; errorMessage = '';
   if (value === 'activity' && entered()) { beginActivity(); refreshConfig().then(() => { if (!state.activity.session) { state.activity.questionCount = Number(serverConfig.l2Questions) === 2 ? 2 : 3; persist(); render(); } }); }
   persist(); location.hash = value === 'learn' ? '#/learn' : '#/lesson2'; render();
@@ -294,6 +354,7 @@ function rollbackForRetry(data) {
   errorMessage = data.prompt || CONTENT.labels.offTopicReminder;
 }
 async function ensureQuestion() {
+  if (!lessonIsOpen(2)) return;
   if (!state.activity.session || state.activity.remoteQuestions[state.activity.turn]) return;
   if (!api.isConfigured()) { state.activity.mode = 'script-local'; persist(); return; }
   const generation = ++requestGeneration; busy = true; render();
@@ -310,6 +371,7 @@ async function ensureQuestion() {
   } finally { if (generation === requestGeneration) { busy = false; persist(); render(); } }
 }
 async function showFeedback(earlyFinish = false) {
+  if (!lessonIsOpen(2)) return;
   state.activity.earlyFinish = earlyFinish; state.activity.feedback = engine.getFeedback(state.activity.session); state.activity.step = 'feedback';
   busy = false; errorMessage = ''; persist(); render(); scrollToMain();
   if (!api.isConfigured()) return;
@@ -325,6 +387,7 @@ async function showFeedback(earlyFinish = false) {
   } finally { if (generation === requestGeneration) { busy = false; persist(); render(); } }
 }
 async function nextStep() {
+  if (!lessonIsOpen(2)) return;
   const a = state.activity;
   errorMessage = '';
   if (a.step === 'stance') { if (!a.stance) return setError('나의 입장을 골라 주세요.'); a.step = 'reason'; }
@@ -347,6 +410,7 @@ async function nextStep() {
   persist(); render(); scrollToMain(); if (a.step === 'dialogue') await ensureQuestion();
 }
 async function commitAnswer() {
+  if (!lessonIsOpen(2)) return;
   const a = state.activity; if (a.blocked) return setError('이전 단계의 내용을 확인하고 선생님께 알려 주세요.');
   const answer = String(a.answerDrafts[a.turn] || '').trim();
   if (!answer) return setError(CONTENT.labels.offTopicReminder);
@@ -361,6 +425,7 @@ async function commitAnswer() {
   a.turn++; persist(); render(); scrollToMain(); await ensureQuestion();
 }
 async function submitActivity() {
+  if (!lessonIsOpen(2)) return;
   const a = state.activity; const reflection = a.reflection.trim();
   if (reflection.length < 10 || reflection.length > 150) return setError('한 줄 성찰을 10~150자로 적어 주세요.');
   if (containsPrivateData(reflection)) return setError('이름·학번·연락처를 지우고 성찰만 적어 주세요.');
@@ -374,7 +439,7 @@ async function submitActivity() {
   errorMessage = ''; persist(); queue.enqueue(payload); render(); scrollToMain(); await queue.flush({ force: true }); render();
 }
 async function loadShared() {
-  if (!entered()) return;
+  if (!entered() || !lessonIsOpen(2)) return;
   const requestedClass = studentClass(state.studentId);
   shareLoading = true; render();
   try {
@@ -387,8 +452,8 @@ async function loadTeacher(passcode = teacherPasscode, cls = teacherClass) {
   if (!api.isConfigured()) return setError('활동 기록 연결이 준비되지 않았습니다. 게시 설정을 확인해 주세요.');
   busy = true; errorMessage = ''; render();
   try {
-    const summary = await api.get('l2_summary', { cls, passcode });
-    const records = await api.get('list', { tab: 'l2_sessions', cls, latest: 1, passcode });
+    const summary = await api.get(teacherLesson === 4 ? 'l4_summary' : 'l2_summary', { cls, passcode });
+    const records = await api.get('list', { tab: teacherLesson === 4 ? 'l4_sessions' : 'l2_sessions', cls, latest: 1, passcode });
     teacherPasscode = passcode; teacherClass = Number(cls); teacherData = summary.data;
     teacherRows = Array.isArray(records.data) ? records.data : records.data?.rows || records.data?.entries || [];
   } catch (error) { teacherPasscode = ''; teacherData = null; teacherRows = []; errorMessage = error.message; }
@@ -407,7 +472,8 @@ function showTeacherRecord(index, projectionIndex = null) {
   const row = teacherRows[index]; if (!row) return;
   const record = teacherRecord(row);
   const history = record.history;
-  openDialog(`<h2 id="dialog-title">${h(maskStudentId(row.studentId))} · 활동 기록</h2><div class="teacher-record"><label class="field-label">입론</label><pre>${h(record.argText || row.argText || '')}</pre>${history.map((item, j) => `<div class="feedback-item"><span class="criterion-badge">답변 ${j + 1}</span><p>${h(item.questionText || item.question?.verify || '')}</p><div class="my-answer">${h(item.answer || item.text || '')}</div>${button('번호 가리고 화면에 띄우기 ↗', 'project-answer', { className: 'small', extra: `data-record="${index}" data-answer="${j}"` })}</div>`).join('')}<label class="field-label" style="margin-top:24px">성찰</label><pre>${h(record.reflection || row.reflection || '')}</pre>${teacherFeedbackComparison(record)}</div>`, { wide: true });
+  const groupMode = teacherLesson === 4;
+  openDialog(`<h2 id="dialog-title">${h(groupMode ? row.groupName || '모둠' : maskStudentId(row.studentId))} · 활동 기록</h2><div class="teacher-record">${groupMode ? `<p class="field-help">모둠원 학번: ${h(memberList(row).join(', '))}</p><label class="field-label">① 입론</label><pre>${h(record.arg1 || '')}</pre>${record.arg5 ? `<label class="field-label">⑤ 입론</label><pre>${h(record.arg5)}</pre>` : ''}` : `<label class="field-label">입론</label><pre>${h(record.argText || row.argText || '')}</pre>`}${history.map((item, j) => `<div class="feedback-item"><span class="criterion-badge">답변 ${j + 1}</span><p>${h(item.questionText || item.question?.verify || '')}</p><div class="my-answer">${h(item.answer || item.text || '')}</div>${button('번호 가리고 화면에 띄우기 ↗', 'project-answer', { className: 'small', extra: `data-record="${index}" data-answer="${j}"` })}</div>`).join('')}<label class="field-label" style="margin-top:24px">성찰</label><pre>${h(record.reflection || row.reflection || '')}</pre>${teacherFeedbackComparison(record)}</div>`, { wide: true });
 }
 function teacherFeedbackComparison(record) {
   const rule = record.ruleFeedback?.items || record.feedback?.rule || [];
@@ -419,12 +485,12 @@ function teacherProgressPanel() {
   const rows = teacherData?.progress || [];
   if (!rows.length) return '';
   const stageName = stage => ({ entry: '입장', reason: '이유 선택', card: '근거 자료 선택', argument: '입론 작성', feedback: '피드백·성찰', submitted: '제출 완료' }[stage] || (/^question\d/.test(stage) ? `질문 ${stage.replace('question', '')}` : '진행 중'));
-  return `<div class="chart-panel"><h3>활동 진행 현황</h3><div class="table-scroll"><table class="teacher-table"><thead><tr><th>학생</th><th>단계</th><th>진행 방식</th></tr></thead><tbody>${rows.map(row => `<tr><td>${h(row.masked || maskStudentId(row.studentId))}</td><td>${h(stageName(row.stage))}</td><td>${row.mode === 'ai' ? 'AI 대담' : row.mode === 'script-local' ? '기기 대본' : '대본'}</td></tr>`).join('')}</tbody></table></div></div>`;
+  return `<div class="chart-panel"><h3>활동 진행 현황</h3><div class="table-scroll"><table class="teacher-table"><thead><tr><th>${teacherLesson === 4 ? '모둠' : '학생'}</th><th>단계</th><th>진행 방식</th></tr></thead><tbody>${rows.map(row => `<tr><td>${h(teacherLesson === 4 ? row.groupName || '모둠' : row.masked || maskStudentId(row.studentId))}</td><td>${h(stageName(row.stage))}</td><td>${row.mode === 'ai' && teacherLesson !== 4 ? 'AI 대담' : row.mode === 'script-local' ? '기기 대본' : '대본'}</td></tr>`).join('')}</tbody></table></div></div>`;
 }
 function safeParse(value) { try { return JSON.parse(value); } catch { return {}; } }
 function teacherRecord(row) {
   const record = typeof row?.data === 'string' ? safeParse(row.data) : row?.data || row || {};
-  const history = record.history || record.answers || [1, 2, 3].filter(n => record[`a${n}Text`]).map(n => ({ questionText: record[`q${n}Text`], answer: record[`a${n}Text`], helpIds: record[`a${n}Help`] }));
+  const history = record.history || record.answers || [1, 2, 3, 4, 5].filter(n => record[`a${n}Text`] || record[`a${n}`]).map(n => ({ questionText: record[`q${n}Text`] || record[`q${n}`], answer: record[`a${n}Text`] || record[`a${n}`], helpIds: record[`a${n}Help`] || record[`help${n}`] }));
   return { ...record, history, feedback: typeof record.feedback === 'string' ? safeParse(record.feedback) : record.feedback, ruleFeedback: typeof record.ruleFeedback === 'string' ? safeParse(record.ruleFeedback) : record.ruleFeedback, aiFeedback: typeof record.aiFeedback === 'string' ? safeParse(record.aiFeedback) : record.aiFeedback };
 }
 function projectAnswer(recordIndex, answerIndex) {
@@ -436,6 +502,11 @@ function projectAnswer(recordIndex, answerIndex) {
 document.addEventListener('click', async event => {
   const node = event.target.closest('[data-action]'); if (!node || node.disabled) return;
   const action = node.dataset.action;
+  if (action === 'lesson') { selectLesson(node.dataset.value); return; }
+  if (action === 'refresh-config') { await refreshConfig(); render(); return; }
+  if (action.startsWith('l4-')) { await lesson4.handleClick(action, node); return; }
+  if (action === 'toggle-lesson') { await toggleLesson(Number(node.dataset.lesson)); return; }
+  if (['tab', 'learn-slide', 'learn-prev', 'learn-next', 'learn-finish', 'stance', 'reason', 'card', 'next', 'previous', 'commit-answer', 'early-feedback', 'submit', 'review-feedback', 'retry-submit', 'cite', 'share', 'perform', 'refresh-share', 'login-dialog', 'identity', 'textbook'].includes(action) && !lessonIsOpen(2)) { render(); return; }
   if (busy && ['next', 'commit-answer', 'submit', 'early-feedback'].includes(action)) return;
   try {
     if (action === 'tab') switchTab(node.dataset.value);
@@ -469,7 +540,7 @@ document.addEventListener('click', async event => {
     else if (action === 'close-dialog') closeDialog();
     else if (action === 'textbook') openDialog(`<h2 id="dialog-title">교과서에서 함께 볼 곳</h2><p>개념을 다시 확인하고 싶을 때 찾아보세요.</p><div class="sample-pair"><div class="sample-row"><b>201쪽</b>토론의 개념 · 논제 유형 · 반대 신문의 역할과 절차</div><div class="sample-row"><b>202쪽</b>입론 예시와 ㉠㉡㉢ · 주장·이유·근거</div><div class="sample-row"><b>203쪽</b>타당성·신뢰성·공정성 · 확인·검증 질문 · 폐쇄형 질문</div></div><p class="quiet-note">앱의 예시와 자료 카드는 수업을 위해 따로 만든 내용입니다.</p>`);
     else if (action === 'teacher') { errorMessage = ''; location.hash = '#/teacher'; render(); }
-    else if (action === 'student-screen') { location.hash = state.tab === 'learn' ? '#/learn' : '#/lesson2'; render(); }
+    else if (action === 'student-screen') { location.hash = state.lesson === 4 ? '#/lesson4' : state.tab === 'learn' ? '#/learn' : '#/lesson2'; render(); }
     else if (action === 'teacher-logout') { teacherPasscode = ''; teacherData = null; teacherRows = []; render(); }
     else if (action === 'teacher-refresh') await loadTeacher();
     else if (action === 'teacher-record') showTeacherRecord(Number(node.dataset.index));
@@ -479,23 +550,29 @@ document.addEventListener('click', async event => {
 
 document.addEventListener('input', event => {
   const key = event.target.dataset.input;
+  if (key?.startsWith('l4-')) { lesson4.handleInput(key, event.target.value); return; }
+  if (['reasonText', 'argText', 'reflection', 'answer'].includes(key) && !lessonIsOpen(2)) { render(); return; }
   if (['reasonText', 'argText', 'reflection'].includes(key)) updateActivityText(key, event.target.value);
   else if (key === 'answer') state.activity.answerDrafts[state.activity.turn] = event.target.value;
   else return;
   const count = document.querySelector(`[data-count="${key}"]`); if (count) count.textContent = String(event.target.value.length); persist();
 });
 document.addEventListener('change', async event => {
-  if (event.target.dataset.input === 'lesson-select') { state.learningIndex = Number(event.target.value); persist(); render(); }
+  if (event.target.dataset.input === 'lesson-select' && lessonIsOpen(2)) { state.learningIndex = Number(event.target.value); persist(); render(); }
   if (event.target.dataset.input === 'teacher-class') { teacherClass = Number(event.target.value); await loadTeacher(); }
+  if (event.target.dataset.input === 'teacher-lesson') { teacherLesson = Number(event.target.value) === 4 ? 4 : 2; await loadTeacher(); }
 });
 document.addEventListener('submit', async event => {
   const form = event.target; if (!form.dataset.form) return; event.preventDefault(); const data = new FormData(form);
+  if (form.dataset.form === 'l4-entry') { await lesson4.handleForm(data); return; }
   if (form.dataset.form === 'login') {
+    if (!lessonIsOpen(2)) { render(); return; }
     const id = String(data.get('studentId') || '').trim(); if (!validateStudentId(id, serverConfig)) return toast('학년·반·번호를 확인해 학번 5자리를 입력해 주세요.');
     if (id !== state.studentId) {
       requestGeneration++; busy = false; sharedData = null;
-      const saved = safeParse(storage.getItem(`chaeum:v5:student:${id}`) || '{}');
-      state = saved.version === 5 ? saved : { ...initialState(), learned: state.learned, learningIndex: state.learningIndex, studentId: id, tab: 'activity' };
+      const saved = safeParse(storage.getItem(`chaeum:v5:student:${id}`) || '{}'), currentGroupDraft = state.lesson4;
+      state = saved.version === 5 ? { ...initialState(), ...saved } : { ...initialState(), learned: state.learned, learningIndex: state.learningIndex, studentId: id, tab: 'activity' };
+      state.lesson4 = currentGroupDraft; state.lesson = 2;
       state.studentId = id; state.activity.committedAnswers ||= [];
     }
     state.tab = 'activity'; state.activityView = 'perform'; errorMessage = ''; beginActivity(); closeDialog(); location.hash = '#/lesson2'; persist(); render(); await refreshConfig();
@@ -505,7 +582,9 @@ document.addEventListener('submit', async event => {
 });
 document.addEventListener('keydown', event => {
   if (!dialogRoot.firstChild) {
-    if (event.target.getAttribute('role') === 'tab' && ['ArrowRight', 'ArrowLeft'].includes(event.key)) {
+    if (event.target.dataset.action === 'lesson' && ['ArrowRight', 'ArrowLeft'].includes(event.key)) {
+      event.preventDefault(); const next = state.lesson === 4 ? 2 : 4; selectLesson(next); document.querySelector(`#lesson-tab-${next}`)?.focus();
+    } else if (event.target.getAttribute('role') === 'tab' && ['ArrowRight', 'ArrowLeft'].includes(event.key)) {
       event.preventDefault(); const next = state.tab === 'learn' ? 'activity' : 'learn'; switchTab(next); document.querySelector(`#tab-${next}`)?.focus();
     }
     return;
@@ -524,18 +603,29 @@ function tickTimer() {
   timer.textContent = `안내 ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
   timer.classList.toggle('warn', left > 0 && left <= 120); timer.classList.toggle('over', left === 0);
 }
-window.addEventListener('online', () => { queue.flush({ force: true }); flushProgress(); });
-window.addEventListener('beforeunload', event => { if (queue.getItems().length) { event.preventDefault(); event.returnValue = ''; } });
+window.addEventListener('online', () => { refreshConfig().then(() => { queue.flush(); flushProgress(); lesson4.recover(); }); });
+window.addEventListener('beforeunload', event => { if (queue.getItems().length || lesson4.hasPending()) { event.preventDefault(); event.returnValue = ''; } });
 window.addEventListener('hashchange', () => {
-  if (location.hash === '#/learn') state.tab = 'learn';
-  else if (location.hash === '#/lesson2') state.tab = 'activity';
+  if (location.hash === '#/learn') { state.lesson = 2; state.tab = 'learn'; }
+  else if (location.hash === '#/lesson2') { state.lesson = 2; state.tab = 'activity'; }
+  else if (location.hash === '#/lesson4') state.lesson = 4;
   errorMessage = ''; persist(); render();
 });
 setInterval(tickTimer, 1000);
 setInterval(flushProgress, 30000);
-if (location.hash === '#/lesson2') state.tab = 'activity';
-if (location.hash === '#/learn') state.tab = 'learn';
+setInterval(() => { if (document.visibilityState !== 'hidden') refreshConfig(); }, 15000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refreshConfig(); });
+if (location.hash === '#/lesson2') { state.lesson = 2; state.tab = 'activity'; }
+if (location.hash === '#/learn') { state.lesson = 2; state.tab = 'learn'; }
+if (location.hash === '#/lesson4') state.lesson = 4;
 render();
 refreshConfig().then(() => { if (!state.activity.session) state.activity.questionCount = Number(serverConfig.l2Questions) === 2 ? 2 : 3; render(); if (state.activity.step === 'dialogue') ensureQuestion(); });
 queue.start();
 flushProgress();
+lesson4.startRecovery();
+
+function downloadFile(text, filename) {
+  const url = URL.createObjectURL(new Blob(['\ufeff', text], { type: 'text/plain;charset=utf-8' }));
+  const link = document.createElement('a'); link.href = url; link.download = filename; document.body.append(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}

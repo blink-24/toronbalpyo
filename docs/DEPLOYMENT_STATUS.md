@@ -1,40 +1,25 @@
 # 배포 상태
 
-확인일: 2026년 10월 27일(한국 시간). 수업안 v6·웹앱 스펙 v5 기준이다.
+확인일: 2026-10-27. 수업안 v6·웹앱 스펙 v5, 사용자의 2·4차시 확장 요청과 대본 우선 선택을 기준으로 한다.
 
-| 항목 | 현재 상태 |
+| 구성 | 상태 |
 |---|---|
-| 2차시 학습·활동·공유 화면 | 자체 검토 수정분 PR #6 병합·Pages 게시 완료. Chromium 데스크톱·모바일 크기 검사 통과 |
-| 대본 엔진·선택적 AI 어댑터 | 기본 대본 모드 연결. AI 키·모델 미설정 |
-| Google Sheets 스키마 | 9탭·155개 헤더와 초기 설정 준비 |
-| Google 계정 | 요청한 개인 계정 연결과 소유권 확인 완료 |
-| 실제 Google Sheet | 비공개 시트 생성. 9탭·155개 헤더·설정 8행·Asia/Seoul 확인 |
-| Apps Script 프로젝트·웹 앱 | 최초 배포 서버로 실제 정상 저장·중복 ACK 확인. 추가 안정성 보완은 저장소 코드에 반영됐으며 소유자의 새 버전 배포 대기 |
-| GitHub | 구현·연결·자체 검토 PR #1·#3·#4·#5·#6 병합 완료 |
-| GitHub Pages | 자체 검토 수정분 실행 40486746828 게시 및 공개 파일 검사 성공. https://blink-24.github.io/toronbalpyo/ |
-| 브라우저·학교 태블릿 | Chromium 자동 브라우저 데스크톱·모바일 크기 통과. 학교 실제 기기·망과 교사 실제 암호 로그인은 별도 확인 |
-| 3·4차시 앱·녹음 업로드 | 이번 2차시 구현의 후속 범위 |
+| 2차시 | 기존 학습 19장·개인 활동·공유 유지, 이전 브라우저 자체 검토 통과 |
+| 4차시 프런트·공통 엔진 | 입론①/⑤, 모둠, 질문 3~5개, 도움 자료·피드백·성찰·저장·다운로드 구현 후보 |
+| 교사 화면 | 차시별 기록 선택과 개방 제어 구현 후보 |
+| 실제 AI | 사용자가 연결 보류. 4차시는 대본 전용, AI API 호출 없음 |
+| 서버 5.1.0 | 생성 코드·스키마 준비. 소유자 전체 코드 교체·setupDB·기존 배포 새 버전 필요 |
+| 실제 Google Sheet | 요청한 개인 계정 소유·비공개. 기존 9탭155헤더. setupDB 후 9탭166헤더로 확장 예정 |
+| 현재 실행 Apps Script | 최초 5.0.0 서버. 새 기능의 실제 Google 저장은 아직 확인하지 않음 |
+| Pages | 기존 사이트 운영 중. 이번 후보 검증·병합·게시 결과는 아래에 기록 |
 
-`config.js`에 실제 `/exec` URL을 반영했다. [Live API connection](https://github.com/blink-24/toronbalpyo/actions/runs/40481995409)의 5개 검사에 이어 [전체 브라우저 검사](https://github.com/blink-24/toronbalpyo/actions/runs/40486318647)에서 수정 후보 화면과 실제 Google 서버의 질문·답변·제출·중복 ACK·익명 공유를 확인했다. 모바일 오프라인 2문항 종료와 재연결 후 저장도 통과했고 실제 시트에서 문항 수와 한 세션당 한 행을 대조했다. 시험 세션 3개의 제출·대담·진행 기록 49행만 정리하고 재조회로 확인했다.
+공개 사이트: [채움](https://blink-24.github.io/toronbalpyo/).
+유지보수 창구: [Issues](https://github.com/blink-24/toronbalpyo/issues), 이번 확장 [#8](https://github.com/blink-24/toronbalpyo/issues/8).
 
-자체 검토 결과와 적용 범위는 [AUDIT_20261027.md](AUDIT_20261027.md), 서버의 남은 소유자 작업은 [SERVER_UPDATE.md](SERVER_UPDATE.md)에 있다. **GitHub의 서버 파일 수정은 현재 실행 중인 Apps Script 서버를 자동 갱신하지 않는다.**
+기존 서버에서도 2차시를 유지하고, 새 서버 capability가 없으면 4차시를 준비 중으로 표시한다. 프런트 게시와 서버 새 버전 적용을 구분한다. 원본 수업 자료는 수정하지 않았다.
 
-공개 사이트: [채움 토론과 반대 신문](https://blink-24.github.io/toronbalpyo/). 배포 뒤 HTML·설정·메인 모듈·스타일 HTTP 확인을 수행하도록 워크플로를 추가했다. HTTP 파일 확인과 실제 브라우저 실행은 구분한다.
+## 검증 경계
 
-## 연결에 필요한 정보
+이전 2차시 실제 Google 왕복·데스크톱/모바일 크기 검사는 [자체 검토 기록](AUDIT_20261027.md)에 있다. 이번 4차시의 자동 브라우저 검사는 실제 서비스 모듈에 메모리 저장소를 연결하며 외부 Google 요청을 모두 로컬 fixture로 우회한다. 교사 암호·학생 입력은 합성 시험값이고 실제 Google 행이나 AI 호출을 만들지 않는다. 이 시험을 실제 Google 저장 완료로 표현하지 않는다.
 
-1. Google 시트 생성·개인 계정 소유·비공개 상태를 확인했다. 시트 URL은 계정 소유자에게 직접 전달하며 이 공개 문서에는 학생 기록과 함께 게시하지 않는다.
-2. 대상 저장소는 blink-24/toronbalpyo다. 소유자의 최초 화면 작업은 [OWNER_SETUP.md](OWNER_SETUP.md)를 따른다.
-3. 시트와 연결된 Apps Script 편집기에 `backend/ServerBundle.gs` 하나를 넣고 `setupDB()`를 실행한다. 최초 Google 권한 승인은 계정 소유자가 수행한다. 세부 설정은 `backend/README.md`를 따른다.
-4. 웹 앱 배포 후 실행 URL을 공개 설정에 연결하고 가상 입력으로 실제 제출·재전송·익명 집계·교사 조회를 확인한다. 비밀키나 교사 암호는 대화·저장소·프런트 설정에 넣지 않는다.
-
-현재 연결 도구에는 Apps Script 프로젝트 생성·권한 승인·웹 앱 배포 기능이 없다. 이 초기 단계는 소유자의 화면 작업이 필요하다. 이후 프런트 설정·코드 수정·PR·병합은 지정한 저장소에서 이어서 처리할 수 있다.
-
-## 2026년 10월 27일 원격 확인
-
-- [구현 PR #1](https://github.com/blink-24/toronbalpyo/pull/1): 자동검사 성공 후 병합 완료.
-- [Pages 실행](https://github.com/blink-24/toronbalpyo/actions/runs/40445969544): `checks / Test and validate`, 정적 빌드, 공개 파일 경계 검사 성공. `Configure GitHub Pages`는 사이트 설정을 찾지 못해 실패했으며 게시 단계는 실행하지 않았다.
-- 사용자가 Settings → Pages → Source를 GitHub Actions로 설정한 뒤 같은 실행 40481995416의 실패 작업만 재실행했다. 2번째 시도에서 build·deploy 성공, 배포 로그의 실제 환경 URL을 확인했다.
-- [최초 연결·수업 전 확인 이슈 #2](https://github.com/blink-24/toronbalpyo/issues/2): 남은 소유자 설정·실제 왕복·학교 기기 검증과 유지보수 요청 창구.
-
-공식 참고: [Apps Script 웹 앱](https://developers.google.com/apps-script/guides/web), [Content Service](https://developers.google.com/apps-script/guides/content), [GitHub Pages 워크플로](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
+학교 실제 기기·망 및 소유자 새 서버 배포 후 인증·저장 검증은 남아 있다. [서버 갱신 순서](SERVER_UPDATE.md)를 따른다.

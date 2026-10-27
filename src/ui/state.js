@@ -1,3 +1,4 @@
+import { freshLesson4 } from './lesson4-state.js';
 export const STATE_KEY = 'chaeum:v5:state';
 export const uid = prefix => `${prefix}_${globalThis.crypto?.randomUUID?.().replaceAll('-', '').slice(0, 24) || `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}`}`;
 export function validateStudentId(value, config = {}) {
@@ -14,9 +15,9 @@ export function containsPrivateData(value) {
 export function freshActivity() {
   return { step: 'stance', stance: '', reasonId: '', reasonText: '', cardId: '', argText: '', sessionId: uid('s'), submissionId: uid('sub'), startedAt: 0, turn: 1, answerDrafts: {}, helpSelections: {}, remoteQuestions: {}, session: null, feedback: null, reflection: '', mode: 'script-local', status: 'draft', earlyFinish: false };
 }
-export function initialState() { return { version: 5, studentId: '', tab: 'learn', learningIndex: 0, learned: [], activityView: 'perform', activity: freshActivity() }; }
+export function initialState() { return { version: 5, lesson: 2, studentId: '', tab: 'learn', learningIndex: 0, learned: [], activityView: 'perform', activity: freshActivity(), lesson4: freshLesson4() }; }
 export function loadState(storage) {
-  try { const parsed = JSON.parse(storage.getItem(STATE_KEY)); if (parsed?.version === 5) return { ...initialState(), ...parsed, activity: { ...freshActivity(), ...parsed.activity } }; } catch {}
+  try { const parsed = JSON.parse(storage.getItem(STATE_KEY)); if (parsed?.version === 5) return { ...initialState(), ...parsed, activity: { ...freshActivity(), ...parsed.activity }, lesson4: { ...freshLesson4(), ...parsed.lesson4 } }; } catch {}
   return initialState();
 }
 export function saveState(storage, state) { storage.setItem(STATE_KEY, JSON.stringify(state)); }

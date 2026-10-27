@@ -41,7 +41,7 @@ async function runFlow(options) {
     await step('open both tabs and learning content', async () => {
       await page.goto(site, { waitUntil: 'networkidle' });
       await page.locator('#tab-learn').waitFor();
-      assert.equal(await page.locator('[role="tab"]').count(), 2);
+      assert.equal(await page.locator('.main-tabs [role="tab"]').count(), 2);
       assert.equal(await page.locator('[data-action="learn-slide"]').count(), 19);
       await inspect(page, `${options.name}-learning`);
       if (!options.mobile) {

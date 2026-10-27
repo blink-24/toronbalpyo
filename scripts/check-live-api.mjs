@@ -26,22 +26,33 @@ async function call(action, payload, method = 'GET') {
 const ping = await call('ping');
 assert.equal(ping.ok, true, 'ping: 서버 오류');
 assert.equal(ping.data?.status, 'ok');
-assert.equal(ping.data?.version, '5.0.0');
+assert.ok(['5.0.0', '5.1.0'].includes(ping.data?.version), '확인하지 않은 서버 버전입니다.');
 console.log('PASS: 공개 서버 상태 응답');
 
 const config = await call('config');
 assert.equal(config.ok, true, 'config: 시트 설정 읽기 실패');
 assert.equal(config.data?.grade, 2);
 assert.equal(config.data?.classCount, 11);
-assert.ok(config.data?.acceptLessons?.includes(2));
+assert.ok(Array.isArray(config.data?.acceptLessons));
+assert.ok(config.data.acceptLessons.every(lesson => [2, 4].includes(lesson)));
+if (ping.data.version === '5.1.0') {
+  assert.ok(config.data.implementedLessons?.includes(4));
+  assert.ok([3, 4, 5].includes(config.data.l4Questions));
+  assert.equal(config.data.l4AiEnabled, false);
+} else console.log('INFO: 최초 서버가 실행 중입니다. 4차시·교사 개방 설정은 서버 새 버전 적용 대기입니다.');
 for (const key of ['PASSCODE', 'AI_API_KEY', 'AI_MODEL', 'passcode', 'apiKey']) assert.ok(!(key in config.data));
 console.log('PASS: 실제 시트 설정 조회 및 비밀값 비노출');
 
 const shared = await call('public_summary');
-assert.equal(shared.ok, true, 'public_summary: 집계 조회 실패');
-assert.ok(Number.isInteger(shared.data?.completed));
 const publicKeys = new Set(['count','total','completed','stanceCounts','cardCounts','feedbackCounts','byStance','byReason','byCard','lowReliability','metrics']);
-assert.ok(Object.keys(shared.data).every(key => publicKeys.has(key)), '공개 집계에 허용하지 않은 필드가 있습니다.');
+if (config.data.acceptLessons.includes(2)) {
+  assert.equal(shared.ok, true, 'public_summary: 집계 조회 실패');
+  assert.ok(Number.isInteger(shared.data?.completed));
+  assert.ok(Object.keys(shared.data).every(key => publicKeys.has(key)), '공개 집계에 허용하지 않은 필드가 있습니다.');
+} else {
+  assert.equal(shared.ok, false);
+  assert.equal(shared.error?.code, 'LESSON_CLOSED');
+}
 console.log('PASS: 실제 익명 집계 허용 필드');
 
 const privateQuery = await call('l2_summary');
@@ -51,6 +62,6 @@ console.log('PASS: 암호 없는 교사 조회 거부');
 
 const invalid = await call('submit', { lesson: 2, kind: 'l2_session', studentId: '00000' }, 'POST');
 assert.equal(invalid.ok, false);
-assert.equal(invalid.error?.code, 'INVALID_STUDENT_ID');
+assert.equal(invalid.error?.code, config.data.acceptLessons.includes(2) ? 'INVALID_STUDENT_ID' : 'LESSON_CLOSED');
 console.log('PASS: 실제 POST 수신 및 잘못된 학번 거부(저장 없음)');
 console.log('실제 저장·교사 암호 로그인·브라우저 CORS·학교 기기 동작은 별도 확인이 필요합니다.');

@@ -19,7 +19,7 @@ function activityFixture() {
 }
 function frontendContext(activity = activityFixture()) {
   const callbacks = new Map();
-  const context = { state: { activity }, CONTENT, composeArgument, busy: false, errorMessage: '',
+  const context = { state: { activity }, CONTENT, composeArgument, busy: false, errorMessage: '', lessonIsOpen: () => true,
     document: { addEventListener: (name, fn) => callbacks.set(name, fn), querySelector: () => null },
     selectedCard: () => CONTENT.evidenceCards.find(card => card.id === activity.cardId),
     markProgress() {}, persist() {}, render() {}, scrollToMain() {}, setError(message) { throw new Error(message); }, containsPrivateData: () => false };
@@ -124,7 +124,7 @@ test('첫 BUSY는 차단하지 않고 backoff 뒤 같은 제출 ID로 자동 복
 test('질문 요청의 BUSY는 학생을 막지 않고 기기 대본을 이어 간다', async () => {
   const context = { state: { activity: { session: {}, turn: 1, remoteQuestions: {}, mode: 'script' } }, requestGeneration: 0, busy: false,
     api: { isConfigured: () => true, async post() { throw new ApiError('서버 사용 중', 'BUSY'); } },
-    mayUseLocalFallback, render() {}, persist() {}, turnPayload: () => ({}), errorMessage: '' };
+    mayUseLocalFallback, lessonIsOpen: () => true, render() {}, persist() {}, turnPayload: () => ({}), errorMessage: '' };
   vm.runInNewContext(between('async function ensureQuestion()', 'async function showFeedback(') + ';globalThis.run=ensureQuestion;', context);
   await context.run(); assert.equal(context.state.activity.mode, 'script-local'); assert.notEqual(context.state.activity.blocked, true); assert.equal(context.busy, false);
 });
@@ -161,4 +161,45 @@ test('교사 로그인 암호·반 선택은 DOM 값으로만 유지하고 다�
   assert.equal(nodes.get('teacher-passcode').value, 'fixture-secret-never-persist'); assert.equal(active, nodes.get('teacher-passcode'));
   assert.equal(nodes.get('teacher-class').value, '11'); assert.equal(nodes.get('answer-text').value, '');
   assert.equal(markup.includes('fixture-secret-never-persist'), false);
+});
+
+test('2차시도 학생의 입장과 반대인 상대 토론자를 표시한다', () => {
+  for (const stance of ['찬성', '반대']) {
+    const context = { state: { activity: { stance, turn: 1, questionCount: 3, answerDrafts: {}, mode: 'script' } },
+      currentQuestion: () => ({ confirm: '질문의 확인 부분인가요?', verify: '질문의 검증 부분인가요?', helpCards: [] }),
+      h: escapeHtml, CONTENT, busy: false, errorHtml: () => '', actionBar: () => '', committed: () => [] };
+    vm.runInNewContext(between('function dialogueView()', 'const ratingLabel') + ';globalThis.screen=dialogueView();', context);
+    const opponent = stance === '찬성' ? '반대' : '찬성';
+    assert.match(context.screen, new RegExp(`class="chat-person"[^]*?</span>${opponent}측 토론자<span`));
+  }
+});
+
+test('온라인 복귀도 닫힘 차단은 풀지 않고 일시 오류의 backoff를 지킨다', async () => {
+  async function reconnect(queue) {
+    const callbacks = new Map(), flushes = [];
+    vm.runInNewContext(between("window.addEventListener('online'", "window.addEventListener('beforeunload'"), {
+      window: { addEventListener: (event, callback) => callbacks.set(event, callback) },
+      refreshConfig: async () => {}, queue: { flush: options => { const promise = queue.flush(options); flushes.push(promise); return promise; } },
+      flushProgress() {}, lesson4: { recover() {} },
+    });
+    callbacks.get('online')(); await new Promise(resolve => setImmediate(resolve)); await Promise.all(flushes);
+  }
+  let clock = 0, calls = 0, closed = true;
+  const api = { isConfigured: () => true, async post() {
+    calls++; if (closed) throw new ApiError('활동이 닫혀 있습니다.', 'LESSON_CLOSED');
+    return { ok: true, data: { accepted: true } };
+  } };
+  const queue = createSubmissionQueue({ storage: queueFixture(), api, now: () => clock }); queue.enqueue({ submissionId: 'sub_closed_online_01' });
+  await queue.flush(); closed = false; clock = 600000; await reconnect(queue);
+  assert.equal(calls, 1); assert.equal(queue.getItems()[0].blocked, true);
+  await queue.flush({ force: true }); assert.equal(calls, 2); assert.equal(queue.getItems().length, 0);
+
+  let temporaryCalls = 0; clock = 0;
+  const temporary = createSubmissionQueue({ storage: queueFixture(), now: () => clock, api: { isConfigured: () => true, async post() {
+    temporaryCalls++; if (temporaryCalls === 1) throw new ApiError('연결을 확인해 주세요.', 'NETWORK');
+    return { ok: true, data: { accepted: true } };
+  } } });
+  temporary.enqueue({ submissionId: 'sub_network_online_01' }); await temporary.flush();
+  await reconnect(temporary); assert.equal(temporaryCalls, 1); assert.equal(temporary.getItems().length, 1);
+  clock = 30000; await reconnect(temporary); assert.equal(temporaryCalls, 2); assert.equal(temporary.getItems().length, 0);
 });

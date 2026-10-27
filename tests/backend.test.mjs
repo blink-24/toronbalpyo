@@ -245,7 +245,7 @@ test('9개 탭과 append-only 머리글, GAS doPost text/plain JSON 포장', asy
   const sandbox = { PropertiesService: {}, SpreadsheetApp: {}, LockService: {}, ContentService: { MimeType: { JSON: 'application/json' }, createTextOutput: text => ({ text, setMimeType(type) { this.mime = type; return this; } }) } };
   vm.createContext(sandbox); vm.runInContext(await fs.readFile(new URL('../backend/ServerBundle.gs', import.meta.url), 'utf8'), sandbox);
   let actual = ['legacy', 'receivedAt'], writes = [];
-  const sheet = { getLastColumn: () => actual.length, getName: () => 'test', getRange: (r, c, nr, nc) => ({ getValues: () => [actual], setValues: rows => { writes.push({ c, rows }); actual = actual.concat(rows[0]); } }), setFrozenRows() {} };
+  const sheet = { getLastColumn: () => actual.length, getMaxColumns: () => 100, getName: () => 'test', getRange: (r, c, nr, nc) => ({ getValues: () => [actual], setValues: rows => { writes.push({ c, rows }); actual = actual.concat(rows[0]); } }), setFrozenRows() {} };
   sandbox.classroomHeaders_(sheet, ['receivedAt', 'submissionId']);
   assert.equal(writes[0].c, 3); assert.deepEqual(actual, ['legacy', 'receivedAt', 'submissionId']);
   sandbox.classroomService_ = () => fixture().service;
