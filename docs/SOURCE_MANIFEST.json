@@ -1,8 +1,8 @@
 {
-  "version": "5.1.0",
+  "version": "5.1.1",
   "baseline": "lessonplan-v6-webapp-v5-user-script-first-2026-10-27",
-  "external_state": "New user /exec API5.1.0 verified; l4_sessions39headers verified; current open lesson2; teacher login/open4/real submit pending",
-  "tests_passed": 109,
+  "external_state": "Frontend5.1.1 local logout/resume candidate; current server5.1.0 unchanged; same-device scope chosen by user",
+  "tests_passed": 116,
   "files": [
     {
       "path": ".github/ISSUE_TEMPLATE/bug_report.yml",
@@ -22,7 +22,7 @@
     },
     {
       "path": ".github/workflows/lesson4-browser.yml",
-      "sha256": "cc27abb4901d0f1c55052852a107e2d5d1c8d506faf445a8ffb6f76e5a5f3069"
+      "sha256": "e63660c80acbcf89b2885b22d34fcfe71f32a5d4d01d7ba3dda57eef78a603f1"
     },
     {
       "path": ".github/workflows/live-api.yml",
@@ -42,7 +42,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "08da254725ade8b54a828b194bb1ba8bf43dc3a3f3ea41484f1c7d7329f7e22e"
+      "sha256": "bf7e107d05c7f6de9d9cbcc82d4624cb257414304565cb02cf8266fb41c22c77"
     },
     {
       "path": "assets/favicon.svg",
@@ -78,7 +78,7 @@
     },
     {
       "path": "config.js",
-      "sha256": "5e9dbc21c55eacf0cd8db184959ae26f93e3e6e551a8f2ec164b421c8fc7bda3"
+      "sha256": "003914b55cebe1bb0b3ca390be24ce47ba162f80b67a363f1e3bccd75f2a3933"
     },
     {
       "path": "data/content.json",
@@ -90,7 +90,7 @@
     },
     {
       "path": "docs/API_CONTRACT.md",
-      "sha256": "bf2eb503287aa8be83a0933eea1da2e5cc12e8ef541d11e234365ad04a975bac"
+      "sha256": "d180004cf2e80e2e74a8ef3bab50c6276ddaf3484f7d0266a765101f372e66ef"
     },
     {
       "path": "docs/AUDIT_20261027.md",
@@ -102,7 +102,7 @@
     },
     {
       "path": "docs/DEPLOYMENT_STATUS.md",
-      "sha256": "5c0ae048e950158c3699c3be3c9db51931f0cfa498ab8b04198c47527e57d09e"
+      "sha256": "9fd770a625ac86437ac814da7a1d7e63b53d939e076a2398ad8264b9c85ad5fb"
     },
     {
       "path": "docs/LESSON4_IMPLEMENTATION_CONTRACT.md",
@@ -122,7 +122,7 @@
     },
     {
       "path": "docs/VALIDATION.md",
-      "sha256": "ad7117f6bda6230f2dc99c7a69824f4c3274bce9b80792e3a22a0934dc5ae721"
+      "sha256": "d6542fc92a3a409fcd4373f174f8b88bb2a476797df069e122afa6ec9a87abc6"
     },
     {
       "path": "index.html",
@@ -130,7 +130,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "5a638950a67b874c7304186824ed5a8740b0d7591a47ab2011509932d84323b4"
+      "sha256": "3af5c7c63c9db280b702f388aa6efd7d850e4d64f389f698bee222f1d2cfd724"
     },
     {
       "path": "qa/browser-audit.mjs",
@@ -142,7 +142,7 @@
     },
     {
       "path": "qa/lesson4-browser.mjs",
-      "sha256": "8ae50435cd094b14d0619d775f26fc69127c0b058d064b99e4ef5f44ba3185f8"
+      "sha256": "da52d0920a498f0aa968172593ac62ad88b6aa7922e88413c03c6c647e32fe74"
     },
     {
       "path": "qa/lesson4-fixture.mjs",
@@ -178,7 +178,7 @@
     },
     {
       "path": "src/main.js",
-      "sha256": "ed15cc26c2e6a1f210bafd13f6d7d364fa9c99d8d9e4eba338b5de19bd53399e"
+      "sha256": "3c87d110b718a328229a16604d5ca9a2686732a92b9956698b72a0e296b3739d"
     },
     {
       "path": "src/network/client.js",
@@ -198,11 +198,11 @@
     },
     {
       "path": "src/ui/lesson4.js",
-      "sha256": "ac02d9d797b54a6815484a269e231ccbea59ade2cabfd9342a331cf0d3117902"
+      "sha256": "c22a67c99a929364dcf00d5071707deb905e9e5447a9c4a2fbfab5c66c09e9c0"
     },
     {
       "path": "src/ui/state.js",
-      "sha256": "974ed3e9180f8bdccfb6fd7b9e58e0a0002d9f3b961e98782d04e7ff1aa510d8"
+      "sha256": "3a6a44101a8616e220f1eb0891dbdf3a8e1460d5099bbb66d8a8c4b00f7e566a"
     },
     {
       "path": "styles.css",
@@ -234,7 +234,7 @@
     },
     {
       "path": "tests/ui/lesson4-ui.test.mjs",
-      "sha256": "293f2062e2cddaccf91fb5cb7d21d4627382447ae7e6934c6273d23e87f4ea2d"
+      "sha256": "db4e8341933697cff1e7ce8525bbeee8dcb4bb9f83470743da322ae1a0badb5d"
     },
     {
       "path": "tests/ui/network.test.mjs",
@@ -243,6 +243,10 @@
     {
       "path": "tests/ui/service-flow.test.mjs",
       "sha256": "05a6ec224ca1f00530947da1e10b2ebf9c8c4f33d9747d095c9a5e9331112ff7"
+    },
+    {
+      "path": "tests/ui/student-session.test.mjs",
+      "sha256": "f56a388c86c870a46370b3ecfcf45e498143f6ce98d572aef431def99dce10a5"
     }
   ]
 }

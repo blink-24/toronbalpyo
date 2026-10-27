@@ -111,3 +111,7 @@ comment, better
 `l4_sessions`는 기존 열 뒤에 `groupName,groupKey,memberStudentIds,stance,arg1,arg5,completedQuestionCount,earlyFinish,durationSec,ruleFeedback,payloadHash`를 추가한다. 기존 행·열을 지우지 않고 같은 제출 ID의 재시도는 한 행이다. 상태·로그는 차시와 세션으로 구분한다.
 
 현재 Apps Script가 이 확장을 지원하지 않으면 4차시와 개방 제어는 준비 상태다. 코드 전체 교체·`setupDB()`·기존 배포 새 버전 적용이 끝나기 전 실제 연결 완료로 표현하지 않는다. [서버 갱신 안내](SERVER_UPDATE.md)와 [배포 상태](DEPLOYMENT_STATUS.md)를 따른다.
+
+## 8. 학생 로그아웃과 로컬 복원(화면5.1.1)
+
+사용자는 같은 기기·브라우저 복원을 선택했다. 서버 API·GAS코드는 그대로5.1.0이며, 새 학생 기록 조회 API를 만들지 않는다. 학생 로그아웃은 개인·모둠 초안을 기존 기기 키에 저장한 뒤 활성 학생/모둠 정보를 초기화하고 입장 화면으로 이동한다. 전송 대기 큐와 제출ID는 유지한다. 같은 학번은 자신의 학습 위치·활동 단계·문항·확정 답·초안을 복원하며4차시는 같은모둠명/명단으로 복원한다. 로그아웃 후 늦은 비동기 응답은 새 로그인에 적용하지 않는다.

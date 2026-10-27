@@ -76,12 +76,31 @@ try {
   await l2.locator('[data-action="next"]').click(); await waitL2('reason');
   await l2.locator('[data-action="reason"][data-id="RN2"]').click(); await l2.locator('[data-action="next"]').click(); await waitL2('evidence');
   await l2.locator('[data-action="card"][data-id="ND"]').click(); await l2.locator('[data-action="next"]').click(); await waitL2('argument');
+  const editedArgument = ((await l2.locator('#arg-text').inputValue()) + '\n적용 범위를 더 살피겠습니다.').slice(0, 300);
+  await l2.locator('#arg-text').fill(editedArgument);
+  const originalL2 = (await state(l2)).activity.sessionId;
+  await l2.locator('[data-action="student-logout"]').click();
+  await l2.locator('#student-id').waitFor(); assert.equal((await state(l2)).studentId, '');
+  await l2.reload({ waitUntil: 'networkidle' }); await l2.locator('#student-id').waitFor();
+  await l2.locator('#student-id').fill('21194'); await l2.locator('form[data-form="login"] button[type="submit"]').click(); await waitL2('stance');
+  assert.equal((await state(l2)).activity.argText, '');
+  await l2.locator('[data-action="student-logout"]').click();
+  await l2.locator('#student-id').fill('21195'); await l2.locator('form[data-form="login"] button[type="submit"]').click(); await waitL2('argument');
+  assert.equal(await l2.locator('#arg-text').inputValue(), editedArgument); assert.equal((await state(l2)).activity.sessionId, originalL2);
   await l2.locator('[data-action="next"]').click(); await waitL2('dialogue');
   assert.match(await l2.locator('.chat-person').innerText(), /찬성측 토론자/);
   for (let turn = 1; turn <= 3; turn++) {
     await l2.locator('#answer-text').fill('한계는 인정합니다. 다만 보행 중 스마트폰 정책은 자료의 출처와 시기, 다른 원인을 함께 확인해서 주장 범위를 제한하고 근거를 보완하겠습니다.');
     await l2.locator('[data-action="cite"]').first().click();
     await l2.locator('[data-action="commit-answer"]').click(); await waitL2(turn === 3 ? 'feedback' : 'dialogue');
+    if (turn === 1) {
+      await l2.locator('#answer-text').fill('두 번째 질문에서 작성 중이던 답변입니다.');
+      await inspect(l2, 'student-logout-button');
+      await l2.locator('[data-action="student-logout"]').click();
+      await l2.locator('#student-id').fill('21195'); await l2.locator('form[data-form="login"] button[type="submit"]').click(); await waitL2('dialogue');
+      assert.equal((await state(l2)).activity.turn, 2); assert.equal((await state(l2)).activity.committedAnswers.length, 1);
+      assert.equal(await l2.locator('#answer-text').inputValue(), '두 번째 질문에서 작성 중이던 답변입니다.');
+    }
   }
   await l2.locator('#reflection-text').fill('다음에는 자료의 출처와 정책의 적용 범위를 함께 확인하겠습니다.');
   await l2.locator('[data-action="submit"]').click(); await waitL2('complete');
@@ -134,6 +153,14 @@ try {
       await page.locator('[data-action="l4-submit"]').click(); await stage(page, 'complete');
       if (options.offline) {
         assert.equal((await state(page)).lesson4.status, 'pending');
+        const submissionId = (await state(page)).lesson4.submissionId;
+        await page.locator('[data-action="student-logout"]').click(); await page.locator('#l4-representative').waitFor();
+        assert.equal(await page.locator('#l4-group-name').inputValue(), '');
+        await inspect(page, 'group-signed-out-mobile');
+        await page.locator('#l4-representative').fill('21199'); await page.locator('#l4-group-name').fill(`검토용 ${options.name}`);
+        for (let n = 1; n <= 4; n++) await page.locator(`#l4-member-${n}`).fill(`211${95 + n}`);
+        await page.locator('#l4-entry-submit').click(); await stage(page, 'complete');
+        assert.equal((await state(page)).lesson4.submissionId, submissionId); assert.equal((await state(page)).lesson4.status, 'pending');
         ctx.apiOffline = false; await page.locator('[data-action="l4-retry"]').click();
       }
       await page.waitForFunction(() => JSON.parse(localStorage.getItem('chaeum:v5:state') || '{}').lesson4?.status === 'sent');
