@@ -1,0 +1,56 @@
+name: 오류 신고
+description: 화면·체험·제출에서 발생한 문제를 알려 주세요.
+title: '[오류] '
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        학생 이름·학번·실제 답변·녹음·교과서 원본·암호·API 키를 첨부하지 마세요.
+        예시는 가상 문장으로 바꾸고 화면 속 식별 정보를 가린 뒤 올려 주세요.
+  - type: dropdown
+    id: area
+    attributes:
+      label: 문제가 생긴 곳
+      options:
+        - 학습 자료
+        - 반대 신문 체험
+        - 저장·제출
+        - 공유 집계
+        - 교사 화면
+        - 배포·연결
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 문제를 다시 확인하는 순서
+      description: 어떤 화면에서 어떤 단추를 눌렀는지 적어 주세요.
+      placeholder: '1. 체험에서 찬성 선택 → 2. 근거 카드 선택 → 3. ...'
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 기대한 동작
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 실제 동작·오류 문구
+      description: 개인정보를 제외한 오류 문구와 가상 예시만 적어 주세요.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: 기기·브라우저·앱 버전
+      placeholder: 학교 태블릿 / Chrome / 화면에 표시된 앱 버전
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: 첨부 내용 확인
+      options:
+        - label: 학생 식별 정보·실제 수업 기록·암호·API 키·교과서 원본을 포함하지 않았습니다.
+          required: true

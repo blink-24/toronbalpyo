@@ -1,0 +1,13 @@
+{
+  "name": "chaeum-ai-classroom",
+  "version": "5.0.0",
+  "private": true,
+  "type": "module",
+  "description": "화법과 언어 2차시 학습과 반대 신문 체험",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test": "node --test",
+    "check": "node scripts/check-project.mjs",
+    "build": "node scripts/build-static.mjs"
+  }
+}
