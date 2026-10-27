@@ -51,11 +51,46 @@ function savedState(f) {
 
 test('버전·차시 개방 계약과 기존 l4 열 순서를 보존한다', () => {
   const f = fixture({ opened: '2' }), cfg = f.service.respond('GET', { action: 'config' }).data;
-  assert.equal(VERSION, '5.1.0'); assert.equal(content.version, '5.0.0'); assert.equal(cfg.appVersion, VERSION);
+  assert.equal(VERSION, '5.2.0'); assert.equal(content.version, '5.0.0'); assert.equal(cfg.appVersion, VERSION);
+  assert.equal(cfg.l4ScriptVersion, '1.1.0');
   assert.deepEqual(cfg.implementedLessons, [2, 4]); assert.equal(cfg.l4Questions, 4); assert.equal(cfg.l4AiEnabled, false);
   assert.deepEqual(cfg.acceptLessons, [2]); assert.equal(cfg.lessons[4].enabled, false);
   assert.deepEqual(HEADERS.l4_sessions.slice(0, 28), [...COMMON_HEADERS, 'sessionId', 'part', ...[1, 2, 3, 4, 5].flatMap(n => [`q${n}`, `a${n}`, `help${n}`]), 'feedback', 'reflection', 'mode']);
   assert.deepEqual(HEADERS.l4_sessions.slice(28), ['groupName', 'groupKey', 'memberStudentIds', 'stance', 'arg1', 'arg5', 'completedQuestionCount', 'earlyFinish', 'durationSec', 'ruleFeedback', 'payloadHash']);
+});
+
+test('기존 대본의 진행 기록·로컬 전송 대기는 서버 갱신 뒤에도 재계획 없이 제출한다', () => {
+  const f = fixture();
+  const legacy = session({ scriptVersion: '1.0.0', count: 1 });
+  // 갱신 전 화면은 scriptVersion을 보내지 않았고 appVersion은5.1.x였다.
+  const oldRequest = turn(legacy, { appVersion: '5.1.1' });
+  const second = f.service.respond('POST', oldRequest);
+  assert.equal(second.ok, true, JSON.stringify(second));
+  assert.equal(second.data.question.id, engine.getQuestion(legacy, 2).id);
+  assert.equal(savedState(f).version, '1.0.0');
+  // 새 화면이 신버전을 알려도 이미 진행 중인 서버 세션은 기존 버전으로 고정한다.
+  const continued = f.service.respond('POST', { ...oldRequest, selection: { ...oldRequest.selection, scriptVersion: '1.1.0' } });
+  assert.equal(continued.ok, true);
+  assert.equal(savedState(f).version, '1.0.0');
+  const finishedLegacy = session({ scriptVersion: '1.0.0' });
+  const submitted = f.service.respond('POST', submit(finishedLegacy));
+  assert.equal(submitted.ok, true, JSON.stringify(submitted));
+  assert.equal(f.db.l4_sessions.length, 1);
+  assert.equal(f.service.respond('POST', submit(finishedLegacy)).data.duplicate, true);
+  const offline = fixture();
+  assert.equal(offline.service.respond('POST', submit(finishedLegacy)).ok, true);
+  assert.equal(savedState(offline).version, '1.0.0');
+});
+
+test('새 대본 질문·도움 카드를 서버가 재계산하고 임의 버전은 저장 전에 거부한다', () => {
+  const f = fixture(), s = session({ count: 0, arg1: '정확도와 환각 위험에 관해서는 원자료를 먼저 확인한 뒤 공공 도입의 조건을 판단해야 합니다.' });
+  const response = f.service.respond('POST', turn(s, { selection: { stance: s.stance, arg1: s.arg1, arg5: s.arg5, scriptVersion: '1.1.0' } }));
+  assert.equal(response.ok, true, JSON.stringify(response));
+  assert.deepEqual(response.data.question, engine.getQuestion(s, 1));
+  assert.equal(savedState(f).version, '1.1.0');
+  const invalid = fixture();
+  assert.equal(invalid.service.respond('POST', turn(s, { selection: { stance: s.stance, arg1: s.arg1, arg5: s.arg5, scriptVersion: 'unknown' } })).error.code, 'INVALID_SCRIPT_VERSION');
+  assert.equal(invalid.db.progress.length, 0);
 });
 test('교사 인증 후 2·4만 열거나 모두 닫고, 잘못된 설정은 쓰지 않는다', () => {
   const f = fixture(), before = JSON.stringify(f.db.config);

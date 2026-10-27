@@ -154,3 +154,35 @@ test('모둠 로그아웃 준비는 초안·현재 질문을 보관하고 같은
   assert.equal(restored.state().answerDrafts[2], '아직 확정하지 않은 두 번째 답입니다.');
   f.controller.stop(); restored.controller.stop();
 });
+
+test('서버가 새 대본을 알리기 전 기존 버전을 사용하고 갱신 후에도 진행 중 버전을 유지한다', async () => {
+  const server = serverFixture(), f = controllerFixture(server);
+  f.config({ implementedLessons: [2, 4], acceptLessons: [2, 4] });
+  await prepare(f);
+  assert.equal(f.state().session.version, '1.0.0');
+  const plan = structuredClone(f.state().session.plan);
+  f.config(server.service.respond('GET', { action: 'config' }).data);
+  await answer(f);
+  assert.equal(f.state().session.version, '1.0.0');
+  assert.deepEqual(f.state().session.plan, plan);
+  for (let i = 0; i < 3; i++) await answer(f);
+  f.controller.handleInput('l4-reflection', reflection);
+  await f.controller.handleClick('l4-submit', { dataset: {} });
+  assert.equal(f.state().status, 'sent');
+  assert.equal(server.db.l4_sessions.length, 1);
+  f.controller.stop();
+});
+
+test('새 대본 지원 서버에서 새 모둠은 키워드 질문으로 시작하고 재입장 때 그대로 복원한다', async () => {
+  const server = serverFixture(), f = controllerFixture(server);
+  await prepare(f);
+  assert.equal(f.state().session.version, '1.1.0');
+  assert.ok(f.state().session.plan.some(q => q.id.startsWith('L4K-')));
+  await answer(f);
+  const restored = controllerFixture(server, { storage: f.storage });
+  await restored.controller.handleForm(entryData());
+  assert.equal(restored.state().session.version, '1.1.0');
+  assert.deepEqual(restored.state().session.plan, f.state().session.plan);
+  assert.equal(restored.state().turn, 2);
+  f.controller.stop(); restored.controller.stop();
+});

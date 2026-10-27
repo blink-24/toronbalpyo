@@ -23,6 +23,20 @@ function clueCount(text, keywords) {
   return keywords.reduce((sum, keyword) => sum + Number(value.includes(canonical(keyword))), 0);
 }
 
+function keywordMatches(text, keywords) {
+  const normalized = canonical(text);
+  // 수치 단서는 단위·소수점을 지켜 70회/303명 같은 다른 수치를 오인하지 않습니다.
+  const numericText = String(text).normalize('NFKC').toLowerCase().replace(/\s/gu, '');
+  return [...new Set(keywords)].filter(word => {
+    const cue = String(word).normalize('NFKC').toLowerCase().replace(/\s/gu, '');
+    if (/^\d+(?:\.\d+)?%?$/.test(cue)) {
+      const escaped = cue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return new RegExp(`(?<![\\d.])${escaped}(?!\\d|\\.\\d)`, 'u').test(numericText);
+    }
+    return normalized.includes(canonical(word));
+  });
+}
+
 function pairs(value) {
   const text = canonical(value), result = new Set();
   for (let i = 0; i < text.length - 1; i++) result.add(text.slice(i, i + 2));
@@ -43,11 +57,31 @@ function snippetFor(session, bank) {
   for (const [slot, text] of [['①', session.arg1], ['⑤', session.arg5]]) {
     if (!text) continue;
     const sentences = text.split(/\n+|(?<=[.!?。！？])\s+/u).map(value => value.trim()).filter(Boolean);
-    for (const sentence of sentences) parts.push({ slot, sentence, score: clueCount(sentence, bank.keywords) });
+    for (const sentence of sentences) parts.push({ slot, sentence, score: session.version === '1.0.0'
+      ? clueCount(sentence, bank.keywords) : keywordMatches(sentence, bank.keywords).length });
   }
   parts.sort((a, b) => b.score - a.score);
   const selected = parts[0];
-  const text = selected.sentence.replace(/[“”"<>]/g, '').replace(/\s+/g, ' ');
+  let sentence = selected.sentence;
+  // 새 대본은 긴 문장 뒤의 단서도 인용하며 기존 세션의 문구는 그대로 복원합니다.
+  if (session.version !== '1.0.0' && sentence.length > 76 && selected.score > 0) {
+    const tokens = [];
+    const offsets = [];
+    let offset = 0;
+    for (const char of sentence) {
+      const part = canonical(char);
+      for (const token of part) { tokens.push(token); offsets.push(offset); }
+      offset += char.length;
+    }
+    const normalized = tokens.join('');
+    const positions = bank.keywords.map(word => normalized.indexOf(canonical(word))).filter(index => index >= 0);
+    const first = Math.min(...positions);
+    if (Number.isFinite(first) && offsets[first] > 45) {
+      const start = Math.max(0, offsets[first] - 18);
+      sentence = `…${sentence.slice(start)}`;
+    }
+  }
+  const text = sentence.replace(/[“”"<>]/g, '').replace(/\s+/g, ' ');
   return { slot: selected.slot, snippet: text.length > 76 ? `${text.slice(0, 75)}…` : text.replace(/[.。]$/, '') };
 }
 
@@ -67,14 +101,16 @@ export function createLesson4Engine(content) {
   invariant(content?.lesson === 4 && Array.isArray(content.questions) && Array.isArray(content.helpCards)
     && content.limits && content.labels?.virtualBadge, 'MISSING_CONTENT', '4차시 대본 자료를 불러오지 못했습니다.');
   const limits = content.limits;
-  const questionBank = new Map(content.questions.map(question => [question.id, question]));
-  invariant(questionBank.size === content.questions.length, 'DUPLICATE_CONTENT', '4차시 질문 번호가 겹칩니다.');
+  const allQuestions = [...content.questions, ...(content.keywordQuestions || [])];
+  const questionBank = new Map(allQuestions.map(question => [question.id, question]));
+  invariant(questionBank.size === allQuestions.length, 'DUPLICATE_CONTENT', '4차시 질문 번호가 겹칩니다.');
   const helpBank = new Map(content.helpCards.map(card => [card.id, card]));
   invariant(helpBank.size === content.helpCards.length, 'DUPLICATE_CONTENT', '4차시 도움 자료 번호가 겹칩니다.');
   invariant(content.helpCards.every(card => card.virtual === true && card.badge === content.labels.virtualBadge
     && /가상/.test(card.source)), 'INVALID_VIRTUAL_CARD', '4차시 도움 자료에는 가상 자료 표시가 필요합니다.');
 
   function checkSession(session) {
+    invariant([content.version, '1.0.0'].includes(session?.version), 'INVALID_SCRIPT_VERSION', '대본 복원 버전을 확인해 주세요.');
     invariant(session?.lesson === 4 && sessionIdPattern.test(session.sessionId || '') && typeof session.seed === 'string'
       && [3, 4, 5].includes(session.questionCount) && Array.isArray(session.plan)
       && session.plan.length === session.questionCount && Array.isArray(session.answers),
@@ -88,6 +124,7 @@ export function createLesson4Engine(content) {
       const bank = questionBank.get(item.id);
       invariant(bank && bank.stance === session.stance && bank.targetKey === item.targetKey && bank.criterion === item.criterion,
         'INVALID_SESSION', '4차시 질문 계획을 확인해 주세요.');
+      invariant(session.version !== '1.0.0' || !bank.cueId, 'INVALID_SCRIPT_VERSION', '기존 대본의 질문 계획을 확인해 주세요.');
     }
     invariant(session.answers.length <= session.questionCount && session.answers.every((entry, index) =>
       entry.turn === index + 1 && entry.questionId === session.plan[index].id),
@@ -106,17 +143,39 @@ export function createLesson4Engine(content) {
     invariant(['string', 'number'].includes(typeof (input.seed ?? input.sessionId)), 'INVALID_SEED', '대담 복원 정보를 확인해 주세요.');
     const seed = String(input.seed ?? input.sessionId);
     invariant(seed.length > 0 && seed.length <= 256, 'INVALID_SEED', '대담 복원 정보를 확인해 주세요.');
+    const scriptVersion = input.scriptVersion ?? content.version;
+    invariant([content.version, '1.0.0'].includes(scriptVersion), 'INVALID_SCRIPT_VERSION', '지원하는 대본 버전을 확인해 주세요.');
     const text = `${arg1}\n${arg5}`;
-    const candidates = shuffle(content.questions.filter(bank => bank.stance === stance), `${seed}:questions`)
-      .map(bank => ({ bank, matches: clueCount(text, bank.keywords) }))
+    let candidates = shuffle(content.questions.filter(bank => bank.stance === stance), `${seed}:questions`)
+      .map(bank => ({ bank, matches: scriptVersion === '1.0.0' ? clueCount(text, bank.keywords) : keywordMatches(text, bank.keywords).length }))
       .filter(item => !item.bank.requiresCue || item.matches > 0)
       .map(item => ({ ...item, score: item.matches * 10 + (item.matches ? item.bank.priority : 0) }))
       .sort((a, b) => b.score - a.score);
+    if (scriptVersion !== '1.0.0') {
+      const targeted = (content.keywordProfiles || []).flatMap(profile => {
+        const matches = keywordMatches(text, profile.keywords).map(canonical);
+        if (!matches.length) return [];
+        const variants = allQuestions.filter(bank => bank.cueId === profile.id && bank.stance === stance);
+        const bank = shuffle(variants, `${seed}:${profile.id}:${stance}:variant`)[0];
+        invariant(bank, 'MISSING_QUESTION', '입론 단서의 대응 질문이 부족합니다.');
+        // 동의어·반복 나열이 점수를 무한히 올리지 않으며 출처·보류 검토는 우선합니다.
+        return [{ bank, matches: matches.length, score: profile.priority * 1000
+          + Math.min(matches.length, 3) * 10 + Math.min(Math.max(...matches.map(word => word.length)), 20) }];
+      });
+      candidates = shuffle([...targeted, ...candidates.map(item => ({ ...item, score: Math.min(item.score, 99) }))], `${seed}:keyword-order`)
+        .sort((a, b) => b.score - a.score);
+    }
     const selected = [];
     const allowed = item => !selected.some(other => other.bank.targetKey === item.bank.targetKey
+      || (scriptVersion !== '1.0.0' && Boolean(other.bank.cueId) !== Boolean(item.bank.cueId)
+        && (other.bank.family || other.bank.topic) === (item.bank.family || item.bank.topic))
       || similarity(other.bank.verify, item.bank.verify) >= 0.67);
     // 기준은 반복될 수 있지만, 기본 세 기준은 한 번씩 다루고 대상은 겹치지 않습니다.
-    for (const criterion of criteria) {
+    // 새 대본은 감지된 단서를 먼저 확보한 뒤 부족한 기준을 일반 질문으로 채웁니다.
+    const criterionOrder = scriptVersion === '1.0.0' ? criteria : criteria.slice().sort((left, right) =>
+      (candidates.find(item => item.bank.criterion === right)?.score || 0)
+      - (candidates.find(item => item.bank.criterion === left)?.score || 0));
+    for (const criterion of criterionOrder) {
       const candidate = candidates.find(item => item.bank.criterion === criterion && allowed(item));
       invariant(candidate, 'MISSING_QUESTION', '입론에 맞는 4차시 질문이 부족합니다.');
       selected.push(candidate);
@@ -129,7 +188,7 @@ export function createLesson4Engine(content) {
     selected.sort((a, b) => b.score - a.score || candidates.indexOf(a) - candidates.indexOf(b));
     const plan = selected.map(({ bank, score }) => ({ id: bank.id, criterion: bank.criterion,
       targetKey: bank.targetKey, severity: score }));
-    return { version: content.version, lesson: 4, sessionId: input.sessionId, stance, arg1, arg5,
+    return { version: scriptVersion, lesson: 4, sessionId: input.sessionId, stance, arg1, arg5,
       questionCount, seed, plan, answers: [], mode: 'script' };
   }
 
