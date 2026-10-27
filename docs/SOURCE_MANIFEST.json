@@ -1,8 +1,8 @@
 {
   "version": "5.1.0",
   "baseline": "lessonplan-v6-webapp-v5-user-script-first-2026-10-27",
-  "external_state": "GitHub feature candidate; Apps Script original server; owner code replacement/setupDB/existing deployment update pending",
-  "tests_passed": 107,
+  "external_state": "GitHub feature PR9; original Apps Script server; owner update pending; deployment evidence is tracked in PR9 and issue8",
+  "tests_passed": 109,
   "files": [
     {
       "path": ".github/ISSUE_TEMPLATE/bug_report.yml",
@@ -122,7 +122,7 @@
     },
     {
       "path": "docs/VALIDATION.md",
-      "sha256": "eb39e19af6de8c7e68c27e3c912fa4088a0239800e427434cfef6d2309af1953"
+      "sha256": "ca72ee00bd4bbc801e3edc6ee85537b6acc3fd81499fc9c677ab8c443cf5e48c"
     },
     {
       "path": "index.html",
@@ -138,7 +138,7 @@
     },
     {
       "path": "qa/lesson4-browser.mjs",
-      "sha256": "4ace529f5c7b3a064773550e6b9c73e339f73e3a06e630380719f479bbaa0b5d"
+      "sha256": "cb16a6484b1a2dee0bafc23ed2957e38e8bf839b47ea74014ba6b03ad1e0f989"
     },
     {
       "path": "qa/lesson4-fixture.mjs",
@@ -174,7 +174,7 @@
     },
     {
       "path": "src/main.js",
-      "sha256": "8a4c54d5227127ceb496984148ea7e4d6f70dd8546d2dfd93c90c6579cdc491c"
+      "sha256": "e353f5551a3da60ff7d1ef3ac0e7d6d1f1a505688fb43d316cd2a988558b0dda"
     },
     {
       "path": "src/network/client.js",
@@ -226,7 +226,7 @@
     },
     {
       "path": "tests/ui/frontend-regressions.test.mjs",
-      "sha256": "613e31b01d5b18d2ef6159eeacdd5ea62d03b247042fb0a0e4fde7c57c44c648"
+      "sha256": "2c58b1d33c6ed347074f482a81595163c9c7bba62670b2656057ed3c53000d4d"
     },
     {
       "path": "tests/ui/lesson4-ui.test.mjs",

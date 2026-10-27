@@ -62,6 +62,31 @@ try {
   await inspect(teacher, 'teacher-controls');
   report.cases.push({ name: 'teacher open L4, unauthorized write denied', status: 'passed' });
 
+  const l2Context = await context({ viewport: { width: 1280, height: 900 } });
+  const l2 = await l2Context.newPage(); l2.setDefaultTimeout(35000);
+  const waitL2 = async expected => {
+    await l2.waitForFunction(value => JSON.parse(localStorage.getItem('chaeum:v5:state') || '{}').activity?.step === value, expected);
+    await l2.waitForFunction(() => !document.querySelector('.busy-note'));
+  };
+  await l2.goto(site, { waitUntil: 'networkidle' }); await l2.locator('#tab-activity').click();
+  await l2.locator('#student-id').fill('21195'); await l2.locator('form[data-form="login"] button[type="submit"]').click();
+  await waitL2('stance'); await l2.locator('[data-action="stance"][data-value="반대"]').click();
+  await l2.locator('[data-action="next"]').click(); await waitL2('reason');
+  await l2.locator('[data-action="reason"][data-id="RN2"]').click(); await l2.locator('[data-action="next"]').click(); await waitL2('evidence');
+  await l2.locator('[data-action="card"][data-id="ND"]').click(); await l2.locator('[data-action="next"]').click(); await waitL2('argument');
+  await l2.locator('[data-action="next"]').click(); await waitL2('dialogue');
+  assert.match(await l2.locator('.chat-person').innerText(), /찬성측 토론자/);
+  for (let turn = 1; turn <= 3; turn++) {
+    await l2.locator('#answer-text').fill('한계는 인정합니다. 다만 보행 중 스마트폰 정책은 자료의 출처와 시기, 다른 원인을 함께 확인해서 주장 범위를 제한하고 근거를 보완하겠습니다.');
+    await l2.locator('[data-action="cite"]').first().click();
+    await l2.locator('[data-action="commit-answer"]').click(); await waitL2(turn === 3 ? 'feedback' : 'dialogue');
+  }
+  await l2.locator('#reflection-text').fill('다음에는 자료의 출처와 정책의 적용 범위를 함께 확인하겠습니다.');
+  await l2.locator('[data-action="submit"]').click(); await waitL2('complete');
+  await l2.waitForFunction(() => JSON.parse(localStorage.getItem('chaeum:v5:state') || '{}').activity?.status === 'sent');
+  await inspect(l2, 'lesson2-existing-complete'); await l2Context.close();
+  report.cases.push({ name: 'existing L2 three answers, opposing role, saved once', status: 'passed' });
+
   for (const options of [
     { name: 'desktop-four', viewport: { width: 1440, height: 1000 }, mobile: false, early: false, offline: false, stance: '찬성' },
     { name: 'mobile-early-offline', viewport: { width: 390, height: 844 }, mobile: true, early: true, offline: true, stance: '반대' }
