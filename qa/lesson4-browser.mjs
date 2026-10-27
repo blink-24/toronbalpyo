@@ -32,6 +32,11 @@ async function context(options = {}) {
     if (url.hostname === 'script.google.com') {
       if (ctx.apiOffline) return route.abort('internetdisconnected');
       const response = await route.fetch({ url: api + url.search });
+      if (ctx.oldServer && url.searchParams.get('action') === 'config') {
+        const body = await response.json(); delete body.data.implementedLessons;
+        delete body.data.l4AiEnabled; body.data.appVersion = '5.0.0';
+        return route.fulfill({ response, body: JSON.stringify(body), headers: { ...response.headers(), 'access-control-allow-origin': '*' } });
+      }
       return route.fulfill({ response, headers: { ...response.headers(), 'access-control-allow-origin': '*' } });
     }
     return route.abort('blockedbyclient');
@@ -121,6 +126,16 @@ try {
   await teacher.locator('[data-action="teacher-refresh"]').click();
   await teacher.getByText('검토용 desktop-four', { exact: true }).first().waitFor();
   await inspect(teacher, 'teacher-group-results');
+  await teacher.locator('[data-action="teacher-record"]').first().click();
+  assert.match(await teacher.locator('[role="dialog"]').innerText(), /21196, 21197, 21198, 21199/);
+  assert.equal(await teacher.locator('[data-action="project-answer"]').count(), 4);
+  await teacher.locator('[data-action="project-answer"]').first().click();
+  assert.doesNotMatch(await teacher.locator('[role="dialog"]').innerText(), /2119[6-9]|검토용/);
+  await teacher.locator('[data-action="close-dialog"]').first().click();
+  const watchingContext = await context(); const watching = await watchingContext.newPage();
+  watching.setDefaultTimeout(25000);
+  await watching.goto(site + '#/lesson4', { waitUntil: 'networkidle' });
+  await watching.locator('#l4-group-name').fill('닫힘 중 보존할 초안');
   await teacher.locator('[data-action="toggle-lesson"][data-lesson="2"]').click();
   await teacher.waitForFunction(() => document.querySelector('[data-action="toggle-lesson"][data-lesson="2"]')?.textContent.includes('열기'));
   await teacher.locator('[data-action="toggle-lesson"][data-lesson="4"]').click();
@@ -128,13 +143,29 @@ try {
   assert.deepEqual((await call('config', {}, 'GET')).data.acceptLessons, []);
   assert.equal((await call('progress', { lesson: 2, studentId: '21199' })).error.code, 'LESSON_CLOSED');
   assert.equal((await call('progress', { lesson: 4, studentId: '21199' })).error.code, 'LESSON_CLOSED');
+  await watching.locator('[data-lesson-locked="4"]').waitFor();
+  assert.equal((await state(watching)).lesson4.groupName, '닫힘 중 보존할 초안');
   const closedContext = await context(); const closed = await closedContext.newPage();
   await closed.goto(site, { waitUntil: 'networkidle' });
   assert.equal(await closed.locator('[data-action="learn-slide"]').count(), 0, 'L2 learning also gated');
   await closed.locator('#lesson-tab-4').click();
   assert.equal(await closed.locator('form[data-form="l4-entry"]').count(), 0);
   await inspect(closed, 'both-lessons-closed'); await closedContext.close();
+  await teacher.locator('[data-action="toggle-lesson"][data-lesson="4"]').click();
+  await watching.locator('#l4-group-name').waitFor();
+  assert.equal(await watching.locator('#l4-group-name').inputValue(), '닫힘 중 보존할 초안');
+  await inspect(watching, 'reopened-draft-preserved'); await watchingContext.close();
   report.cases.push({ name: 'teacher group results and both closed on client/server', status: 'passed' });
+  await call('set_lessons', { passcode: 'fixture-teacher-only', acceptLessons: [2,4] });
+  const legacyContext = await context(); legacyContext.oldServer = true;
+  const legacy = await legacyContext.newPage();
+  await legacy.goto(site, { waitUntil: 'networkidle' });
+  assert.equal(await legacy.locator('[data-action="learn-slide"]').count(), 19);
+  await legacy.locator('#lesson-tab-4').click();
+  await legacy.getByText('4차시를 준비하고 있어요.', { exact: true }).waitFor();
+  assert.equal(await legacy.locator('form[data-form="l4-entry"]').count(), 0);
+  await inspect(legacy, 'original-server-compatibility'); await legacyContext.close();
+  report.cases.push({ name: 'original server keeps L2, L4 preparing', status: 'passed' });
 } finally {
   report.completedAt = new Date().toISOString();
   await fs.writeFile(new URL('report.json', output), JSON.stringify(report, null, 2));
