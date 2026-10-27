@@ -2,7 +2,7 @@
   "version": "5.2.0",
   "baseline": "lessonplan-v6-webapp-v5-user-keyword30-script-first-2026-10-27",
   "external_state": "Keyword scripts implemented and verified locally; actual server5.1.0 unchanged until owner deployment; frontend negotiates script version",
-  "tests_passed": 155,
+  "tests_passed": 156,
   "files": [
     {
       "path": ".github/ISSUE_TEMPLATE/bug_report.yml",
@@ -58,7 +58,7 @@
     },
     {
       "path": "backend/ServerBundle.gs",
-      "sha256": "125af2173dac3da33c992cbbf6ca9c13e65737f4165fe55769dbe94a75826a45"
+      "sha256": "425d55edcc464ea18fe410447fe71992aca49605d6aba8dff1d2fbf7700c8ff1"
     },
     {
       "path": "backend/appsscript.json",
@@ -102,7 +102,7 @@
     },
     {
       "path": "docs/DEPLOYMENT_STATUS.md",
-      "sha256": "a05055cc32640b425a357b1eca86243bcacd05358279ec29109fb8bdd609bb5e"
+      "sha256": "75f0de935f87efb9c5d043933949de967cc7500abcbba189db0f56c3fbbf106b"
     },
     {
       "path": "docs/LESSON4_IMPLEMENTATION_CONTRACT.md",
@@ -110,7 +110,7 @@
     },
     {
       "path": "docs/LESSON4_KEYWORD_SCRIPTS.md",
-      "sha256": "465b9160ad7c6d1f06373961321909aa656ca7d2c87a620ec57996a80f0badbb"
+      "sha256": "ae310ac743c4e1f8322c069b25a73a25e8d952cf89abe06816485451edf25f33"
     },
     {
       "path": "docs/MAINTENANCE.md",
@@ -122,11 +122,11 @@
     },
     {
       "path": "docs/SERVER_UPDATE.md",
-      "sha256": "1ecba9cab1f166d9924e944942d8f927779dc88a299a978ceb1954dc8051c9ff"
+      "sha256": "0a18e61535b8b68afe87c5a942fa9ba2f84bc65b25276373f317908380eadb55"
     },
     {
       "path": "docs/VALIDATION.md",
-      "sha256": "d5b8ba7b0479d927f55f0d365339530b595e31c5fa343a0abc00262357836e5e"
+      "sha256": "432171c268c537625042809e8e9060e6c0d8d8dcdb5782c3dfc4d57c3848640b"
     },
     {
       "path": "index.html",
@@ -178,7 +178,7 @@
     },
     {
       "path": "src/core/lesson4.js",
-      "sha256": "0aa65f315cd13afb3703bef1be0d3ffa051bfe35afe12a5dc8df2002063ef8b7"
+      "sha256": "d4314079b18b9712dda6f1f61c52aedfbcc20354e06e2a578923eaa4e6f8db79"
     },
     {
       "path": "src/main.js",
@@ -234,7 +234,7 @@
     },
     {
       "path": "tests/lesson4-keywords.test.mjs",
-      "sha256": "3e411597c4ef29c0f1c4d27e85e125b469413af5421c152c3fc28b84d889687e"
+      "sha256": "dc1a8ac809c208590708d936db3dfc66dbb97a2887c49642c402576122c70abb"
     },
     {
       "path": "tests/native-upgrade.test.mjs",

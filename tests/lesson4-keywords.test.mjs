@@ -85,6 +85,17 @@ test('알 수 없는 단서는 일반 질문으로 진행하고 핵심어 반복
   assert.throws(() => engine.buildSession(input({ scriptVersion: 'untrusted-version' })), error => error.code === 'INVALID_SCRIPT_VERSION');
 });
 
+test('설문 비율·소수점 단서는 숫자 일부나 다른 단위와 혼동하지 않는다', () => {
+  const has = (text, id) => engine.buildSession(input({ arg1: argument(text), questionCount: 5 })).plan.some(q => q.targetKey === `argument.keyword.${id}`);
+  assert.equal(has('70%', 'survey'), true);
+  assert.equal(has('７０ ％', 'survey'), true);
+  assert.equal(has('170%', 'survey'), false);
+  assert.equal(has('70회', 'survey'), false);
+  assert.equal(has('30.3%', 'remote'), true);
+  assert.equal(has('303명', 'remote'), false);
+  assert.equal(has('130.3%', 'remote'), false);
+});
+
 test('혼합 단서는 보류·원출처 검토를 우선하고 중복 없이3~5답 완료·복원된다', () => {
   for (const stance of ['찬성', '반대']) for (const count of [3, 4, 5]) for (let i = 0; i < 30; i++) {
     // 30종 전체 및 서로 다른 부분 집합도 시험해 후보 부족·반복 질문을 찾는다.

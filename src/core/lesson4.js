@@ -23,6 +23,20 @@ function clueCount(text, keywords) {
   return keywords.reduce((sum, keyword) => sum + Number(value.includes(canonical(keyword))), 0);
 }
 
+function keywordMatches(text, keywords) {
+  const normalized = canonical(text);
+  // 수치 단서는 단위·소수점을 지켜 70회/303명 같은 다른 수치를 오인하지 않습니다.
+  const numericText = String(text).normalize('NFKC').toLowerCase().replace(/\s/gu, '');
+  return [...new Set(keywords)].filter(word => {
+    const cue = String(word).normalize('NFKC').toLowerCase().replace(/\s/gu, '');
+    if (/^\d+(?:\.\d+)?%?$/.test(cue)) {
+      const escaped = cue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return new RegExp(`(?<![\\d.])${escaped}(?!\\d|\\.\\d)`, 'u').test(numericText);
+    }
+    return normalized.includes(canonical(word));
+  });
+}
+
 function pairs(value) {
   const text = canonical(value), result = new Set();
   for (let i = 0; i < text.length - 1; i++) result.add(text.slice(i, i + 2));
@@ -43,7 +57,8 @@ function snippetFor(session, bank) {
   for (const [slot, text] of [['①', session.arg1], ['⑤', session.arg5]]) {
     if (!text) continue;
     const sentences = text.split(/\n+|(?<=[.!?。！？])\s+/u).map(value => value.trim()).filter(Boolean);
-    for (const sentence of sentences) parts.push({ slot, sentence, score: clueCount(sentence, bank.keywords) });
+    for (const sentence of sentences) parts.push({ slot, sentence, score: session.version === '1.0.0'
+      ? clueCount(sentence, bank.keywords) : keywordMatches(sentence, bank.keywords).length });
   }
   parts.sort((a, b) => b.score - a.score);
   const selected = parts[0];
@@ -132,14 +147,13 @@ export function createLesson4Engine(content) {
     invariant([content.version, '1.0.0'].includes(scriptVersion), 'INVALID_SCRIPT_VERSION', '지원하는 대본 버전을 확인해 주세요.');
     const text = `${arg1}\n${arg5}`;
     let candidates = shuffle(content.questions.filter(bank => bank.stance === stance), `${seed}:questions`)
-      .map(bank => ({ bank, matches: clueCount(text, bank.keywords) }))
+      .map(bank => ({ bank, matches: scriptVersion === '1.0.0' ? clueCount(text, bank.keywords) : keywordMatches(text, bank.keywords).length }))
       .filter(item => !item.bank.requiresCue || item.matches > 0)
       .map(item => ({ ...item, score: item.matches * 10 + (item.matches ? item.bank.priority : 0) }))
       .sort((a, b) => b.score - a.score);
     if (scriptVersion !== '1.0.0') {
-      const normalized = canonical(text);
       const targeted = (content.keywordProfiles || []).flatMap(profile => {
-        const matches = [...new Set(profile.keywords.map(canonical))].filter(word => normalized.includes(word));
+        const matches = keywordMatches(text, profile.keywords).map(canonical);
         if (!matches.length) return [];
         const variants = allQuestions.filter(bank => bank.cueId === profile.id && bank.stance === stance);
         const bank = shuffle(variants, `${seed}:${profile.id}:${stance}:variant`)[0];
