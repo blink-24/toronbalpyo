@@ -240,8 +240,8 @@ test('전송 대기 초기 진행 정보가 늦게 도착해도 제출 단계를
   const late = f.service.respond('POST', { action: 'progress', lesson: 2, studentId: '20315', cls: 3, sessionId: request.sessionId, stage: 'argument' });
   assert.equal(late.data.ignored, true); assert.equal(f.db.progress.length, count); assert.equal(f.db.progress.at(-1).stage, 'submitted');
 });
-test('9개 탭과 append-only 머리글, GAS doPost text/plain JSON 포장', async () => {
-  assert.equal(Object.keys(HEADERS).length, 9);
+test('기존9개와 기록2개 탭 및 append-only 머리글, GAS doPost text/plain JSON 포장', async () => {
+  assert.equal(Object.keys(HEADERS).length, 11);
   const sandbox = { PropertiesService: {}, SpreadsheetApp: {}, LockService: {}, ContentService: { MimeType: { JSON: 'application/json' }, createTextOutput: text => ({ text, setMimeType(type) { this.mime = type; return this; } }) } };
   vm.createContext(sandbox); vm.runInContext(await fs.readFile(new URL('../backend/ServerBundle.gs', import.meta.url), 'utf8'), sandbox);
   let actual = ['legacy', 'receivedAt'], writes = [];
@@ -252,4 +252,22 @@ test('9개 탭과 append-only 머리글, GAS doPost text/plain JSON 포장', asy
   const result = sandbox.doPost({ postData: { type: 'text/plain;charset=utf-8', contents: JSON.stringify(submission()) } });
   assert.equal(JSON.parse(result.text).ok, true); assert.equal(result.mime, 'application/json');
   assert.equal(JSON.parse(sandbox.doPost({ postData: { contents: 'bad-json' } }).text).error.code, 'INVALID_JSON');
+});
+
+
+test('2차시 기록 탭에 원문 기반 활동·관찰 기록을 만들고 재전송·재생성은 중복하지 않는다', () => {
+  const { service, db } = fixture(), request = submission();
+  assert.equal(service.respond('POST', request).ok, true);
+  assert.equal(db['2차시'].length, 1);
+  assert.ok(db['2차시'][0]['활동 기록문'].includes(request.data.argText));
+  assert.ok(db['2차시'][0]['활동 기록문'].includes(request.data.answers[0].answer));
+  assert.ok(db['2차시'][0]['교사용 관찰 기록문'].includes(request.data.reflection));
+  assert.equal(service.respond('POST', request).ok, true);
+  assert.equal(db['2차시'].length, 1);
+  db['2차시'].length = 0;
+  assert.equal(service.rebuildReports().added, 1);
+  assert.equal(service.rebuildReports().added, 0);
+  const teacher = service.respond('GET', { action: 'l2_summary', passcode: 'test-teacher-passcode', cls: 3 });
+  assert.equal(teacher.ok, true);
+  assert.equal(teacher.data.classBreakdown.find(row => row.cls === 3).pro, 1);
 });

@@ -521,9 +521,11 @@ const { createEngine, DomainError, invariant, normalizeStance, validateStudentId
   detectPII, validateQuestionOutput, validateFeedbackOutput, isClearlyUnrelated } = ClassroomCore;
 const { createLesson4Engine } = ClassroomLesson4;
 const LESSON4_CONTENT = {LESSON4_CONTENT:ClassroomLesson4Content,default:ClassroomLesson4Content}.default;
-const VERSION = '5.2.0';
+const VERSION = '5.3.0';
 const COMMON_HEADERS = ['receivedAt', 'submissionId', 'studentId', 'cls', 'groupNo', 'lesson', 'clientTs', 'appVersion'];
+const RECORD_HEADERS = ['receivedAt', 'submissionId', 'sessionId', 'cls', 'studentId', 'groupName', 'memberStudentIds', 'stance', '활동 기록문', '교사용 관찰 기록문'];
 const HEADERS = {
+  '2차시': RECORD_HEADERS, '4차시': RECORD_HEADERS,
   config: ['key', 'value', 'note'],
   l2_sessions: [...COMMON_HEADERS, 'sessionId', 'stance', 'reasonId', 'reasonText', 'cardId', 'argText',
     ...[1, 2, 3].flatMap(n => [`q${n}Id`, `q${n}Crit`, `q${n}Text`, `a${n}Text`, `a${n}Help`]),
@@ -562,6 +564,28 @@ function constantEqual(a, b) {
   for (let i = 0; i < Math.max(a.length, b.length); i++) diff |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
   return diff === 0;
 }
+function classroomRecord(row, lesson) {
+  const text = value => safeText(value).trim();
+  const sentences = [];
+  const args = lesson === 4 ? [row.arg1, row.arg5].filter(Boolean).join(' / ') : row.argText;
+  sentences.push(`${lesson}차시 활동에서 ${text(row.stance)} 입장으로 참여하였다. 입론에는 다음 내용을 작성하였다. “${text(args)}”`);
+  let answers = 0, cited = 0;
+  for (let n = 1; n <= (lesson === 4 ? 5 : 3); n++) {
+    const q = row[lesson === 4 ? `q${n}` : `q${n}Text`];
+    const a = row[lesson === 4 ? `a${n}` : `a${n}Text`];
+    if (!q) continue;
+    answers++;
+    const help = parseJSON(row[lesson === 4 ? `help${n}` : `a${n}Help`], []);
+    if (Array.isArray(help) && help.length) cited++;
+    sentences.push(`질문 ${n} “${text(q)}”에 대하여 “${text(a)}”라고 답변하였다.`);
+  }
+  sentences.push(`활동 후 성찰에는 “${text(row.reflection)}”라고 기록하였다.`);
+  return { receivedAt: row.receivedAt, submissionId: row.submissionId, sessionId: row.sessionId, cls: row.cls,
+    studentId: row.studentId, groupName: row.groupName || '', memberStudentIds: row.memberStudentIds || '', stance: row.stance,
+    '활동 기록문': sentences.join(' '),
+    '교사용 관찰 기록문': `${lesson === 4 ? '모둠' : '학생'}은 ${text(row.stance)} 입장의 입론을 제출하고 반대 신문 질문 ${answers}개에 답변을 남겼다. 도움 자료 선택 기록이 있는 답변 차례는 ${cited}개이다. 성찰에는 “${text(row.reflection)}”라고 작성하였다. 이 기록은 제출된 글과 선택 기록에 근거하며, 실제 협력 과정·발언 태도·자료의 진위를 판정하지 않는다.` };
+}
+
 function createService({ content, lesson4Content = LESSON4_CONTENT, store, properties, clock = () => Date.now(), hash, providerCall = null }) {
   const engine = createEngine(content);
   const lesson4Engine = createLesson4Engine(lesson4Content);
@@ -577,7 +601,7 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
       const val = values[field] ?? '';
       const cell = typeof val === 'object' ? JSON.stringify(val) : val;
       safe[field] = sanitizeCell(cell);
-      invariant(typeof safe[field] !== 'string' || safe[field].length <= 2000, 'STORAGE_LENGTH', '기록할 입력란이 너무 깁니다.');
+      invariant(typeof safe[field] !== 'string' || safe[field].length <= (['2차시', '4차시'].includes(tab) ? 20000 : 2000), 'STORAGE_LENGTH', '기록할 입력란이 너무 깁니다.');
     }
     store.append(tab, safe);
   }
@@ -992,6 +1016,16 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
       byStance: stanceCounts, byReason: reasonCounts, byCard: cardCounts, lowReliability: { count: low, rate: completed.length ? low / completed.length : 0 },
       metrics: { answerCount: items, reliabilityGoodRate: items ? feedbackCounts.reliability['●'] / items : 0, validityGoodRate: items ? feedbackCounts.validity['●'] / items : 0 } };
   }
+  function classBreakdown(lesson) {
+    const records = lesson === 4 ? latestGroups('l4_sessions', null) : latest('l2_sessions', null);
+    return Array.from({ length: config().classCount }, (_, index) => {
+      const cls = index + 1, selected = records.filter(row => Number(row.cls) === cls);
+      const pro = selected.filter(row => row.stance === '찬성').length;
+      const con = selected.filter(row => row.stance === '반대').length;
+      return { cls, completed: selected.length, pro, con, denominator: pro + con,
+        proRate: pro + con ? pro / (pro + con) : 0, conRate: pro + con ? con / (pro + con) : 0 };
+    });
+  }
   function classFilter(value) {
     if (value === undefined || value === '') return null;
     const n = Number(value); invariant(Number.isInteger(n) && n >= 1 && n <= config().classCount, 'INVALID_CLASS', '반을 확인해 주세요.'); return n;
@@ -1010,7 +1044,7 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
     if (action === 'l2_summary') {
       const records = latest('l2_sessions', cls), progress = latest('progress', cls).map(x => ({ studentId: x.studentId, masked: `${String(x.studentId).slice(0, 3)}**`, cls: x.cls, stage: x.stage, receivedAt: x.receivedAt, mode: stateFor(x.sessionId)?.mode || 'script' }));
       const answers = records.flatMap(row => [1, 2, 3].filter(n => row[`q${n}Id`]).map(n => ({ questionId: row[`q${n}Id`], answer: row[`a${n}Text`], masked: `${String(row.studentId).slice(0, 3)}**`, sessionId: row.sessionId })));
-      return { ...summary(cls), records, progress, answers };
+      return { ...summary(cls), records, progress, answers, classBreakdown: classBreakdown(2) };
     }
     if (action === 'l4_summary') {
       const records = latestGroups('l4_sessions', cls).map(row => ({ ...row, memberStudentIds: parseJSON(row.memberStudentIds, []) }));
@@ -1019,7 +1053,7 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
         stage: row.stage, receivedAt: row.receivedAt, mode: 'script' }));
       const answers = records.flatMap(row => [1, 2, 3, 4, 5].filter(n => row[`q${n}`]).map(n => ({ questionId: `L4-${n}`,
         questionText: row[`q${n}`], answer: row[`a${n}`], groupName: row.groupName, sessionId: row.sessionId })));
-      return { ...summaryLesson4(cls), records, progress, answers };
+      return { ...summaryLesson4(cls), records, progress, answers, classBreakdown: classBreakdown(4) };
     }
     if (action === 'list') {
       invariant(['l2_sessions', 'ai_log', 'l3_args', 'l4_sessions', 'recordings', 'uploads', 'progress'].includes(request.tab), 'INVALID_TAB', '조회할 탭을 확인해 주세요.');
@@ -1057,14 +1091,31 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
     }
     throw new DomainError('UNKNOWN_ACTION', '현재 지원하지 않는 활동입니다.');
   }
+  function rebuildReports(onlyId = null) {
+    return locked(() => {
+      let added = 0;
+      for (const lesson of [2, 4]) {
+        const tab = `${lesson}차시`, existing = new Set(rows(tab).map(row => row.submissionId));
+        for (const row of rows(lesson === 2 ? 'l2_sessions' : 'l4_sessions')) {
+          if (!row.submissionId || (onlyId && row.submissionId !== onlyId) || existing.has(row.submissionId)) continue;
+          append(tab, classroomRecord(row, lesson)); existing.add(row.submissionId); added++;
+        }
+      }
+      return { added };
+    });
+  }
   function respond(method, request) {
-    try { return { ok: true, data: method === 'GET' ? handleGet(request) : handlePost(request) }; }
+    try {
+      const data = method === 'GET' ? handleGet(request) : handlePost(request);
+      if (method === 'POST' && request.action === 'submit' && data.accepted) rebuildReports(request.submissionId);
+      return { ok: true, data };
+    }
     catch (error) { return { ok: false, error: { code: error instanceof DomainError ? error.code : 'SERVER_ERROR', message: error instanceof DomainError ? error.message : '서버 연결을 확인한 뒤 다시 시도해 주세요.' } }; }
   }
-  return { respond, handleGet, handlePost, config, engine, lesson4Engine, headers: HEADERS };
+  return { respond, handleGet, handlePost, config, engine, lesson4Engine, rebuildReports, headers: HEADERS };
 }
 
-return {VERSION,COMMON_HEADERS,HEADERS,createService};
+return {VERSION,COMMON_HEADERS,HEADERS,classroomRecord,createService};
 })();
 /* 이 파일은 Apps Script 전용입니다. 설정·키는 Script Properties에만 둡니다. */
 function classroomSpreadsheet_() {
@@ -1096,6 +1147,10 @@ function setupDB() {
   Object.keys(ClassroomService.HEADERS).forEach(function(name) {
     var sheet = db.getSheetByName(name) || db.insertSheet(name);
     classroomHeaders_(sheet, ClassroomService.HEADERS[name]);
+    if ((name === '2차시' || name === '4차시') && typeof sheet.setColumnWidths === 'function') {
+      sheet.setColumnWidths(9, 2, 560);
+      sheet.getRange(1, 9, sheet.getMaxRows(), 2).setWrap(true);
+    }
   });
   var config = db.getSheetByName('config');
   var all = config.getDataRange().getValues();
@@ -1107,6 +1162,7 @@ function setupDB() {
   var props = PropertiesService.getScriptProperties();
   if (!props.getProperty('AI_PROVIDER')) props.setProperty('AI_PROVIDER', 'none');
   if (!props.getProperty('AI_RATE_PER_HOUR')) props.setProperty('AI_RATE_PER_HOUR', '30');
+  classroomService_().rebuildReports();
   return { initialized: true, tabs: Object.keys(ClassroomService.HEADERS), passcodeConfigured: !!props.getProperty('PASSCODE'), aiProvider: props.getProperty('AI_PROVIDER') };
 }
 
