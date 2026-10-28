@@ -42,7 +42,7 @@ async function runFlow(options) {
       await page.goto(site, { waitUntil: 'networkidle' });
       await page.locator('#tab-learn').waitFor();
       assert.equal(await page.locator('.main-tabs [role="tab"]').count(), 2);
-      assert.equal(await page.locator('[data-action="learn-slide"]').count(), 19);
+      assert.equal(await page.locator('[data-action="learn-slide"]').count(), 18);
       await inspect(page, `${options.name}-learning`);
       if (!options.mobile) {
         for (const index of [4, 13, 15]) {

@@ -124,7 +124,7 @@ try {
     try {
       await page.goto(site, { waitUntil: 'networkidle' });
       await page.locator('#tab-learn').waitFor();
-      assert.equal(await page.locator('[data-action="learn-slide"]').count(), 19);
+      assert.equal(await page.locator('[data-action="learn-slide"]').count(), 18);
       await page.locator('#lesson-tab-4').click();
       await page.locator('#l4-representative').fill('21199');
       await page.locator('#l4-group-name').fill(`검토용 ${options.name}`);
@@ -243,7 +243,7 @@ try {
   const legacyContext = await context(); legacyContext.oldServer = true;
   const legacy = await legacyContext.newPage();
   await legacy.goto(site, { waitUntil: 'networkidle' });
-  assert.equal(await legacy.locator('[data-action="learn-slide"]').count(), 19);
+  assert.equal(await legacy.locator('[data-action="learn-slide"]').count(), 18);
   await legacy.locator('#lesson-tab-4').click();
   await legacy.getByText('4차시를 준비하고 있어요.', { exact: true }).waitFor();
   assert.equal(await legacy.locator('form[data-form="l4-entry"]').count(), 0);

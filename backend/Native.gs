@@ -28,6 +28,10 @@ function setupDB() {
   Object.keys(ClassroomService.HEADERS).forEach(function(name) {
     var sheet = db.getSheetByName(name) || db.insertSheet(name);
     classroomHeaders_(sheet, ClassroomService.HEADERS[name]);
+    if ((name === '2차시' || name === '4차시') && typeof sheet.setColumnWidths === 'function') {
+      sheet.setColumnWidths(9, 2, 560);
+      sheet.getRange(1, 9, sheet.getMaxRows(), 2).setWrap(true);
+    }
   });
   var config = db.getSheetByName('config');
   var all = config.getDataRange().getValues();
@@ -39,6 +43,7 @@ function setupDB() {
   var props = PropertiesService.getScriptProperties();
   if (!props.getProperty('AI_PROVIDER')) props.setProperty('AI_PROVIDER', 'none');
   if (!props.getProperty('AI_RATE_PER_HOUR')) props.setProperty('AI_RATE_PER_HOUR', '30');
+  classroomService_().rebuildReports();
   return { initialized: true, tabs: Object.keys(ClassroomService.HEADERS), passcodeConfigured: !!props.getProperty('PASSCODE'), aiProvider: props.getProperty('AI_PROVIDER') };
 }
 

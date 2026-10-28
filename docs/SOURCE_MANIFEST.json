@@ -1,8 +1,8 @@
 {
-  "version": "5.2.0",
+  "version": "5.3.0",
   "baseline": "lessonplan-v6-webapp-v5-user-keyword30-script-first-2026-10-27",
-  "external_state": "Keyword scripts implemented and verified locally; actual server5.1.0 unchanged until owner deployment; frontend negotiates script version",
-  "tests_passed": 156,
+  "external_state": "Record tabs and UI implemented; actual new GAS pending owner update",
+  "tests_passed": 159,
   "files": [
     {
       "path": ".github/ISSUE_TEMPLATE/bug_report.yml",
@@ -42,7 +42,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "0db0408973deedce2feab010e0cc380d4a7b592964028c979a770a752b43262c"
+      "sha256": "fc6e3dfac3a5da79d935fc59ba24290214b730e83c8e15940e2125d69d35c390"
     },
     {
       "path": "assets/favicon.svg",
@@ -50,7 +50,7 @@
     },
     {
       "path": "backend/Native.gs",
-      "sha256": "23be7492c758f0447b0d6936f46a6a421d3b706d1b0dc23236df83a4f00365bb"
+      "sha256": "23a67b945be8baa765d2a49cb6d2cf4afd24e2e74c91fc3ffe91bdc327841d69"
     },
     {
       "path": "backend/README.md",
@@ -58,7 +58,7 @@
     },
     {
       "path": "backend/ServerBundle.gs",
-      "sha256": "425d55edcc464ea18fe410447fe71992aca49605d6aba8dff1d2fbf7700c8ff1"
+      "sha256": "5c2e754f82d84967c08146b3da7cf459994705bb324b0df7daf120173807edc7"
     },
     {
       "path": "backend/appsscript.json",
@@ -66,11 +66,11 @@
     },
     {
       "path": "backend/schema.json",
-      "sha256": "83020386529627a7304e0747b1675b4fb4ab27d6cea39e109ff196cd72657558"
+      "sha256": "61ce9bcf99126caeb959f35f5884bd72ff0f2c448311c47e9fd0156503e44f5b"
     },
     {
       "path": "backend/service.js",
-      "sha256": "2dea8ec4c167ee5cdbd5a58098729b0239d2d2ae787b93882d507c97d626edcc"
+      "sha256": "ce2574014ca768a6cfe4caca0e418ebc66b5b4d8055e4c12c5398dece486a050"
     },
     {
       "path": "backend/sync.mjs",
@@ -78,7 +78,7 @@
     },
     {
       "path": "config.js",
-      "sha256": "317681b6dd6cf2549bf380d90932284f876783db010205da54af0215c0a561fd"
+      "sha256": "2e76ebe700df481d969a89f5c5c46f0a9063e6b2938fd852e0bbe2e54721e196"
     },
     {
       "path": "data/content.json",
@@ -102,7 +102,7 @@
     },
     {
       "path": "docs/DEPLOYMENT_STATUS.md",
-      "sha256": "75f0de935f87efb9c5d043933949de967cc7500abcbba189db0f56c3fbbf106b"
+      "sha256": "32d0de064caad299a6d35423302fd81c040e26939ffe2b3673722979daa13a24"
     },
     {
       "path": "docs/LESSON4_IMPLEMENTATION_CONTRACT.md",
@@ -122,7 +122,7 @@
     },
     {
       "path": "docs/SERVER_UPDATE.md",
-      "sha256": "0a18e61535b8b68afe87c5a942fa9ba2f84bc65b25276373f317908380eadb55"
+      "sha256": "b75e26a2c22aa66dd243e16d796f616b206ea4bcfac454df8b65edd4c7e9d91e"
     },
     {
       "path": "docs/VALIDATION.md",
@@ -134,19 +134,19 @@
     },
     {
       "path": "package.json",
-      "sha256": "d47071898bc50a036f56190951541d6fb4fe2b8b68baa5428c6e5e8102e30ba3"
+      "sha256": "9927ad956c09c4ed1f432e9da7f186965a8e9009d182ee0a3fc6623d33c79df3"
     },
     {
       "path": "qa/browser-audit.mjs",
-      "sha256": "0f8a78ee728d3019f30dae6d9e28c3030612b130aaab94e954274713376cafab"
+      "sha256": "b5b8507ed0d50b5b24a276492839dda676f3621635da01e3977be5a92189fdfd"
     },
     {
       "path": "qa/connection-browser.mjs",
-      "sha256": "ed09a800e2d6aae519d16861a37f571c2495aa4f87bf5cabdd786c61e917c00a"
+      "sha256": "39f4528e57075058efc61c3b29e9a2ab48fa34ed0bdf8eb186a1fc685cf52a51"
     },
     {
       "path": "qa/lesson4-browser.mjs",
-      "sha256": "8479f48e53f8e2736824b776e52a425d77f4344d648d4f4c1ed94d5e3109b32f"
+      "sha256": "b260fb079c1b7e7cad9f91283c1b11a4f60fa1e25f6f2108cf3196ecdf2f1adb"
     },
     {
       "path": "qa/lesson4-fixture.mjs",
@@ -158,7 +158,7 @@
     },
     {
       "path": "scripts/check-live-api.mjs",
-      "sha256": "89d80ad009e5b469914d0bc005a1e4268af46e4973de81c2cc452b028897b65b"
+      "sha256": "58b458b4fe4b09c06301ef67f28f3f28058c828eabd1a8dded3036e5d58d431d"
     },
     {
       "path": "scripts/check-project.mjs",
@@ -182,7 +182,7 @@
     },
     {
       "path": "src/main.js",
-      "sha256": "6480994c2d339aeb10e8f88e0490f4a8a5a5a72f2c8cdb381f3f07f5ea521a1f"
+      "sha256": "bd31425884ed11c11535042abbb6e20b7b598308e24a8e167b0cd67b85b08e17"
     },
     {
       "path": "src/network/client.js",
@@ -210,11 +210,11 @@
     },
     {
       "path": "styles.css",
-      "sha256": "44a1a4e47e6ee90bac757577c3babf12940c7b060e12ca0675a12e286a4c81c1"
+      "sha256": "e20dae244b3eb9caed665eecde677829fb45b4a5b597255c00a41029f6c475ba"
     },
     {
       "path": "tests/backend.test.mjs",
-      "sha256": "e2475ccb0eff88ba857bc78c8779308f5b3d3d1bc200628eaa55cbbc47ac1e35"
+      "sha256": "f751b50571a2a09d31a0850b2fc68de6b2def8a564e5a27f2b6f22b999e8529a"
     },
     {
       "path": "tests/engine.test.mjs",
@@ -226,7 +226,7 @@
     },
     {
       "path": "tests/lesson4-backend.test.mjs",
-      "sha256": "b762a9e3c6c4c6d42bbed580276651233d3dd4bd798408cb5e738b1ba40d2948"
+      "sha256": "3e86398fca07ebd7bfe31179ff07786ac34ed9aab686b86f6a2db2e8b5f55d3f"
     },
     {
       "path": "tests/lesson4-engine.test.mjs",

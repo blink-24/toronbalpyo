@@ -10,6 +10,30 @@
     "appVersion"
   ],
   "tabs": {
+    "2차시": [
+      "receivedAt",
+      "submissionId",
+      "sessionId",
+      "cls",
+      "studentId",
+      "groupName",
+      "memberStudentIds",
+      "stance",
+      "활동 기록문",
+      "교사용 관찰 기록문"
+    ],
+    "4차시": [
+      "receivedAt",
+      "submissionId",
+      "sessionId",
+      "cls",
+      "studentId",
+      "groupName",
+      "memberStudentIds",
+      "stance",
+      "활동 기록문",
+      "교사용 관찰 기록문"
+    ],
     "config": [
       "key",
       "value",

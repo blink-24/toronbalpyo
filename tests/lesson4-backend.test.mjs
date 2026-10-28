@@ -51,7 +51,7 @@ function savedState(f) {
 
 test('버전·차시 개방 계약과 기존 l4 열 순서를 보존한다', () => {
   const f = fixture({ opened: '2' }), cfg = f.service.respond('GET', { action: 'config' }).data;
-  assert.equal(VERSION, '5.2.0'); assert.equal(content.version, '5.0.0'); assert.equal(cfg.appVersion, VERSION);
+  assert.equal(VERSION, '5.3.0'); assert.equal(content.version, '5.0.0'); assert.equal(cfg.appVersion, VERSION);
   assert.equal(cfg.l4ScriptVersion, '1.1.0');
   assert.deepEqual(cfg.implementedLessons, [2, 4]); assert.equal(cfg.l4Questions, 4); assert.equal(cfg.l4AiEnabled, false);
   assert.deepEqual(cfg.acceptLessons, [2]); assert.equal(cfg.lessons[4].enabled, false);
@@ -237,7 +237,7 @@ test('최대 입론·다섯 답의 JSON 이스케이프를 복원하고 한도 �
   const restored = savedState(f); assert.equal(restored.arg1, maxArg); assert.equal(restored.arg5, maxArg); assert.equal(restored.answers[4].answer, maxAnswer);
   assert.equal(restored.feedback, undefined); assert.equal(restored.questionCache, undefined); assert.equal(restored.completedQuestionCount, 5);
   assert.ok(f.db.l4_sessions[0].groupName.startsWith("'="));
-  for (const rows of Object.values(f.db)) for (const row of rows) for (const value of Object.values(row)) if (typeof value === 'string') assert.ok(value.length <= 2000);
+  for (const [tab, rows] of Object.entries(f.db)) for (const row of rows) for (const value of Object.values(row)) if (typeof value === 'string') assert.ok(value.length <= (['2차시', '4차시'].includes(tab) ? 20000 : 2000));
   const rejected = fixture({ questionCount: 5 });
   let huge = engine.buildSession({ stance: '찬성', arg1: '\ud800'.repeat(1500), arg5: '\ud800'.repeat(1500), sessionId: 'lesson4-reject-max-001', questionCount: 5 });
   for (let n = 1; n <= 5; n++) huge = engine.recordAnswer(huge, { turn: n, answer: '\ud800'.repeat(600), helpIds: [] });
@@ -251,4 +251,33 @@ test('같은 세션 식별자를 써도 2·4차시의 상태·로그를 혼동�
   assert.equal(f.service.respond('POST', { action: 'turn', mode: 'question', lesson: 2, studentId: '20301', cls: 3, sessionId: s.sessionId, selection: l2, history: [], turn: 1, forceMode: 'script' }).ok, true);
   assert.equal(f.db.ai_log.length, 2); assert.deepEqual(f.db.ai_log.map(row => row.lesson).sort(), [2, 4]);
   assert.equal(f.service.respond('POST', turn(s)).ok, true);
+});
+
+
+test('모둠 기록 생성 실패 뒤 재전송하면 원래 제출은 한 행이고 기록 탭만 복구된다', () => {
+  let failOnce = true;
+  const f = fixture({ beforeAppend: tab => { if (tab === '4차시' && failOnce) { failOnce = false; throw Error('synthetic write failure'); } } });
+  const request = submit();
+  assert.equal(f.service.respond('POST', request).ok, false);
+  assert.equal(f.db.l4_sessions.length, 1);
+  assert.equal(f.service.respond('POST', request).ok, true);
+  assert.equal(f.db.l4_sessions.length, 1);
+  assert.equal(f.db['4차시'].length, 1);
+  const text = f.db['4차시'][0]['활동 기록문'];
+  assert.ok(text.includes(request.data.arg1));
+  assert.ok(text.includes(request.data.answers[0].answer));
+  assert.equal(f.service.rebuildReports().added, 0);
+});
+
+test('교사 반별 찬반 비율은 최신 모둠 기준이며 공개 집계에는 반별/기록문을 추가하지 않는다', () => {
+  const f = fixture(); f.service.respond('POST', submit());
+  const result = f.service.respond('GET', { action: 'l4_summary', passcode: 'virtual-teacher-passcode', cls: 3 });
+  assert.equal(result.ok, true);
+  const row = result.data.classBreakdown.find(item => item.cls === 3);
+  assert.equal(row.pro, 1); assert.equal(row.con, 0); assert.equal(row.proRate, 1);
+  const empty = result.data.classBreakdown.find(item => item.cls === 1);
+  assert.equal(empty.denominator, 0);
+  const published = f.service.respond('GET', { action: 'public_summary', lesson: 4 });
+  assert.equal('classBreakdown' in published.data, false);
+  assert.doesNotMatch(JSON.stringify(published.data), /활동 기록문|교사용 관찰 기록문/);
 });
