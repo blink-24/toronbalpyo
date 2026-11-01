@@ -112,15 +112,18 @@ function debateInstruction(turn, context) {
   return `AI 측 반박 ${turn.slot}을 ${max}자 이내로 쓴다. transcript에서 이미 나온 쟁점 한두 개만 골라 AI 측 주장이 유지되는 이유와 모둠 주장의 약점을 정리한다. 새 근거나 새 쟁점은 꺼내지 않는다.${turn.final ? ' 토론의 마지막 발언이므로 새 논점을 더하지 않는다.' : ''}`;
 }
 
-export function createService({ content, lesson4Content = LESSON4_CONTENT, store, properties, clock = () => Date.now(), hash, providerCall = null, debateCall = null }) {
+export function createService({ content, lesson4Content = LESSON4_CONTENT, store, properties, cache = null, clock = () => Date.now(), hash, providerCall = null, debateCall = null }) {
   const engine = createEngine(content);
   const lesson4Engine = createLesson4Engine(lesson4Content);
   const now = () => new Date(clock()).toISOString();
   const prop = key => safeText(properties.get(key));
   const rows = tab => store.read(tab) || [];
   const locked = fn => store.withLock(fn);
-  function cacheGet(key) { try { return properties.get(key); } catch { return null; } }
-  function cacheSet(key, value) { try { properties.set(key, value); return true; } catch { return false; } }
+  // 중복 확인 표시·사용량 같은 임시 값은 cache에 둡니다. Apps Script에서는 만료되는 CacheService를 써서
+  // 스크립트 속성이 계속 늘어나지 않게 합니다(원본 판정은 시트 행으로 다시 확인).
+  const temporary = cache || properties;
+  function cacheGet(key) { try { return temporary.get(key); } catch { return null; } }
+  function cacheSet(key, value) { try { temporary.set(key, value); return true; } catch { return false; } }
   function append(tab, values) {
     const safe = {};
     for (const field of HEADERS[tab]) {
@@ -225,7 +228,7 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
   function aiAllowed(actor) {
     if (!config().aiEnabled || !providerCall) return false;
     return locked(() => {
-      const key = `rate:${actor.studentId}:${Math.floor(clock() / 3600000)}`, used = Number(prop(key) || 0), requestedMax = Number(prop('AI_RATE_PER_HOUR') || 30);
+      const key = `rate:${actor.studentId}:${Math.floor(clock() / 3600000)}`, used = Number(cacheGet(key) || 0), requestedMax = Number(prop('AI_RATE_PER_HOUR') || 30);
       const max = Number.isInteger(requestedMax) && requestedMax >= 1 && requestedMax <= 300 ? requestedMax : 30;
       if (used >= max) return false;
       // 사용량을 확정하지 못하면 AI 호출을 하지 않아 학생별 한도를 우회하지 않습니다.
@@ -673,9 +676,12 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
   function debateLimits() {
     return { session: intProp('L4_DEBATE_SESSION_CALL_MAX', 20, 1, 200), daily: intProp('L4_DEBATE_DAILY_CALL_MAX', 400, 1, 20000) };
   }
-  const dayKey = () => `l4debate:day:${new Date(clock()).toISOString().slice(0, 10)}`;
+  // 하루 사용량은 날짜별 키를 늘리지 않고 스크립트 속성 하나(L4_DEBATE_USAGE = 날짜:횟수)에 덮어씁니다.
+  const today = () => new Date(clock()).toISOString().slice(0, 10);
+  function usageToday() { const [day, count] = safeText(prop('L4_DEBATE_USAGE')).split(':'); return day === today() ? Number(count) || 0 : 0; }
+  function setUsageToday(count) { try { properties.set('L4_DEBATE_USAGE', `${today()}:${Math.max(0, count)}`); return true; } catch { return false; } }
   function debateUsage() {
-    return { debateServerReady: debateServerReady(), debateCallsToday: Number(cacheGet(dayKey()) || 0), debateDailyMax: debateLimits().daily };
+    return { debateServerReady: debateServerReady(), debateCallsToday: usageToday(), debateDailyMax: debateLimits().daily };
   }
   const cleanText = value => safeText(value).replace(/^'(?=[=+\-@])/, '');
   function debateLabel(step) { const item = DEBATE_SEQUENCE[Number(step) - 1]; return item ? `${item.side} ${item.no} ${item.kind === '신문' ? '반대 신문' : item.kind}` : ''; }
@@ -853,11 +859,11 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
       const started = Number(cacheGet(pendingKey) || 0);
       // 같은 차례를 이미 만드는 중이면 중복 호출하지 않고 잠시 뒤 다시 묻게 합니다.
       if (started && clock() - started < 45000) return { pending: true };
-      const limits = debateLimits(), used = Number(cacheGet(dayKey()) || 0), spent = Number(state.aiCalls) || 0;
+      const limits = debateLimits(), used = usageToday(), spent = Number(state.aiCalls) || 0;
       const ready = debateServerReady();
       let reserve = ready ? Math.max(0, Math.min(2, limits.session - spent, limits.daily - used)) : 0;
       // 사용량을 기록하지 못하면 호출하지 않아 한도를 넘지 않습니다.
-      if (reserve && !cacheSet(dayKey(), String(used + reserve))) reserve = 0;
+      if (reserve && !setUsageToday(used + reserve)) reserve = 0;
       if (reserve) cacheSet(pendingKey, String(clock()));
       return { state, plan, turn, transcript, reserve, limitReason: ready ? (reserve ? '' : 'AI_LIMIT') : 'DEBATE_UNAVAILABLE' };
     });
@@ -867,7 +873,7 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
     return locked(() => {
       if (prepared.reserve) {
         cacheSet(pendingKey, '');
-        if (result.attempts < prepared.reserve) cacheSet(dayKey(), String(Math.max(0, Number(cacheGet(dayKey()) || 0) - (prepared.reserve - result.attempts))));
+        if (result.attempts < prepared.reserve) setUsageToday(usageToday() - (prepared.reserve - result.attempts));
       }
       const state = loadDebate(sid, actor), transcript = debateTurns(sid);
       if (transcript.some(row => Number(row.turnNo) === turnNo && row.actor === 'ai') || state.cursor !== prepared.state.cursor || state.finished) {
@@ -948,8 +954,8 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
     const turn = plan.turns.find(item => item.kind === kind);
     invariant(turn, 'INVALID_STEP', '미리 볼 AI 발언 종류를 확인해 주세요.');
     const state = { stance: plan.stance, ...args, exchanges: 1, rebuttal: true, seed: 'preview-session', sessionId: 'preview-session' };
-    const used = Number(cacheGet(dayKey()) || 0);
-    invariant(used < debateLimits().daily && cacheSet(dayKey(), String(used + 1)), 'AI_LIMIT', '오늘 AI 호출 한도를 확인해 주세요.');
+    const used = usageToday();
+    invariant(used < debateLimits().daily && setUsageToday(used + 1), 'AI_LIMIT', '오늘 AI 호출 한도를 확인해 주세요.');
     return generateDebateTurn({ state, plan, turn, transcript: [], reserve: 1, limitReason: '' });
   }
   function respond(method, request) {

@@ -47,7 +47,8 @@ function setupDB() {
   if (!props.getProperty('L4_DEBATE_PROVIDER')) props.setProperty('L4_DEBATE_PROVIDER', 'none');
   classroomService_().rebuildReports();
   return { initialized: true, tabs: Object.keys(ClassroomService.HEADERS), passcodeConfigured: !!props.getProperty('PASSCODE'), aiProvider: props.getProperty('AI_PROVIDER'),
-    debateProvider: props.getProperty('L4_DEBATE_PROVIDER'), solarKeyConfigured: !!props.getProperty('SOLAR_API_KEY'), solarModel: props.getProperty('SOLAR_MODEL') || '' };
+    debateProvider: props.getProperty('L4_DEBATE_PROVIDER'), solarKeyConfigured: !!props.getProperty('SOLAR_API_KEY'), solarModel: props.getProperty('SOLAR_MODEL') || '',
+    temporaryProperties: props.getKeys().filter(function(key) { return CLASSROOM_TEMPORARY_PROPERTY_.test(key); }).length };
 }
 
 function classroomProvider_(task, payload, settings) {
@@ -101,6 +102,86 @@ function classroomDebateSettings_() {
   var props = PropertiesService.getScriptProperties(), get = function(key) { return props.getProperty(key) || ''; };
   return { provider: get('L4_DEBATE_PROVIDER'), key: get('SOLAR_API_KEY'), model: get('SOLAR_MODEL'), baseUrl: get('SOLAR_BASE_URL') || 'https://api.upstage.ai/v1',
     jsonMode: get('SOLAR_JSON_MODE') || 'json_object', maxTokens: Number(get('SOLAR_MAX_TOKENS')) || 2000, reasoningEffort: get('SOLAR_REASONING_EFFORT') };
+}
+
+// 이전 버전이 스크립트 속성에 남긴 임시 표시입니다. 원본 판정은 시트 행으로 다시 하므로 지워도 기록은 그대로입니다.
+var CLASSROOM_TEMPORARY_PROPERTY_ = /^(submission:|log:|rate:|l4debate:pending:|l4debate:day:)/;
+
+// 편집기 또는 채움 관리 메뉴에서 실행: 임시 표시만 지우고 설정값(PASSCODE·SPREADSHEET_ID·AI·SOLAR 등)은 그대로 둡니다.
+function cleanupScriptProperties() {
+  var props = PropertiesService.getScriptProperties(), all = props.getProperties(), keep = {}, removed = 0;
+  Object.keys(all).forEach(function(key) { if (CLASSROOM_TEMPORARY_PROPERTY_.test(key)) removed++; else keep[key] = all[key]; });
+  if (removed) props.setProperties(keep, true);
+  var names = Object.keys(keep).sort();
+  Logger.log('임시 표시 ' + removed + '개를 지웠습니다. 남은 스크립트 속성 ' + names.length + '개: ' + names.join(', '));
+  return { removed: removed, remaining: names.length, names: names };
+}
+
+// 값은 보여 주지 않고 속성 이름만 확인합니다.
+function listScriptPropertyNames() {
+  var keys = PropertiesService.getScriptProperties().getKeys(), temporary = keys.filter(function(key) { return CLASSROOM_TEMPORARY_PROPERTY_.test(key); });
+  var settings = keys.filter(function(key) { return !CLASSROOM_TEMPORARY_PROPERTY_.test(key); }).sort();
+  Logger.log('전체 ' + keys.length + '개 · 임시 표시 ' + temporary.length + '개 · 설정값 ' + settings.length + '개: ' + settings.join(', '));
+  return { total: keys.length, temporary: temporary.length, settings: settings };
+}
+
+function classroomSaveSolarKey_(key, model) {
+  var value = String(key || '').trim(), name = String(model || '').trim() || 'solar-pro4';
+  if (!/^[\x21-\x7E]{10,300}$/.test(value)) throw new ClassroomCore.DomainError('INVALID_KEY', '키 형식을 확인해 주세요. 공백 없이 붙여 넣어야 합니다.');
+  if (!/^[A-Za-z0-9._-]{2,80}$/.test(name)) throw new ClassroomCore.DomainError('INVALID_MODEL', '모델 이름을 확인해 주세요.');
+  PropertiesService.getScriptProperties().setProperties({ L4_DEBATE_PROVIDER: 'solar', SOLAR_API_KEY: value, SOLAR_MODEL: name });
+  return { model: name, keyTail: value.slice(-4) };
+}
+
+// 시트를 열면 '채움 관리' 메뉴를 추가합니다. 스크립트 속성 화면이 읽기 전용이어도 키를 넣을 수 있습니다.
+function onOpen() {
+  SpreadsheetApp.getUi().createMenu('채움 관리')
+    .addItem('① 임시 기록 정리(스크립트 속성)', 'menuCleanupScriptProperties')
+    .addItem('② AI 토론 키 입력(Solar)', 'menuSetSolarKey')
+    .addItem('③ Solar 연결 확인', 'menuTestSolarConnection')
+    .addItem('④ AI 토론 발언 미리보기', 'menuDebateSample')
+    .addSeparator()
+    .addItem('AI 토론 끄기(키 유지)', 'menuDisableDebate')
+    .addToUi();
+}
+
+function menuCleanupScriptProperties() {
+  var ui = SpreadsheetApp.getUi(), before = listScriptPropertyNames();
+  var answer = ui.alert('임시 기록 정리', '스크립트 속성 ' + before.total + '개 중 임시 표시 ' + before.temporary + '개(submission·log·rate 등)를 지웁니다.\n교사 암호·시트 ID·AI 설정과 시트의 학생 기록은 그대로입니다. 진행할까요?', ui.ButtonSet.YES_NO);
+  if (answer !== ui.Button.YES) return;
+  var result = cleanupScriptProperties();
+  ui.alert('정리 완료', '임시 표시 ' + result.removed + '개를 지웠습니다. 남은 속성 ' + result.remaining + '개:\n' + result.names.join(', '), ui.ButtonSet.OK);
+}
+
+function menuSetSolarKey() {
+  var ui = SpreadsheetApp.getUi();
+  var key = ui.prompt('AI 토론 키 입력 (1/2)', 'Upstage 콘솔에서 받은 Solar API 키를 붙여 넣어 주세요.\n키는 이 스크립트의 속성에만 저장되며 화면·로그에 다시 표시하지 않습니다.', ui.ButtonSet.OK_CANCEL);
+  if (key.getSelectedButton() !== ui.Button.OK) return;
+  var model = ui.prompt('AI 토론 키 입력 (2/2)', '모델 이름을 입력해 주세요. 비워 두면 solar-pro4를 사용합니다.', ui.ButtonSet.OK_CANCEL);
+  if (model.getSelectedButton() !== ui.Button.OK) return;
+  try {
+    var saved = classroomSaveSolarKey_(key.getResponseText(), model.getResponseText());
+    ui.alert('저장 완료', '키(끝 4자리 …' + saved.keyTail + ')와 모델 ' + saved.model + '을 저장했습니다.\n이어서 ③ Solar 연결 확인을 실행해 주세요.', ui.ButtonSet.OK);
+  } catch (error) { ui.alert('저장하지 못했습니다', error.message, ui.ButtonSet.OK); }
+}
+
+function menuTestSolarConnection() {
+  var result = testSolarConnection(), ui = SpreadsheetApp.getUi();
+  ui.alert('Solar 연결 확인', result.ok ? '연결 성공 · 모델 ' + result.model + ' · ' + result.latencyMs + 'ms'
+    : result.missing ? '설정이 더 필요합니다: ' + result.missing.join(', ') : '연결 실패 · ' + result.code + '\n' + result.message, ui.ButtonSet.OK);
+}
+
+function menuDebateSample() {
+  var ui = SpreadsheetApp.getUi();
+  try {
+    var result = testDebateSample();
+    ui.alert('AI 토론 발언 미리보기', '결과: ' + result.mode + (result.error ? ' · ' + result.error : '') + ' · ' + result.latencyMs + 'ms' + (result.text ? '\n\n' + result.text : ''), ui.ButtonSet.OK);
+  } catch (error) { ui.alert('미리보기 실패', (error.code || 'ERROR') + ' · ' + error.message, ui.ButtonSet.OK); }
+}
+
+function menuDisableDebate() {
+  PropertiesService.getScriptProperties().setProperty('L4_DEBATE_PROVIDER', 'none');
+  SpreadsheetApp.getUi().alert('AI 토론 끄기', 'AI 토론 연결을 껐습니다. 키는 지우지 않았습니다. 다시 켜려면 ② 키 입력을 실행하거나 L4_DEBATE_PROVIDER를 solar로 바꿔 주세요.', SpreadsheetApp.getUi().ButtonSet.OK);
 }
 
 // 편집기에서 실행: 키·모델 설정과 Solar 연결만 확인합니다. 학생 기록을 쓰지 않으며 키를 로그에 남기지 않습니다.
@@ -171,8 +252,11 @@ function classroomService_() {
       try { return fn(); } finally { lock.releaseLock(); }
     }
   };
+  // 중복 확인 표시 같은 임시 값은 6시간 뒤 만료되는 캐시에 둡니다. 스크립트 속성에는 설정값만 남깁니다.
+  var scriptCache = CacheService.getScriptCache();
   return ClassroomService.createService({ content: ClassroomContent, store: store,
     properties: { get: function(k) { return props.getProperty(k); }, set: function(k, v) { props.setProperty(k, String(v)); } },
+    cache: { get: function(k) { return scriptCache.get(k); }, set: function(k, v) { scriptCache.put(k, String(v), 21600); } },
     hash: function(text) { return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, text, Utilities.Charset.UTF_8).map(function(b) { return ('0' + ((b + 256) % 256).toString(16)).slice(-2); }).join(''); },
     providerCall: classroomProvider_, debateCall: classroomSolar_ });
 }

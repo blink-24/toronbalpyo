@@ -24,7 +24,8 @@ function sheetFixture(rows, columns = rows[0].length) {
 }
 function sandboxFor(config) {
   const box = { PropertiesService: { getScriptProperties: () => ({ getProperty: key => key === 'SPREADSHEET_ID' ? 'fixture-db' : null }) },
-    SpreadsheetApp: { getActiveSpreadsheet: () => null, openById: () => ({ getSheetByName: () => config }) }, LockService: {} };
+    SpreadsheetApp: { getActiveSpreadsheet: () => null, openById: () => ({ getSheetByName: () => config }) }, LockService: {},
+    CacheService: { getScriptCache: () => ({ entries: new Map(), get(key) { return this.entries.get(key) ?? null; }, put(key, value, seconds) { assert.ok(seconds <= 21600); this.entries.set(key, value); } }) } };
   vm.createContext(box); vm.runInContext(source, box); return box;
 }
 test('GAS 머리글은 28→39열로 확장하면서 기존 헤더·행을 그대로 보존한다', () => {
@@ -36,9 +37,12 @@ test('GAS 머리글은 28→39열로 확장하면서 기존 헤더·행을 그�
 });
 test('GAS config adapter는 열 순서·메모·다른 설정을 유지하며 모두 닫힌 빈값도 기록한다', () => {
   const sheet = sheetFixture([['note','value','key'], ['설명 유지','2','acceptLessons'], ['다른 설정','11','classCount']]);
-  const box = sandboxFor(sheet); let store;
-  box.ClassroomService.createService = options => { store = options.store; return {}; };
+  const box = sandboxFor(sheet); let store, cache;
+  box.ClassroomService.createService = options => { store = options.store; cache = options.cache; return {}; };
   box.classroomService_();
+  // 임시 표시는 스크립트 속성이 아니라 만료되는 CacheService로 간다.
+  cache.set('submission:virtual', '{}'); assert.equal(cache.get('submission:virtual'), '{}');
+  store.writeConfig('l4Mode', 'debate'); assert.deepEqual(sheet.data.at(-1), ['4차시 활동 방식 script·debate', 'debate', 'l4Mode']);
   store.writeConfig('acceptLessons', '2,4');
   assert.deepEqual(sheet.data[1], ['설명 유지','2,4','acceptLessons']);
   store.writeConfig('acceptLessons', '');

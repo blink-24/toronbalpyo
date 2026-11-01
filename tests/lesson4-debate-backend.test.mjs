@@ -159,8 +159,9 @@ test('Solar 장애: AI 질문은 대본 질문으로 대체하고 그 밖의 차
   const failed = debate(g, 'ai_turn', { turnNo: opening.next.turnNo }).data;
   assert.equal(failed.unavailable.reason, 'AI_RATE_LIMITED'); assert.equal(failed.cursor, 0); assert.equal(g.db.l4_debate_turns.length, 0);
   assert.ok(g.db.log.some(row => /AI_RATE_LIMITED/.test(row.message)));
-  // 실패해도 사용한 호출 수만 일일 사용량에 남는다.
-  assert.equal(g.props.get('l4debate:day:2027-01-15'), '2');
+  // 실패해도 사용한 호출 수만 일일 사용량에 남고, 날짜별 키를 새로 만들지 않는다.
+  assert.equal(g.props.get('L4_DEBATE_USAGE'), '2027-01-15:2');
+  assert.equal([...g.props.keys()].filter(key => key.startsWith('l4debate:day')).length, 0);
   const auth = fixture({ solar: () => { const error = new Error('401'); error.code = 'AI_AUTH'; throw error; } });
   const denied = debate(auth, 'ai_turn', { turnNo: start(auth, '반대').data.next.turnNo }).data;
   assert.equal(denied.unavailable.reason, 'AI_AUTH'); assert.equal(auth.calls.length, 1);
@@ -173,7 +174,7 @@ test('세션·일일 호출 상한에 닿으면 외부 호출 없이 대체·안
   view = debate(f, 'group_turn', { turnNo: 3, text: GROUP_TEXT.group_answer }).data;
   const limited = debate(f, 'ai_turn', { turnNo: 4 }).data;
   assert.equal(limited.transcript.at(-1).mode, 'script-fallback'); assert.equal(f.calls.length, 1);
-  const g = fixture({ props: { L4_DEBATE_DAILY_CALL_MAX: '1', 'l4debate:day:2027-01-15': '1' } });
+  const g = fixture({ props: { L4_DEBATE_DAILY_CALL_MAX: '1', L4_DEBATE_USAGE: '2027-01-15:1' } });
   const blocked = debate(g, 'ai_turn', { turnNo: start(g, '반대').data.next.turnNo }).data;
   assert.equal(blocked.unavailable.reason, 'AI_LIMIT'); assert.equal(g.calls.length, 0);
 });
@@ -247,3 +248,82 @@ test('Apps Script Solar 어댑터: 키는 Authorization 머리글로만 보내�
   assert.equal(sandbox.testSolarConnection().ok, true);
   assert.ok(logs.every(line => !line.includes('virtual-key')));
 });
+
+test('임시 표시는 cache에만 쓰고 스크립트 속성은 설정값만 남긴다', () => {
+  const temp = new Map(), f = fixture();
+  // 별도 cache를 주입한 서비스로 같은 흐름을 다시 만든다.
+  const props = new Map(Object.entries({ PASSCODE: 'virtual-teacher-passcode', AI_PROVIDER: 'none', L4_DEBATE_PROVIDER: 'solar', SOLAR_API_KEY: 'not-a-real-key', SOLAR_MODEL: 'virtual-model' }));
+  let held = false;
+  const service = createService({ content, store: { read: tab => f.db[tab], append: (tab, row) => f.db[tab].push({ ...row }),
+    withLock: fn => { held = true; try { return fn(); } finally { held = false; } }, writeConfig: () => {} },
+  properties: { get: key => props.get(key), set: (key, value) => props.set(key, value) }, cache: { get: key => temp.get(key) ?? null, set: (key, value) => temp.set(key, value) },
+  clock: () => 1800000000000, hash: value => createHash('sha256').update(value).digest('hex'),
+  debateCall: request => ({ content: JSON.stringify({ text: AI_TEXT[JSON.parse(request.messages[1].content).task.kind], refs: [] }) }) });
+  const g = { service, db: f.db };
+  let view = run(g, start(g, '찬성', 'l4d_cache_session_01').data, { sessionId: 'l4d_cache_session_01' });
+  debate(g, 'finish', {}, 'l4d_cache_session_01');
+  const submitted = post(g, { ...envelope('l4d_cache_session_01'), action: 'submit', kind: 'l4_debate_session', submissionId: 'l4dsub_cache_0001',
+    data: { sessionId: 'l4d_cache_session_01', reflection: '조건과 근거를 함께 밝혀야겠습니다.' } });
+  assert.equal(submitted.data.accepted, true); assert.equal(view.cursor, 24);
+  assert.deepEqual([...props.keys()].sort(), ['AI_PROVIDER', 'L4_DEBATE_PROVIDER', 'L4_DEBATE_USAGE', 'PASSCODE', 'SOLAR_API_KEY', 'SOLAR_MODEL']);
+  assert.ok([...temp.keys()].some(key => key.startsWith('submission:')));
+  // 캐시가 비어도(만료) 같은 제출은 시트 행으로 중복을 막는다.
+  temp.clear();
+  assert.equal(post(g, { ...envelope('l4d_cache_session_01'), action: 'submit', kind: 'l4_debate_session', submissionId: 'l4dsub_cache_0001',
+    data: { sessionId: 'l4d_cache_session_01', reflection: '조건과 근거를 함께 밝혀야겠습니다.' } }).data.duplicate, true);
+  assert.equal(f.db.l4_debates.length, 1); assert.equal(held, false);
+});
+
+async function gasSandbox(initial = {}, uiAnswers = []) {
+  const props = new Map(Object.entries(initial)), alerts = [], menus = [];
+  const ui = { ButtonSet: { OK: 'OK', OK_CANCEL: 'OK_CANCEL', YES_NO: 'YES_NO' }, Button: { OK: 'OK', YES: 'YES', CANCEL: 'CANCEL' },
+    prompt: () => { const [button, text] = uiAnswers.shift(); return { getSelectedButton: () => button, getResponseText: () => text }; },
+    alert: (title, message) => { alerts.push(`${title}: ${message || ''}`); return uiAnswers.length ? uiAnswers.shift()[0] : 'OK'; },
+    createMenu: name => { const menu = { name, items: [], addItem(caption, fn) { this.items.push(fn); return this; }, addSeparator() { return this; }, addToUi() { menus.push(this); } }; return menu; } };
+  const store = {
+    getProperty: key => props.get(key) ?? null, setProperty: (key, value) => props.set(key, String(value)), getKeys: () => [...props.keys()],
+    getProperties: () => Object.fromEntries(props), deleteProperty: key => props.delete(key),
+    setProperties: (values, deleteOthers) => { if (deleteOthers) props.clear(); Object.entries(values).forEach(([key, value]) => props.set(key, String(value))); },
+  };
+  const sandbox = { PropertiesService: { getScriptProperties: () => store }, SpreadsheetApp: { getUi: () => ui }, Logger: { log() {} },
+    LockService: {}, CacheService: { getScriptCache: () => ({ get: () => null, put() {} }) }, ContentService: { MimeType: {} } };
+  vm.createContext(sandbox); vm.runInContext(await fs.readFile(new URL('../backend/ServerBundle.gs', import.meta.url), 'utf8'), sandbox);
+  return { sandbox, props, alerts, menus };
+}
+
+test('스크립트 속성 정리는 임시 표시만 지우고 설정값은 보존한다', async () => {
+  const settings = { PASSCODE: 'virtual-pass', SPREADSHEET_ID: 'virtual-sheet', AI_PROVIDER: 'none', AI_RATE_PER_HOUR: '30', L4_DEBATE_PROVIDER: 'solar', SOLAR_API_KEY: 'virtual-key-0000', SOLAR_MODEL: 'solar-pro4', L4_DEBATE_USAGE: '2026-11-01:3' };
+  const temporary = {};
+  for (let i = 0; i < 60; i++) { temporary[`submission:l2sub_${i}`] = '{}'; temporary[`log:4:l4s_${i}:1:ai`] = '1'; }
+  Object.assign(temporary, { 'rate:20301:500000': '2', 'l4debate:pending:l4d_x:2': '', 'l4debate:day:2026-10-31': '5' });
+  const { sandbox, props } = await gasSandbox({ ...settings, ...temporary });
+  const before = sandbox.listScriptPropertyNames();
+  assert.equal(before.total, 8 + 123); assert.equal(before.temporary, 123);
+  const result = sandbox.cleanupScriptProperties();
+  assert.equal(result.removed, 123); assert.equal(result.remaining, 8);
+  assert.deepEqual(Object.fromEntries(props), settings);
+  assert.equal(sandbox.cleanupScriptProperties().removed, 0);
+});
+
+test('채움 관리 메뉴로 키를 저장하고, 취소·형식 오류는 저장하지 않는다', async () => {
+  const done = await gasSandbox({ AI_PROVIDER: 'none' }, [['OK', '  up_virtual_key_1234  '], ['OK', '']]);
+  done.sandbox.onOpen();
+  assert.equal(done.menus[0].name, '채움 관리');
+  for (const fn of done.menus[0].items) assert.equal(typeof done.sandbox[fn], 'function', fn);
+  done.sandbox.menuSetSolarKey();
+  assert.equal(done.props.get('SOLAR_API_KEY'), 'up_virtual_key_1234'); assert.equal(done.props.get('SOLAR_MODEL'), 'solar-pro4');
+  assert.equal(done.props.get('L4_DEBATE_PROVIDER'), 'solar'); assert.equal(done.props.get('AI_PROVIDER'), 'none');
+  assert.ok(done.alerts[0].includes('…1234') && !done.alerts[0].includes('up_virtual_key_1234'));
+  const cancelled = await gasSandbox({}, [['CANCEL', 'up_virtual_key_1234']]);
+  cancelled.sandbox.menuSetSolarKey(); assert.equal(cancelled.props.has('SOLAR_API_KEY'), false);
+  const invalid = await gasSandbox({}, [['OK', '공백 있는 키 값'], ['OK', 'solar-pro4']]);
+  invalid.sandbox.menuSetSolarKey(); assert.equal(invalid.props.has('SOLAR_API_KEY'), false); assert.match(invalid.alerts[0], /저장하지 못했습니다/);
+  const cleanup = await gasSandbox({ PASSCODE: 'virtual-pass', 'submission:a': '{}' }, [['YES']]);
+  cleanup.sandbox.menuCleanupScriptProperties();
+  assert.deepEqual([...cleanup.props.keys()], ['PASSCODE']);
+  const declined = await gasSandbox({ PASSCODE: 'virtual-pass', 'submission:a': '{}' }, [['NO']]);
+  declined.sandbox.menuCleanupScriptProperties(); assert.equal(declined.props.size, 2);
+  const off = await gasSandbox({ L4_DEBATE_PROVIDER: 'solar', SOLAR_API_KEY: 'virtual-key-0000' });
+  off.sandbox.menuDisableDebate(); assert.equal(off.props.get('L4_DEBATE_PROVIDER'), 'none'); assert.equal(off.props.get('SOLAR_API_KEY'), 'virtual-key-0000');
+});
+

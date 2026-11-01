@@ -49,7 +49,9 @@ turn·progress·submit에서 lesson:4와 별도 모둠 필드를 검증한다. �
 
 ## 4차시 AI 토론(5.4.0)
 
-`Native.gs`의 `classroomSolar_`가 Upstage Solar를 호출한다. 키·모델은 스크립트 속성 `L4_DEBATE_PROVIDER`·`SOLAR_API_KEY`·`SOLAR_MODEL`에만 둔다. 2차시용 `AI_PROVIDER`·`AI_API_KEY`와 분리되어 있어 4차시 설정이 2차시 AI를 켜지 않는다. 지시문은 `service.js`에만 있고 공용 규칙(`src/core/lesson4-debate.js`)은 출력 검사·12단계 계획만 담는다. 외부 호출은 시트 잠금 밖에서 하고, 같은 차례의 중복 호출·세션/일일 상한을 서버가 막는다. 편집기에서 `testSolarConnection`·`testDebateSample`로 학생 기록 없이 연결과 발언 품질을 확인한다. 설정 순서는 [AI 키 설정 안내](../docs/AI_KEY_SETUP.md)를 따른다.
+`Native.gs`의 `classroomSolar_`가 Upstage Solar를 호출한다. 키·모델은 스크립트 속성 `L4_DEBATE_PROVIDER`·`SOLAR_API_KEY`·`SOLAR_MODEL`에만 둔다. 2차시용 `AI_PROVIDER`·`AI_API_KEY`와 분리되어 있어 4차시 설정이 2차시 AI를 켜지 않는다. 지시문은 `service.js`에만 있고 공용 규칙(`src/core/lesson4-debate.js`)은 출력 검사·12단계 계획만 담는다. 외부 호출은 시트 잠금 밖에서 하고, 같은 차례의 중복 호출·세션/일일 상한을 서버가 막는다. 편집기나 시트의 **채움 관리** 메뉴에서 `testSolarConnection`·`testDebateSample`로 학생 기록 없이 연결과 발언 품질을 확인한다.
+
+중복 확인 표시·사용 횟수 같은 임시 값은 `createService`의 `cache`(Apps Script에서는 6시간 만료 `CacheService`)에 둔다. 이전 버전은 이를 스크립트 속성에 써서 속성이 50개를 넘으면 설정 화면이 읽기 전용이 되었다. `cleanupScriptProperties`는 `submission:`·`log:`·`rate:`·`l4debate:` 임시 표시만 지우고 설정값은 그대로 둔다. 원본 중복 판정은 시트 행으로 다시 하므로 캐시가 비어도 같은 제출은 한 행이다. Solar 키는 메뉴의 **AI 토론 키 입력**으로도 저장할 수 있다. 설정 순서는 [AI 키 설정 안내](../docs/AI_KEY_SETUP.md)를 따른다.
 
 ## 기존 선택적 AI 어댑터의 경계
 

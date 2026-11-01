@@ -814,15 +814,18 @@ function debateInstruction(turn, context) {
   return `AI 측 반박 ${turn.slot}을 ${max}자 이내로 쓴다. transcript에서 이미 나온 쟁점 한두 개만 골라 AI 측 주장이 유지되는 이유와 모둠 주장의 약점을 정리한다. 새 근거나 새 쟁점은 꺼내지 않는다.${turn.final ? ' 토론의 마지막 발언이므로 새 논점을 더하지 않는다.' : ''}`;
 }
 
-function createService({ content, lesson4Content = LESSON4_CONTENT, store, properties, clock = () => Date.now(), hash, providerCall = null, debateCall = null }) {
+function createService({ content, lesson4Content = LESSON4_CONTENT, store, properties, cache = null, clock = () => Date.now(), hash, providerCall = null, debateCall = null }) {
   const engine = createEngine(content);
   const lesson4Engine = createLesson4Engine(lesson4Content);
   const now = () => new Date(clock()).toISOString();
   const prop = key => safeText(properties.get(key));
   const rows = tab => store.read(tab) || [];
   const locked = fn => store.withLock(fn);
-  function cacheGet(key) { try { return properties.get(key); } catch { return null; } }
-  function cacheSet(key, value) { try { properties.set(key, value); return true; } catch { return false; } }
+  // 중복 확인 표시·사용량 같은 임시 값은 cache에 둡니다. Apps Script에서는 만료되는 CacheService를 써서
+  // 스크립트 속성이 계속 늘어나지 않게 합니다(원본 판정은 시트 행으로 다시 확인).
+  const temporary = cache || properties;
+  function cacheGet(key) { try { return temporary.get(key); } catch { return null; } }
+  function cacheSet(key, value) { try { temporary.set(key, value); return true; } catch { return false; } }
   function append(tab, values) {
     const safe = {};
     for (const field of HEADERS[tab]) {
@@ -927,7 +930,7 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
   function aiAllowed(actor) {
     if (!config().aiEnabled || !providerCall) return false;
     return locked(() => {
-      const key = `rate:${actor.studentId}:${Math.floor(clock() / 3600000)}`, used = Number(prop(key) || 0), requestedMax = Number(prop('AI_RATE_PER_HOUR') || 30);
+      const key = `rate:${actor.studentId}:${Math.floor(clock() / 3600000)}`, used = Number(cacheGet(key) || 0), requestedMax = Number(prop('AI_RATE_PER_HOUR') || 30);
       const max = Number.isInteger(requestedMax) && requestedMax >= 1 && requestedMax <= 300 ? requestedMax : 30;
       if (used >= max) return false;
       // 사용량을 확정하지 못하면 AI 호출을 하지 않아 학생별 한도를 우회하지 않습니다.
@@ -1375,9 +1378,12 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
   function debateLimits() {
     return { session: intProp('L4_DEBATE_SESSION_CALL_MAX', 20, 1, 200), daily: intProp('L4_DEBATE_DAILY_CALL_MAX', 400, 1, 20000) };
   }
-  const dayKey = () => `l4debate:day:${new Date(clock()).toISOString().slice(0, 10)}`;
+  // 하루 사용량은 날짜별 키를 늘리지 않고 스크립트 속성 하나(L4_DEBATE_USAGE = 날짜:횟수)에 덮어씁니다.
+  const today = () => new Date(clock()).toISOString().slice(0, 10);
+  function usageToday() { const [day, count] = safeText(prop('L4_DEBATE_USAGE')).split(':'); return day === today() ? Number(count) || 0 : 0; }
+  function setUsageToday(count) { try { properties.set('L4_DEBATE_USAGE', `${today()}:${Math.max(0, count)}`); return true; } catch { return false; } }
   function debateUsage() {
-    return { debateServerReady: debateServerReady(), debateCallsToday: Number(cacheGet(dayKey()) || 0), debateDailyMax: debateLimits().daily };
+    return { debateServerReady: debateServerReady(), debateCallsToday: usageToday(), debateDailyMax: debateLimits().daily };
   }
   const cleanText = value => safeText(value).replace(/^'(?=[=+\-@])/, '');
   function debateLabel(step) { const item = DEBATE_SEQUENCE[Number(step) - 1]; return item ? `${item.side} ${item.no} ${item.kind === '신문' ? '반대 신문' : item.kind}` : ''; }
@@ -1555,11 +1561,11 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
       const started = Number(cacheGet(pendingKey) || 0);
       // 같은 차례를 이미 만드는 중이면 중복 호출하지 않고 잠시 뒤 다시 묻게 합니다.
       if (started && clock() - started < 45000) return { pending: true };
-      const limits = debateLimits(), used = Number(cacheGet(dayKey()) || 0), spent = Number(state.aiCalls) || 0;
+      const limits = debateLimits(), used = usageToday(), spent = Number(state.aiCalls) || 0;
       const ready = debateServerReady();
       let reserve = ready ? Math.max(0, Math.min(2, limits.session - spent, limits.daily - used)) : 0;
       // 사용량을 기록하지 못하면 호출하지 않아 한도를 넘지 않습니다.
-      if (reserve && !cacheSet(dayKey(), String(used + reserve))) reserve = 0;
+      if (reserve && !setUsageToday(used + reserve)) reserve = 0;
       if (reserve) cacheSet(pendingKey, String(clock()));
       return { state, plan, turn, transcript, reserve, limitReason: ready ? (reserve ? '' : 'AI_LIMIT') : 'DEBATE_UNAVAILABLE' };
     });
@@ -1569,7 +1575,7 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
     return locked(() => {
       if (prepared.reserve) {
         cacheSet(pendingKey, '');
-        if (result.attempts < prepared.reserve) cacheSet(dayKey(), String(Math.max(0, Number(cacheGet(dayKey()) || 0) - (prepared.reserve - result.attempts))));
+        if (result.attempts < prepared.reserve) setUsageToday(usageToday() - (prepared.reserve - result.attempts));
       }
       const state = loadDebate(sid, actor), transcript = debateTurns(sid);
       if (transcript.some(row => Number(row.turnNo) === turnNo && row.actor === 'ai') || state.cursor !== prepared.state.cursor || state.finished) {
@@ -1650,8 +1656,8 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
     const turn = plan.turns.find(item => item.kind === kind);
     invariant(turn, 'INVALID_STEP', '미리 볼 AI 발언 종류를 확인해 주세요.');
     const state = { stance: plan.stance, ...args, exchanges: 1, rebuttal: true, seed: 'preview-session', sessionId: 'preview-session' };
-    const used = Number(cacheGet(dayKey()) || 0);
-    invariant(used < debateLimits().daily && cacheSet(dayKey(), String(used + 1)), 'AI_LIMIT', '오늘 AI 호출 한도를 확인해 주세요.');
+    const used = usageToday();
+    invariant(used < debateLimits().daily && setUsageToday(used + 1), 'AI_LIMIT', '오늘 AI 호출 한도를 확인해 주세요.');
     return generateDebateTurn({ state, plan, turn, transcript: [], reserve: 1, limitReason: '' });
   }
   function respond(method, request) {
@@ -1716,7 +1722,8 @@ function setupDB() {
   if (!props.getProperty('L4_DEBATE_PROVIDER')) props.setProperty('L4_DEBATE_PROVIDER', 'none');
   classroomService_().rebuildReports();
   return { initialized: true, tabs: Object.keys(ClassroomService.HEADERS), passcodeConfigured: !!props.getProperty('PASSCODE'), aiProvider: props.getProperty('AI_PROVIDER'),
-    debateProvider: props.getProperty('L4_DEBATE_PROVIDER'), solarKeyConfigured: !!props.getProperty('SOLAR_API_KEY'), solarModel: props.getProperty('SOLAR_MODEL') || '' };
+    debateProvider: props.getProperty('L4_DEBATE_PROVIDER'), solarKeyConfigured: !!props.getProperty('SOLAR_API_KEY'), solarModel: props.getProperty('SOLAR_MODEL') || '',
+    temporaryProperties: props.getKeys().filter(function(key) { return CLASSROOM_TEMPORARY_PROPERTY_.test(key); }).length };
 }
 
 function classroomProvider_(task, payload, settings) {
@@ -1770,6 +1777,86 @@ function classroomDebateSettings_() {
   var props = PropertiesService.getScriptProperties(), get = function(key) { return props.getProperty(key) || ''; };
   return { provider: get('L4_DEBATE_PROVIDER'), key: get('SOLAR_API_KEY'), model: get('SOLAR_MODEL'), baseUrl: get('SOLAR_BASE_URL') || 'https://api.upstage.ai/v1',
     jsonMode: get('SOLAR_JSON_MODE') || 'json_object', maxTokens: Number(get('SOLAR_MAX_TOKENS')) || 2000, reasoningEffort: get('SOLAR_REASONING_EFFORT') };
+}
+
+// 이전 버전이 스크립트 속성에 남긴 임시 표시입니다. 원본 판정은 시트 행으로 다시 하므로 지워도 기록은 그대로입니다.
+var CLASSROOM_TEMPORARY_PROPERTY_ = /^(submission:|log:|rate:|l4debate:pending:|l4debate:day:)/;
+
+// 편집기 또는 채움 관리 메뉴에서 실행: 임시 표시만 지우고 설정값(PASSCODE·SPREADSHEET_ID·AI·SOLAR 등)은 그대로 둡니다.
+function cleanupScriptProperties() {
+  var props = PropertiesService.getScriptProperties(), all = props.getProperties(), keep = {}, removed = 0;
+  Object.keys(all).forEach(function(key) { if (CLASSROOM_TEMPORARY_PROPERTY_.test(key)) removed++; else keep[key] = all[key]; });
+  if (removed) props.setProperties(keep, true);
+  var names = Object.keys(keep).sort();
+  Logger.log('임시 표시 ' + removed + '개를 지웠습니다. 남은 스크립트 속성 ' + names.length + '개: ' + names.join(', '));
+  return { removed: removed, remaining: names.length, names: names };
+}
+
+// 값은 보여 주지 않고 속성 이름만 확인합니다.
+function listScriptPropertyNames() {
+  var keys = PropertiesService.getScriptProperties().getKeys(), temporary = keys.filter(function(key) { return CLASSROOM_TEMPORARY_PROPERTY_.test(key); });
+  var settings = keys.filter(function(key) { return !CLASSROOM_TEMPORARY_PROPERTY_.test(key); }).sort();
+  Logger.log('전체 ' + keys.length + '개 · 임시 표시 ' + temporary.length + '개 · 설정값 ' + settings.length + '개: ' + settings.join(', '));
+  return { total: keys.length, temporary: temporary.length, settings: settings };
+}
+
+function classroomSaveSolarKey_(key, model) {
+  var value = String(key || '').trim(), name = String(model || '').trim() || 'solar-pro4';
+  if (!/^[\x21-\x7E]{10,300}$/.test(value)) throw new ClassroomCore.DomainError('INVALID_KEY', '키 형식을 확인해 주세요. 공백 없이 붙여 넣어야 합니다.');
+  if (!/^[A-Za-z0-9._-]{2,80}$/.test(name)) throw new ClassroomCore.DomainError('INVALID_MODEL', '모델 이름을 확인해 주세요.');
+  PropertiesService.getScriptProperties().setProperties({ L4_DEBATE_PROVIDER: 'solar', SOLAR_API_KEY: value, SOLAR_MODEL: name });
+  return { model: name, keyTail: value.slice(-4) };
+}
+
+// 시트를 열면 '채움 관리' 메뉴를 추가합니다. 스크립트 속성 화면이 읽기 전용이어도 키를 넣을 수 있습니다.
+function onOpen() {
+  SpreadsheetApp.getUi().createMenu('채움 관리')
+    .addItem('① 임시 기록 정리(스크립트 속성)', 'menuCleanupScriptProperties')
+    .addItem('② AI 토론 키 입력(Solar)', 'menuSetSolarKey')
+    .addItem('③ Solar 연결 확인', 'menuTestSolarConnection')
+    .addItem('④ AI 토론 발언 미리보기', 'menuDebateSample')
+    .addSeparator()
+    .addItem('AI 토론 끄기(키 유지)', 'menuDisableDebate')
+    .addToUi();
+}
+
+function menuCleanupScriptProperties() {
+  var ui = SpreadsheetApp.getUi(), before = listScriptPropertyNames();
+  var answer = ui.alert('임시 기록 정리', '스크립트 속성 ' + before.total + '개 중 임시 표시 ' + before.temporary + '개(submission·log·rate 등)를 지웁니다.\n교사 암호·시트 ID·AI 설정과 시트의 학생 기록은 그대로입니다. 진행할까요?', ui.ButtonSet.YES_NO);
+  if (answer !== ui.Button.YES) return;
+  var result = cleanupScriptProperties();
+  ui.alert('정리 완료', '임시 표시 ' + result.removed + '개를 지웠습니다. 남은 속성 ' + result.remaining + '개:\n' + result.names.join(', '), ui.ButtonSet.OK);
+}
+
+function menuSetSolarKey() {
+  var ui = SpreadsheetApp.getUi();
+  var key = ui.prompt('AI 토론 키 입력 (1/2)', 'Upstage 콘솔에서 받은 Solar API 키를 붙여 넣어 주세요.\n키는 이 스크립트의 속성에만 저장되며 화면·로그에 다시 표시하지 않습니다.', ui.ButtonSet.OK_CANCEL);
+  if (key.getSelectedButton() !== ui.Button.OK) return;
+  var model = ui.prompt('AI 토론 키 입력 (2/2)', '모델 이름을 입력해 주세요. 비워 두면 solar-pro4를 사용합니다.', ui.ButtonSet.OK_CANCEL);
+  if (model.getSelectedButton() !== ui.Button.OK) return;
+  try {
+    var saved = classroomSaveSolarKey_(key.getResponseText(), model.getResponseText());
+    ui.alert('저장 완료', '키(끝 4자리 …' + saved.keyTail + ')와 모델 ' + saved.model + '을 저장했습니다.\n이어서 ③ Solar 연결 확인을 실행해 주세요.', ui.ButtonSet.OK);
+  } catch (error) { ui.alert('저장하지 못했습니다', error.message, ui.ButtonSet.OK); }
+}
+
+function menuTestSolarConnection() {
+  var result = testSolarConnection(), ui = SpreadsheetApp.getUi();
+  ui.alert('Solar 연결 확인', result.ok ? '연결 성공 · 모델 ' + result.model + ' · ' + result.latencyMs + 'ms'
+    : result.missing ? '설정이 더 필요합니다: ' + result.missing.join(', ') : '연결 실패 · ' + result.code + '\n' + result.message, ui.ButtonSet.OK);
+}
+
+function menuDebateSample() {
+  var ui = SpreadsheetApp.getUi();
+  try {
+    var result = testDebateSample();
+    ui.alert('AI 토론 발언 미리보기', '결과: ' + result.mode + (result.error ? ' · ' + result.error : '') + ' · ' + result.latencyMs + 'ms' + (result.text ? '\n\n' + result.text : ''), ui.ButtonSet.OK);
+  } catch (error) { ui.alert('미리보기 실패', (error.code || 'ERROR') + ' · ' + error.message, ui.ButtonSet.OK); }
+}
+
+function menuDisableDebate() {
+  PropertiesService.getScriptProperties().setProperty('L4_DEBATE_PROVIDER', 'none');
+  SpreadsheetApp.getUi().alert('AI 토론 끄기', 'AI 토론 연결을 껐습니다. 키는 지우지 않았습니다. 다시 켜려면 ② 키 입력을 실행하거나 L4_DEBATE_PROVIDER를 solar로 바꿔 주세요.', SpreadsheetApp.getUi().ButtonSet.OK);
 }
 
 // 편집기에서 실행: 키·모델 설정과 Solar 연결만 확인합니다. 학생 기록을 쓰지 않으며 키를 로그에 남기지 않습니다.
@@ -1840,8 +1927,11 @@ function classroomService_() {
       try { return fn(); } finally { lock.releaseLock(); }
     }
   };
+  // 중복 확인 표시 같은 임시 값은 6시간 뒤 만료되는 캐시에 둡니다. 스크립트 속성에는 설정값만 남깁니다.
+  var scriptCache = CacheService.getScriptCache();
   return ClassroomService.createService({ content: ClassroomContent, store: store,
     properties: { get: function(k) { return props.getProperty(k); }, set: function(k, v) { props.setProperty(k, String(v)); } },
+    cache: { get: function(k) { return scriptCache.get(k); }, set: function(k, v) { scriptCache.put(k, String(v), 21600); } },
     hash: function(text) { return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, text, Utilities.Charset.UTF_8).map(function(b) { return ('0' + ((b + 256) % 256).toString(16)).slice(-2); }).join(''); },
     providerCall: classroomProvider_, debateCall: classroomSolar_ });
 }
