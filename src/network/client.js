@@ -3,7 +3,7 @@ export class ApiError extends Error {
 }
 export function createApiClient({ endpoint = '', timeoutMs = 20000, fetchImpl = globalThis.fetch } = {}) {
   let currentEndpoint = String(endpoint).trim();
-  async function request(action, payload, method) {
+  async function request(action, payload, method, options = {}) {
     if (!currentEndpoint) throw new ApiError('아직 제출 연결이 준비되지 않았어요.', 'NOT_CONFIGURED');
     const controller = new AbortController();
     let timeout;
@@ -29,13 +29,14 @@ export function createApiClient({ endpoint = '', timeoutMs = 20000, fetchImpl = 
       return result;
     })();
     const deadline = new Promise((_, reject) => {
-      timeout = setTimeout(() => { controller.abort(); reject(new ApiError('응답이 늦어지고 있어요.', 'TIMEOUT')); }, timeoutMs);
+      timeout = setTimeout(() => { controller.abort(); reject(new ApiError('응답이 늦어지고 있어요.', 'TIMEOUT')); }, Number(options.timeoutMs) || timeoutMs);
     });
     try { return await Promise.race([work, deadline]); } finally { clearTimeout(timeout); }
   }
   return {
     get: (action, payload = {}) => request(action, payload, 'GET'),
-    post: (action, payload = {}) => request(action, payload, 'POST'),
+    // AI 토론처럼 외부 생성이 필요한 요청만 마감 시간을 늘립니다.
+    post: (action, payload = {}, options = {}) => request(action, payload, 'POST', options),
     isConfigured: () => Boolean(currentEndpoint),
     setEndpoint: value => { currentEndpoint = String(value || '').trim(); },
     getEndpoint: () => currentEndpoint,

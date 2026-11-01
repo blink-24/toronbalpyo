@@ -26,7 +26,7 @@ async function call(action, payload, method = 'GET') {
 const ping = await call('ping');
 assert.equal(ping.ok, true, 'ping: 서버 오류');
 assert.equal(ping.data?.status, 'ok');
-assert.ok(['5.1.0', '5.2.0', '5.3.0'].includes(ping.data?.version), '지원하는 2·4차시 서버 배포가 필요합니다.');
+assert.ok(['5.1.0', '5.2.0', '5.3.0', '5.4.0'].includes(ping.data?.version), '지원하는 2·4차시 서버 배포가 필요합니다.');
 console.log(`PASS: 공개 서버 상태 응답(버전 ${ping.data.version})`);
 
 const config = await call('config');
@@ -40,11 +40,11 @@ assert.ok(config.data.implementedLessons?.includes(2) && config.data.implemented
 assert.ok([3, 4, 5].includes(config.data.l4Questions));
 assert.equal(config.data.l4AiEnabled, false);
 assert.equal(config.data.appVersion, ping.data.version);
-if (ping.data.version === '5.2.0' || ping.data.version === '5.3.0') assert.equal(config.data.l4ScriptVersion, '1.1.0');
+if (['5.2.0', '5.3.0', '5.4.0'].includes(ping.data.version)) assert.equal(config.data.l4ScriptVersion, '1.1.0');
 else assert.ok(!config.data.l4ScriptVersion || config.data.l4ScriptVersion === '1.0.0');
 console.log(`INFO: 현재 대본 ${config.data.l4ScriptVersion || '1.0.0'}${ping.data.version === '5.1.0' ? ' (확장 대본은 서버 갱신 대기)' : ''}`);
 console.log(`INFO: 구현 차시 ${config.data.implementedLessons.join(',')}, 개방 차시 ${config.data.acceptLessons.join(',') || '없음'}, 4차시 질문 ${config.data.l4Questions}개, 대본 모드`);
-for (const key of ['PASSCODE', 'AI_API_KEY', 'AI_MODEL', 'passcode', 'apiKey']) assert.ok(!(key in config.data));
+for (const key of ['PASSCODE', 'AI_API_KEY', 'AI_MODEL', 'SOLAR_API_KEY', 'SOLAR_MODEL', 'passcode', 'apiKey']) assert.ok(!(key in config.data));
 console.log('PASS: 실제 시트 설정 조회 및 비밀값 비노출');
 
 const shared = await call('public_summary');

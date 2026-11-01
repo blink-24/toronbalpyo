@@ -1,10 +1,10 @@
-const makeId = prefix => `${prefix}_${globalThis.crypto?.randomUUID?.().replaceAll('-', '').slice(0, 24) || `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}`}`;
+export const makeLesson4Id = prefix => `${prefix}_${globalThis.crypto?.randomUUID?.().replaceAll('-', '').slice(0, 24) || `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}`}`;
 export const LESSON4_GROUP_PREFIX = 'chaeum:v5:l4:group:';
 export function freshLesson4() {
   return { stage: 'entry', representative: '', groupName: '', memberEntries: ['', '', '', '', ''], identity: null,
-    stance: '', arg1: '', arg5: '', sessionId: makeId('l4s'), submissionId: makeId('l4sub'), session: null,
+    stance: '', arg1: '', arg5: '', sessionId: makeLesson4Id('l4s'), submissionId: makeLesson4Id('l4sub'), session: null,
     questionCount: 4, turn: 1, answers: [], answerDrafts: {}, helpSelections: {}, remoteQuestions: {}, feedback: null,
-    reflection: '', earlyFinish: false, mode: 'script-local', status: 'draft', startedAt: 0 };
+    reflection: '', earlyFinish: false, mode: 'script-local', status: 'draft', startedAt: 0, debate: null, debateDrafts: {}, forceScript: false };
 }
 export function normalizeGroupIdentity({ representative, studentId, groupName, memberEntries, memberStudentIds }, config = {}) {
   const id = String(representative || studentId || '').trim();

@@ -24,8 +24,8 @@ try {
     try { return JSON.parse(localStorage.getItem('chaeum:v5:public-config') || '{}').implementedLessons?.includes(4); } catch { return false; }
   });
   const config = await page.evaluate(() => JSON.parse(localStorage.getItem('chaeum:v5:public-config')));
-  assert.ok(['5.1.0', '5.2.0', '5.3.0'].includes(config.appVersion)); assert.equal(config.l4AiEnabled, false);
-  assert.equal(config.l4ScriptVersion, config.appVersion .startsWith('5.2.') || config.appVersion.startsWith('5.3.') ? '1.1.0' : '1.0.0');
+  assert.ok(['5.1.0', '5.2.0', '5.3.0', '5.4.0'].includes(config.appVersion)); assert.equal(config.l4AiEnabled, false);
+  assert.equal(config.l4ScriptVersion, /^5\.[234]\./.test(config.appVersion) ? '1.1.0' : '1.0.0');
   assert.equal(await page.locator('[data-action="learn-slide"]').count(), config.acceptLessons.includes(2) ? 18 : 0);
   await page.locator('#lesson-tab-4').click();
   if (config.acceptLessons.includes(4)) await page.locator('form[data-form="l4-entry"]').waitFor();

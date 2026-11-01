@@ -13,6 +13,7 @@ const namespace = {
   '../src/core/lesson4.js': 'ClassroomLesson4',
   '../src/core/lesson4-content.js': '{LESSON4_CONTENT:ClassroomLesson4Content,default:ClassroomLesson4Content}',
   './lesson4-content.js': '{LESSON4_CONTENT:ClassroomLesson4Content,default:ClassroomLesson4Content}',
+  '../src/core/lesson4-debate.js': 'ClassroomDebate',
 };
 function compileModule(source, name) {
   const names = [...source.matchAll(/^export (?:async )?(?:function|class|const|let)\s+(\w+)/gm)].map(x => x[1]);
@@ -34,10 +35,12 @@ const compiled = '// 자동 생성: node backend/sync.mjs. 직접 수정하지 �
   + `var ClassroomContent = ${JSON.stringify(content)};\n`
   + `var ClassroomLesson4Content = ${JSON.stringify(lesson4Content)};\n`
   + compileModule(await read('src/core/lesson4.js'), 'ClassroomLesson4')
+  + compileModule(await read('src/core/lesson4-debate.js'), 'ClassroomDebate')
   + compileModule(await read('backend/service.js'), 'ClassroomService')
   + await read('backend/Native.gs');
 const schema = JSON.stringify({ common: COMMON_HEADERS, tabs: HEADERS,
-  config: { grade: 2, classCount: 11, groupMax: 8, acceptLessons: '2', l2Questions: 3, l4Questions: 4, publicSharing: 'true', recordingFallbackUrl: '' } }, null, 2) + '\n';
+  config: { grade: 2, classCount: 11, groupMax: 8, acceptLessons: '2', l2Questions: 3, l4Questions: 4, publicSharing: 'true', recordingFallbackUrl: '',
+    l4Mode: 'script', l4DebateExchanges: 2, l4DebateRebuttal: 'true' } }, null, 2) + '\n';
 const dest = path.join(root, 'backend/ServerBundle.gs');
 if (process.argv.includes('--check')) {
   const actual = await fs.readFile(dest, 'utf8').catch(() => '');

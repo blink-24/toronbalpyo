@@ -51,7 +51,7 @@ function savedState(f) {
 
 test('버전·차시 개방 계약과 기존 l4 열 순서를 보존한다', () => {
   const f = fixture({ opened: '2' }), cfg = f.service.respond('GET', { action: 'config' }).data;
-  assert.equal(VERSION, '5.3.0'); assert.equal(content.version, '5.0.0'); assert.equal(cfg.appVersion, VERSION);
+  assert.equal(VERSION, '5.4.0'); assert.equal(content.version, '5.0.0'); assert.equal(cfg.appVersion, VERSION);
   assert.equal(cfg.l4ScriptVersion, '1.1.0');
   assert.deepEqual(cfg.implementedLessons, [2, 4]); assert.equal(cfg.l4Questions, 4); assert.equal(cfg.l4AiEnabled, false);
   assert.deepEqual(cfg.acceptLessons, [2]); assert.equal(cfg.lessons[4].enabled, false);
