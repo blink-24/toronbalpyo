@@ -62,6 +62,11 @@ test('AI 출력 검사: 정상 발언은 통과하고 새 숫자·주소·개인
   assert.equal(reason(() => checkAiOutput(answer, { text: '' })), 'EMPTY');
   assert.equal(reason(() => checkAiOutput(constructive, { text: '짧은 입론입니다.' })), 'TOO_SHORT');
   assert.equal(reason(() => checkAiOutput(rebuttal, { text: '가'.repeat(401) })), 'TOO_LONG');
+  // 조금 넘친 발언은 상한 안의 마지막 완결 문장까지만 남긴다(94.9% 같은 소수점에서는 자르지 않음).
+  const long = `${goodConstructive} 실험에서 상태를 94.9% 맞혔다는 결과도 있습니다. ${'주민의 불편을 함께 살펴야 합니다. '.repeat(20)}`;
+  const trimmed = checkAiOutput(constructive, { text: long }, { allowedText: '94.9%' }).text;
+  assert.ok(long.length > 450 && trimmed.length <= 450 && /합니다\.$/.test(trimmed) && trimmed.includes('94.9%'));
+  assert.equal(reason(() => checkAiOutput(question, { text: `${'입론에서 접근을 넓힌다고 하셨지요'.repeat(10)}? 그 근거를 확인하셨습니까?` })), 'TOO_LONG');
 });
 
 test('AI 출력 검사: 의료 조언·대필·보류 자료·긴 문장·영어 약어를 거절한다', () => {

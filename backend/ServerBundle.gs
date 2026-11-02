@@ -656,8 +656,14 @@ function checkAiOutput(turn, output, { allowedText = '', allowedRefs = [] } = {}
   invariant(range, 'INVALID_STEP', '지금은 AI가 발언할 차례가 아닙니다.');
   const raw = typeof output === 'string' ? output : output?.text;
   if (typeof raw !== 'string' || !raw.trim()) throw reject('EMPTY');
-  const text = raw.normalize('NFC').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
-  if (text.length < range[0]) throw reject('TOO_SHORT');
+  const cleaned = raw.normalize('NFC').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+  if (cleaned.length < range[0]) throw reject('TOO_SHORT');
+  let text = cleaned;
+  // 조금 넘친 발언은 다시 생성하지 않고, 상한 안의 마지막 완결 문장까지만 씁니다. 질문은 두 문장이 짝이라 자르지 않습니다.
+  if (text.length > range[1] && turn.kind !== 'cross_question') {
+    const ends = [...text.matchAll(/[.?!。？！](?=\s|$)/gu)].map(match => match.index + 1).filter(end => end <= range[1]);
+    if (ends.length && ends.at(-1) >= range[0]) text = text.slice(0, ends.at(-1)).trim();
+  }
   if (text.length > range[1]) throw reject('TOO_LONG');
   if (URL_PATTERN.test(text)) throw reject('URL');
   if (detectPII(text).length) throw reject('PII');
@@ -816,7 +822,7 @@ const DEBATE_SYSTEM_PROMPT = [
 
 function debateInstruction(turn, context) {
   const max = DEBATE_LIMITS.ai[turn.kind][1];
-  if (turn.kind === 'constructive') return `AI 측 입론 ${turn.slot}을 ${max}자 이내로 쓴다. 주장 한 문장, 이유 두세 문장, 근거 한두 문장 순서로 짧은 문장을 쓴다. ${turn.slot === 2 ? '앞의 AI 입론 1과 다른 이유를 든다. ' : ''}상대 모둠이 반대 신문에서 짚을 수 있도록 다음 논리적 빈틈을 일부러 하나 남긴다: ${WEAKNESS_TYPES[context.weaknessType].guide} 빈틈이 있다는 사실은 말하지 않는다. 사실을 틀리게 쓰는 방식의 빈틈은 만들지 않는다.`;
+  if (turn.kind === 'constructive') return `AI 측 입론 ${turn.slot}을 ${max}자 이내로 쓴다. 공백 포함 글자 수를 지키며 5문장 이내로 쓴다. 주장 한 문장, 이유 두 문장, 근거 한두 문장 순서로 짧게 쓴다. 자료 요약을 길게 옮기지 말고 한 문장으로 줄여 말한다. ${turn.slot === 2 ? '앞의 AI 입론 1과 다른 이유를 든다. ' : ''}상대 모둠이 반대 신문에서 짚을 수 있도록 다음 논리적 빈틈을 일부러 하나 남긴다: ${WEAKNESS_TYPES[context.weaknessType].guide} 빈틈이 있다는 사실은 말하지 않는다. 사실을 틀리게 쓰는 방식의 빈틈은 만들지 않는다.`;
   if (turn.kind === 'cross_question') return `모둠 입론 ${turn.slot}을 반대 신문한다. 입론의 실제 구절을 짧게 따옴표로 인용한 확인 질문 한 문장을 쓰고, 이어서 그 구절의 근거·연결·공정성 중 한 가지 빈틈을 묻는 검증 질문 한 문장을 쓴다. 두 문장 모두 물음표로 끝낸다. 반박하거나 의견을 말하지 않는다. focus.previousQuestions와 겹치지 않게 묻는다. 전체 ${max}자 이내.`;
   if (turn.kind === 'cross_answer') return `모둠이 AI 입론 ${turn.slot}에 대해 한 질문(focus.question)에 AI 측 입장에서 ${max}자 이내로 직접 답한다. 근거가 없거나 모르는 부분은 솔직히 인정한다. 질문을 되묻지 않고 새 쟁점을 꺼내지 않는다.`;
   return `AI 측 반박 ${turn.slot}을 ${max}자 이내로 쓴다. transcript에서 이미 나온 쟁점 한두 개만 골라 AI 측 주장이 유지되는 이유와 모둠 주장의 약점을 정리한다. 새 근거나 새 쟁점은 꺼내지 않는다.${turn.final ? ' 토론의 마지막 발언이므로 새 논점을 더하지 않는다.' : ''}`;
@@ -1666,8 +1672,11 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
     invariant(turn, 'INVALID_STEP', '미리 볼 AI 발언 종류를 확인해 주세요.');
     const state = { stance: plan.stance, ...args, exchanges: 1, rebuttal: true, seed: 'preview-session', sessionId: 'preview-session' };
     const used = usageToday();
-    invariant(used < debateLimits().daily && setUsageToday(used + 1), 'AI_LIMIT', '오늘 AI 호출 한도를 확인해 주세요.');
-    return generateDebateTurn({ state, plan, turn, transcript: [], reserve: 1, limitReason: '' });
+    invariant(used + 2 <= debateLimits().daily && setUsageToday(used + 2), 'AI_LIMIT', '오늘 AI 호출 한도를 확인해 주세요.');
+    // 실제 토론과 같이 한 번 다시 생성할 수 있게 하고, 쓰지 않은 호출은 사용량에서 돌려줍니다.
+    const result = generateDebateTurn({ state, plan, turn, transcript: [], reserve: 2, limitReason: '' });
+    if (result.attempts < 2) setUsageToday(usageToday() - (2 - result.attempts));
+    return result;
   }
   function respond(method, request) {
     try {

@@ -137,8 +137,14 @@ export function checkAiOutput(turn, output, { allowedText = '', allowedRefs = []
   invariant(range, 'INVALID_STEP', '지금은 AI가 발언할 차례가 아닙니다.');
   const raw = typeof output === 'string' ? output : output?.text;
   if (typeof raw !== 'string' || !raw.trim()) throw reject('EMPTY');
-  const text = raw.normalize('NFC').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
-  if (text.length < range[0]) throw reject('TOO_SHORT');
+  const cleaned = raw.normalize('NFC').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+  if (cleaned.length < range[0]) throw reject('TOO_SHORT');
+  let text = cleaned;
+  // 조금 넘친 발언은 다시 생성하지 않고, 상한 안의 마지막 완결 문장까지만 씁니다. 질문은 두 문장이 짝이라 자르지 않습니다.
+  if (text.length > range[1] && turn.kind !== 'cross_question') {
+    const ends = [...text.matchAll(/[.?!。？！](?=\s|$)/gu)].map(match => match.index + 1).filter(end => end <= range[1]);
+    if (ends.length && ends.at(-1) >= range[0]) text = text.slice(0, ends.at(-1)).trim();
+  }
   if (text.length > range[1]) throw reject('TOO_LONG');
   if (URL_PATTERN.test(text)) throw reject('URL');
   if (detectPII(text).length) throw reject('PII');
