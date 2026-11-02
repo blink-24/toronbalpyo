@@ -338,8 +338,8 @@ test('100명 동시 사용: Solar 동시 호출 수를 제한하고 오래된 �
   f.props.set('l4debate:inflight', JSON.stringify(busy.map(item => ({ ...item, t: now - 61000 }))));
   assert.equal(debate(f, 'ai_turn', { turnNo: view.next.turnNo }).data.transcript.length, 1); assert.equal(f.calls.length, 1);
   assert.deepEqual(JSON.parse(f.props.get('l4debate:inflight')), []);
-  // 기본 하루 상한은 100명(약 25모둠)이 여러 반에서 써도 되도록 1200회다.
-  assert.equal(fixture().service.handleGet({ action: 'l4_summary', passcode: 'virtual-teacher-passcode' }).debateDailyMax, 1200);
+  // 기본 하루 상한은 50모둠(약 600회/수업)이 여러 반에서 써도 되도록 2400회다.
+  assert.equal(fixture().service.handleGet({ action: 'l4_summary', passcode: 'virtual-teacher-passcode' }).debateDailyMax, 2400);
 });
 
 test('최신 상태는 캐시에서 읽고, 캐시가 비면 시트 기록으로 되돌아간다', () => {
@@ -348,9 +348,32 @@ test('최신 상태는 캐시에서 읽고, 캐시가 비면 시트 기록으로
   assert.equal(JSON.parse(JSON.parse(f.props.get(key)).text).cursor, 1);
   f.props.delete(key);
   assert.equal(debate(f, 'state').data.cursor, 1);
-  // 시트 기록이 실패하면 캐시도 비워 두어 낡은 상태를 쓰지 않는다.
+  // 차례 기록 쓰기가 실패하면 차례 캐시를 비우고 상태도 넘어가지 않는다.
   const g = fixture({ props: {} }); start(g, '찬성');
-  g.db.progress.push = () => { throw Error('가상 시트 쓰기 실패'); };
-  assert.equal(debate(g, 'group_turn', { turnNo: 1 }).ok, false); assert.equal(g.props.get(key), '');
+  g.db.l4_debate_turns.push = () => { throw Error('가상 시트 쓰기 실패'); };
+  assert.equal(debate(g, 'group_turn', { turnNo: 1 }).ok, false); assert.equal(g.props.get('turns:l4d_virtual_session_01'), '');
+  assert.equal(JSON.parse(JSON.parse(g.props.get(key)).text).cursor, 0);
+});
+
+test('50모둠 교차 진행: 모두 끝까지 진행되고 기록이 섞이지 않으며 진행 탭 쓰기는 시작·종료뿐이다', () => {
+  const f = fixture(), stances = ['찬성', '반대'];
+  const groups = Array.from({ length: 50 }, (_, i) => {
+    const cls = 1 + (i % 10), base = `2${String(cls).padStart(2, '0')}`, n = 4 * Math.floor(i / 10);
+    const env = { lesson: 4, studentId: base + String(n + 1).padStart(2, '0'), cls, groupName: `가상${i}`,
+      memberStudentIds: [1, 2, 3, 4].map(k => base + String(n + k).padStart(2, '0')), sessionId: `l4d_fifty_${String(i).padStart(3, '0')}` };
+    const view = post(f, { ...env, action: 'l4_debate', op: 'start', selection: { stance: stances[i % 2], arg1, arg5 } }).data;
+    return { env, view };
+  });
+  for (let round = 0; round < 40 && groups.some(g => g.view.next); round++) for (const g of groups) {
+    const turn = g.view.next; if (!turn) continue;
+    const body = turn.actor === 'group' ? { op: 'group_turn', turnNo: turn.turnNo, text: GROUP_TEXT[turn.kind] } : { op: 'ai_turn', turnNo: turn.turnNo, requestId: `r${turn.turnNo}` };
+    const response = post(f, { ...g.env, action: 'l4_debate', ...body });
+    assert.equal(response.ok, true); assert.equal(response.data.unavailable, undefined); g.view = response.data;
+  }
+  for (const g of groups) post(f, { ...g.env, action: 'l4_debate', op: 'finish' });
+  assert.ok(groups.every(g => g.view.cursor === 24 && g.view.transcript.every((row, i) => row.turnNo === i + 1)));
+  assert.ok(groups.every(g => g.view.transcript.filter(row => row.kind === 'group_constructive').every((row, i) => row.text === [arg1, arg5][i])));
+  assert.equal(f.calls.length, 600); assert.equal(f.props.get('L4_DEBATE_USAGE').split(':')[1], '600');
+  assert.equal(f.db.l4_debate_turns.length, 1200); assert.equal(f.db.progress.length, 100);
 });
 

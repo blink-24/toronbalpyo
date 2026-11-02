@@ -1,11 +1,15 @@
 /* 이 파일은 Apps Script 전용입니다. 설정·키는 Script Properties에만 둡니다. */
+// 한 번의 실행(요청) 안에서는 스프레드시트와 탭 머리글을 한 번만 엽니다.
+var CLASSROOM_DB_ = null, CLASSROOM_HEADERS_ = {};
 function classroomSpreadsheet_() {
+  if (CLASSROOM_DB_) return CLASSROOM_DB_;
   var props = PropertiesService.getScriptProperties();
   var id = props.getProperty('SPREADSHEET_ID');
   var active = SpreadsheetApp.getActiveSpreadsheet();
   if (!id && active) { id = active.getId(); props.setProperty('SPREADSHEET_ID', id); }
   if (!id) throw new ClassroomCore.DomainError('DATABASE_NOT_CONFIGURED', '스크립트 속성 SPREADSHEET_ID를 설정해 주세요.');
-  return SpreadsheetApp.openById(id);
+  CLASSROOM_DB_ = SpreadsheetApp.openById(id);
+  return CLASSROOM_DB_;
 }
 
 function classroomHeaders_(sheet, expected) {
@@ -105,7 +109,7 @@ function classroomDebateSettings_() {
 }
 
 // 이전 버전이 스크립트 속성에 남긴 임시 표시입니다. 원본 판정은 시트 행으로 다시 하므로 지워도 기록은 그대로입니다.
-var CLASSROOM_TEMPORARY_PROPERTY_ = /^(submission:|log:|rate:|state:|l4debate:pending:|l4debate:day:|l4debate:inflight)/;
+var CLASSROOM_TEMPORARY_PROPERTY_ = /^(submission:|log:|rate:|state:|turns:|config:rows|l4debate:pending:|l4debate:day:|l4debate:inflight)/;
 
 // 편집기 또는 채움 관리 메뉴에서 실행: 임시 표시만 지우고 설정값(PASSCODE·SPREADSHEET_ID·AI·SOLAR 등)은 그대로 둡니다.
 function cleanupScriptProperties() {
@@ -226,7 +230,7 @@ function classroomService_() {
     },
     append: function(tab, values) {
       var db = classroomSpreadsheet_(), sheet = db.getSheetByName(tab) || db.insertSheet(tab);
-      var header = classroomHeaders_(sheet, ClassroomService.HEADERS[tab]);
+      var header = CLASSROOM_HEADERS_[tab] || (CLASSROOM_HEADERS_[tab] = classroomHeaders_(sheet, ClassroomService.HEADERS[tab]));
       sheet.appendRow(header.map(function(name) { return ClassroomCore.sanitizeCell(values[name]); }));
     },
     writeConfig: function(key, value) {
@@ -257,7 +261,7 @@ function classroomService_() {
   var scriptCache = CacheService.getScriptCache();
   return ClassroomService.createService({ content: ClassroomContent, store: store,
     properties: { get: function(k) { return props.getProperty(k); }, set: function(k, v) { props.setProperty(k, String(v)); } },
-    cache: { get: function(k) { return scriptCache.get(k); }, set: function(k, v) { scriptCache.put(k, String(v), 21600); } },
+    cache: { get: function(k) { return scriptCache.get(k); }, set: function(k, v, seconds) { scriptCache.put(k, String(v), seconds || 21600); } },
     hash: function(text) { return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, text, Utilities.Charset.UTF_8).map(function(b) { return ('0' + ((b + 256) % 256).toString(16)).slice(-2); }).join(''); },
     providerCall: classroomProvider_, debateCall: classroomSolar_ });
 }

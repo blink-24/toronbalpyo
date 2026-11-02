@@ -679,7 +679,8 @@ window.addEventListener('hashchange', () => {
 });
 setInterval(tickTimer, 1000);
 setInterval(flushProgress, 30000);
-setInterval(() => { if (document.visibilityState !== 'hidden') refreshConfig(); }, 15000);
+// 수백 명이 동시에 열어도 서버(동시 실행 30개)가 몰리지 않도록 45~60초 사이로 흩어 확인합니다.
+setInterval(() => { if (document.visibilityState !== 'hidden') refreshConfig(); }, 45000 + Math.floor(Math.random() * 15000));
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refreshConfig(); });
 if (location.hash === '#/lesson2') { state.lesson = 2; state.tab = 'activity'; }
 if (location.hash === '#/learn') { state.lesson = 2; state.tab = 'learn'; }

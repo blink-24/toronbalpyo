@@ -839,7 +839,7 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
   // 스크립트 속성이 계속 늘어나지 않게 합니다(원본 판정은 시트 행으로 다시 확인).
   const temporary = cache || properties;
   function cacheGet(key) { try { return temporary.get(key); } catch { return null; } }
-  function cacheSet(key, value) { try { temporary.set(key, value); return true; } catch { return false; } }
+  function cacheSet(key, value, seconds) { try { temporary.set(key, value, seconds); return true; } catch { return false; } }
   function append(tab, values) {
     const safe = {};
     for (const field of HEADERS[tab]) {
@@ -849,9 +849,20 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
       invariant(typeof safe[field] !== 'string' || safe[field].length <= (['2차시', '4차시'].includes(tab) ? 20000 : 2000), 'STORAGE_LENGTH', '기록할 입력란이 너무 깁니다.');
     }
     store.append(tab, safe);
+    return safe;
   }
+  // 설정 탭은 모든 요청이 읽으므로 30초 캐시에 둡니다(교사 저장 시 즉시 비움, 시트 직접 수정은 30초 안에 반영).
+  function configRows() {
+    if (!cache) return rows('config');
+    const hit = parseJSON(cacheGet('config:rows'));
+    if (Array.isArray(hit)) return hit;
+    const list = rows('config').map(row => ({ key: safeText(row.key), value: safeText(row.value) }));
+    cacheSet('config:rows', JSON.stringify(list), 30);
+    return list;
+  }
+  function writeConfig(key, value) { store.writeConfig(key, value); cacheSet('config:rows', ''); }
   function config() {
-    const source = Object.fromEntries(rows('config').map(x => [x.key, x.value]));
+    const source = Object.fromEntries(configRows().map(x => [x.key, x.value]));
     const integer = (key, base, low, high) => { const n = Number(source[key] || base); return Number.isInteger(n) && n >= low && n <= high ? n : base; };
     const accepts = [...new Set(safeText(source.acceptLessons == null ? '2' : source.acceptLessons).split(',').map(Number).filter(x => x === 2 || x === 4))];
     const provider = prop('AI_PROVIDER'), l4Mode = safeText(source.l4Mode) === 'debate' ? 'debate' : 'script', debateReady = debateServerReady();
@@ -1338,7 +1349,7 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
         && new Set(request.acceptLessons).size === request.acceptLessons.length && request.acceptLessons.every(value => value === 2 || value === 4),
       'INVALID_LESSONS', '개방할 차시는 2차시·4차시 중에서 선택해 주세요.');
       invariant(typeof store.writeConfig === 'function', 'CONFIG_NOT_SUPPORTED', '차시 설정을 지원하는 서버로 갱신해 주세요.');
-      locked(() => store.writeConfig('acceptLessons', request.acceptLessons.slice().sort().join(','))); return config();
+      locked(() => writeConfig('acceptLessons', request.acceptLessons.slice().sort().join(','))); return config();
     }
     if (request.action === 'set_l4_mode') return setLesson4Mode(request);
     if (request.action === 'l4_debate') return handleDebate(request);
@@ -1398,7 +1409,7 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
   // config()가 요청마다 여러 번 부르므로 필요한 세 속성만 읽습니다.
   function debateServerReady() { return typeof debateCall === 'function' && prop('L4_DEBATE_PROVIDER') === 'solar' && Boolean(prop('SOLAR_API_KEY') && prop('SOLAR_MODEL')); }
   function debateLimits() {
-    return { session: intProp('L4_DEBATE_SESSION_CALL_MAX', 20, 1, 200), daily: intProp('L4_DEBATE_DAILY_CALL_MAX', 1200, 1, 20000),
+    return { session: intProp('L4_DEBATE_SESSION_CALL_MAX', 20, 1, 200), daily: intProp('L4_DEBATE_DAILY_CALL_MAX', 2400, 1, 20000),
       concurrent: intProp('L4_DEBATE_MAX_CONCURRENT', 6, 1, 30) };
   }
   // 하루 사용량은 날짜별 키를 늘리지 않고 스크립트 속성 하나(L4_DEBATE_USAGE = 날짜:횟수)에 덮어씁니다.
@@ -1423,14 +1434,22 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
     invariant(request.l4DebateRebuttal === undefined || typeof request.l4DebateRebuttal === 'boolean', 'INVALID_MODE', '반박 단계 설정을 확인해 주세요.');
     invariant(typeof store.writeConfig === 'function', 'CONFIG_NOT_SUPPORTED', '설정을 지원하는 서버로 갱신해 주세요.');
     locked(() => {
-      store.writeConfig('l4Mode', request.l4Mode);
-      if (exchanges !== null) store.writeConfig('l4DebateExchanges', String(exchanges));
-      if (request.l4DebateRebuttal !== undefined) store.writeConfig('l4DebateRebuttal', String(request.l4DebateRebuttal));
+      writeConfig('l4Mode', request.l4Mode);
+      if (exchanges !== null) writeConfig('l4DebateExchanges', String(exchanges));
+      if (request.l4DebateRebuttal !== undefined) writeConfig('l4DebateRebuttal', String(request.l4DebateRebuttal));
     });
     return { ...config(), ...debateUsage() };
   }
   function planFor(state) { return buildDebatePlan({ stance: state.stance, exchanges: state.exchanges, rebuttal: state.rebuttal }); }
+  // 차례 기록도 캐시에 두어 요청마다 l4_debate_turns 탭 전체를 읽지 않습니다. 캐시가 비면 시트에서 다시 만듭니다.
   function debateTurns(sid) {
+    const hit = parseJSON(cacheGet(`turns:${sid}`));
+    if (Array.isArray(hit)) return hit;
+    const list = readDebateTurns(sid);
+    cacheSet(`turns:${sid}`, JSON.stringify(list));
+    return list;
+  }
+  function readDebateTurns(sid) {
     const seen = new Map();
     for (const row of rows('l4_debate_turns')) if (row.sessionId === sid && Number(row.lesson) === 4 && !seen.has(Number(row.turnNo))) seen.set(Number(row.turnNo), row);
     return [...seen.values()].sort((a, b) => Number(a.turnNo) - Number(b.turnNo));
@@ -1459,11 +1478,22 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
     const state = stateFor(sid, 4);
     invariant(state, 'DEBATE_NOT_FOUND', 'AI 토론 기록을 찾지 못했습니다. 처음부터 다시 시작해 주세요.');
     invariant(state.mode === 'debate', 'SESSION_MODE_MISMATCH', '대본 활동 기록에는 AI 토론을 이어 갈 수 없습니다.');
-    assertGroupOwner(state, actor); return state;
+    assertGroupOwner(state, actor);
+    const turns = debateTurns(sid); let count = 0;
+    while (turns[count] && Number(turns[count].turnNo) === count + 1) count++;
+    if (!state.finished && count > (Number(state.cursor) || 0)) state.cursor = count;
+    return state;
   }
   function appendDebateTurn(request, actor, state, turn, values) {
-    append('l4_debate_turns', { ...common(request, actor), sessionId: state.sessionId, debateVersion: state.debateVersion, turnNo: turn.turnNo,
+    const key = `turns:${state.sessionId}`, before = debateTurns(state.sessionId);
+    cacheSet(key, '');
+    const row = append('l4_debate_turns', { ...common(request, actor), sessionId: state.sessionId, debateVersion: state.debateVersion, turnNo: turn.turnNo,
       step: turn.step, exchange: turn.exchange, actor: turn.actor, kind: turn.kind, ...values });
+    cacheSet(key, JSON.stringify([...before, row]));
+  }
+  // 매 차례 진행 탭에 행을 쓰지 않고(시트 쓰기 절반) 캐시에만 둡니다. 차례 기록이 원본이므로 캐시가 비어도 차례 수로 복원합니다.
+  function rememberState(state, request) {
+    cacheSet(stateKey(state.sessionId, Number(request.lesson || 2)), JSON.stringify({ stage: 'debate', text: stateText(state) }));
   }
   function debateStart(request, actor, sid) {
     const cfg = config();
@@ -1500,7 +1530,7 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
       const text = turn.kind === 'group_constructive' ? (turn.slot === 1 ? state.arg1 : state.arg5) : validateGroupTurn(turn, request.text);
       appendDebateTurn(request, actor, state, turn, { text, refs: [], mode: 'group' });
       const next = { ...state, cursor: state.cursor + 1 };
-      saveState(next, request, actor, `debate:${turn.turnNo}`);
+      rememberState(next, request);
       return debateView(next);
     });
   }
@@ -1624,7 +1654,7 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
         provider: result.mode === 'ai' ? 'solar' : 'none', model: result.mode === 'ai' ? debateSettings().model : '', latencyMs: result.latencyMs,
         attempts: result.attempts, error: result.error || '', weaknessType: result.weaknessType || '', requestId: safeText(request.requestId).slice(0, 64) });
       const next = { ...counted, cursor: counted.cursor + 1 };
-      saveState(next, request, actor, `debate:${turnNo}`);
+      rememberState(next, request);
       return debateView(next);
     });
   }
@@ -1707,13 +1737,17 @@ function createService({ content, lesson4Content = LESSON4_CONTENT, store, prope
 return {VERSION,COMMON_HEADERS,HEADERS,classroomRecord,debateRecord,createService};
 })();
 /* 이 파일은 Apps Script 전용입니다. 설정·키는 Script Properties에만 둡니다. */
+// 한 번의 실행(요청) 안에서는 스프레드시트와 탭 머리글을 한 번만 엽니다.
+var CLASSROOM_DB_ = null, CLASSROOM_HEADERS_ = {};
 function classroomSpreadsheet_() {
+  if (CLASSROOM_DB_) return CLASSROOM_DB_;
   var props = PropertiesService.getScriptProperties();
   var id = props.getProperty('SPREADSHEET_ID');
   var active = SpreadsheetApp.getActiveSpreadsheet();
   if (!id && active) { id = active.getId(); props.setProperty('SPREADSHEET_ID', id); }
   if (!id) throw new ClassroomCore.DomainError('DATABASE_NOT_CONFIGURED', '스크립트 속성 SPREADSHEET_ID를 설정해 주세요.');
-  return SpreadsheetApp.openById(id);
+  CLASSROOM_DB_ = SpreadsheetApp.openById(id);
+  return CLASSROOM_DB_;
 }
 
 function classroomHeaders_(sheet, expected) {
@@ -1813,7 +1847,7 @@ function classroomDebateSettings_() {
 }
 
 // 이전 버전이 스크립트 속성에 남긴 임시 표시입니다. 원본 판정은 시트 행으로 다시 하므로 지워도 기록은 그대로입니다.
-var CLASSROOM_TEMPORARY_PROPERTY_ = /^(submission:|log:|rate:|state:|l4debate:pending:|l4debate:day:|l4debate:inflight)/;
+var CLASSROOM_TEMPORARY_PROPERTY_ = /^(submission:|log:|rate:|state:|turns:|config:rows|l4debate:pending:|l4debate:day:|l4debate:inflight)/;
 
 // 편집기 또는 채움 관리 메뉴에서 실행: 임시 표시만 지우고 설정값(PASSCODE·SPREADSHEET_ID·AI·SOLAR 등)은 그대로 둡니다.
 function cleanupScriptProperties() {
@@ -1934,7 +1968,7 @@ function classroomService_() {
     },
     append: function(tab, values) {
       var db = classroomSpreadsheet_(), sheet = db.getSheetByName(tab) || db.insertSheet(tab);
-      var header = classroomHeaders_(sheet, ClassroomService.HEADERS[tab]);
+      var header = CLASSROOM_HEADERS_[tab] || (CLASSROOM_HEADERS_[tab] = classroomHeaders_(sheet, ClassroomService.HEADERS[tab]));
       sheet.appendRow(header.map(function(name) { return ClassroomCore.sanitizeCell(values[name]); }));
     },
     writeConfig: function(key, value) {
@@ -1965,7 +1999,7 @@ function classroomService_() {
   var scriptCache = CacheService.getScriptCache();
   return ClassroomService.createService({ content: ClassroomContent, store: store,
     properties: { get: function(k) { return props.getProperty(k); }, set: function(k, v) { props.setProperty(k, String(v)); } },
-    cache: { get: function(k) { return scriptCache.get(k); }, set: function(k, v) { scriptCache.put(k, String(v), 21600); } },
+    cache: { get: function(k) { return scriptCache.get(k); }, set: function(k, v, seconds) { scriptCache.put(k, String(v), seconds || 21600); } },
     hash: function(text) { return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, text, Utilities.Charset.UTF_8).map(function(b) { return ('0' + ((b + 256) % 256).toString(16)).slice(-2); }).join(''); },
     providerCall: classroomProvider_, debateCall: classroomSolar_ });
 }
