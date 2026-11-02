@@ -106,10 +106,10 @@ const DEBATE_SYSTEM_PROMPT = [
 
 function debateInstruction(turn, context) {
   const max = DEBATE_LIMITS.ai[turn.kind][1];
-  if (turn.kind === 'constructive') return `AI 측 입론 ${turn.slot}을 ${max}자 이내로 쓴다. 공백 포함 글자 수를 지키며 5문장 이내로 쓴다. 주장 한 문장, 이유 두 문장, 근거 한두 문장 순서로 짧게 쓴다. 자료 요약을 길게 옮기지 말고 한 문장으로 줄여 말한다. ${turn.slot === 2 ? '앞의 AI 입론 1과 다른 이유를 든다. ' : ''}상대 모둠이 반대 신문에서 짚을 수 있도록 다음 논리적 빈틈을 일부러 하나 남긴다: ${WEAKNESS_TYPES[context.weaknessType].guide} 빈틈이 있다는 사실은 말하지 않는다. 사실을 틀리게 쓰는 방식의 빈틈은 만들지 않는다.`;
-  if (turn.kind === 'cross_question') return `모둠 입론 ${turn.slot}을 반대 신문한다. 입론의 실제 구절을 짧게 따옴표로 인용한 확인 질문 한 문장을 쓰고, 이어서 그 구절의 근거·연결·공정성 중 한 가지 빈틈을 묻는 검증 질문 한 문장을 쓴다. 두 문장 모두 물음표로 끝낸다. 반박하거나 의견을 말하지 않는다. focus.previousQuestions와 겹치지 않게 묻는다. 전체 ${max}자 이내.`;
-  if (turn.kind === 'cross_answer') return `모둠이 AI 입론 ${turn.slot}에 대해 한 질문(focus.question)에 AI 측 입장에서 ${max}자 이내로 직접 답한다. 근거가 없거나 모르는 부분은 솔직히 인정한다. 질문을 되묻지 않고 새 쟁점을 꺼내지 않는다.`;
-  return `AI 측 반박 ${turn.slot}을 ${max}자 이내로 쓴다. transcript에서 이미 나온 쟁점 한두 개만 골라 AI 측 주장이 유지되는 이유와 모둠 주장의 약점을 정리한다. 새 근거나 새 쟁점은 꺼내지 않는다.${turn.final ? ' 토론의 마지막 발언이므로 새 논점을 더하지 않는다.' : ''}`;
+  if (turn.kind === 'constructive') return `AI 측 입론 ${turn.slot}을 ${max}자 이내로 쓴다. 공백 포함 글자 수를 지키며 5문장 이내로 쓴다. 주장 한 문장, 이유 두 문장, 근거 한두 문장, 마무리 한 문장 순서의 완결된 입론으로 쓴다. 근거는 materials의 실제 자료가 있으면 매체·기관 이름과 함께 하나를 든다. 자료 요약을 길게 옮기지 말고 한 문장으로 줄여 말한다. ${turn.slot === 2 ? '앞의 AI 입론 1과 다른 이유를 든다. ' : ''}상대 모둠이 반대 신문에서 짚을 수 있도록 다음 논리적 빈틈을 일부러 하나 남긴다: ${WEAKNESS_TYPES[context.weaknessType].guide} 빈틈이 있다는 사실은 말하지 않는다. 사실을 틀리게 쓰는 방식의 빈틈은 만들지 않는다.`;
+  if (turn.kind === 'cross_question') return `모둠 입론 ${turn.slot}을 반대 신문한다. ${context.focus.lastAnswer ? '먼저 focus.lastAnswer(모둠의 직전 답)에 한두 문장, 100자 이내로 짧게 응수한다. 응수에서는 materials의 실제 자료 하나를 매체·기관 이름과 함께 근거로 들 수 있다. 응수는 물음표 없이 끝낸다. 그다음 ' : ''}입론의 실제 구절을 짧게 따옴표로 인용한 확인 질문 한 문장을 쓰고, 이어서 그 구절의 근거·연결·공정성 중 한 가지 빈틈을 묻는 검증 질문 한 문장을 쓴다. 질문 두 문장은 모두 물음표로 끝낸다. 길게 반박하지 않는다. focus.previousQuestions와 겹치지 않게 묻는다. 전체 ${max}자 이내.`;
+  if (turn.kind === 'cross_answer') return `모둠이 AI 입론 ${turn.slot}에 대해 한 질문(focus.question)에 AI 측 입장에서 ${max}자 이내로 짧게 응수하듯 직접 답한다. 근거가 필요하면 materials의 실제 자료 하나를 매체·기관 이름과 함께 든다. 근거가 없거나 모르는 부분은 솔직히 인정한다. 질문을 되묻지 않고 새 쟁점을 꺼내지 않는다.`;
+  return `AI 측 반박 ${turn.slot}을 ${max}자 이내로 쓴다. transcript에서 이미 나온 쟁점 한두 개를 골라, 모둠의 답변을 짚고 → materials의 실제 자료로 근거를 들고 → AI 측 주장이 유지되는 이유로 끝맺는 완결된 반박으로 쓴다. 새 근거나 새 쟁점은 꺼내지 않는다.${turn.final ? ' 토론의 마지막 발언이므로 새 논점을 더하지 않는다.' : ''}`;
 }
 
 export function createService({ content, lesson4Content = LESSON4_CONTENT, store, properties, cache = null, clock = () => Date.now(), hash, providerCall = null, debateCall = null }) {

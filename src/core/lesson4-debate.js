@@ -14,7 +14,10 @@ export const DEBATE_SEQUENCE_LABELS = DEBATE_SEQUENCE.map(item => `${item.side} 
 export const DEBATE_LIMITS = {
   argMin: 20, argMax: 1500, exchangesMin: 1, exchangesMax: 3, exchangesDefault: 2,
   group: { group_question: [10, 150], group_answer: [1, 300], group_rebuttal: [20, 500] },
-  ai: { constructive: [80, 450], cross_question: [15, 160], cross_answer: [10, 220], rebuttal: [60, 400] },
+  // 입론·반박은 완결된 발언, 신문의 질문·답변은 짧게 응수합니다(사용자 운영 의견 2026-11-02).
+  ai: { constructive: [80, 500], cross_question: [15, 260], cross_answer: [10, 160], rebuttal: [60, 450] },
+  // 모둠 차례의 제한 시간(초). 시작 화면에 먼저 알리고, 시간이 끝나면 쓴 내용을 그대로 보냅니다.
+  groupSeconds: { group_question: 90, group_answer: 90, group_rebuttal: 150 },
   // 고1 수준을 위한 출발값입니다. 교사 리허설로 조정합니다.
   sentenceMax: 100, sentenceAverageMax: 70,
   // 양측 첫 입론과 신문(1~4단계)을 마친 뒤에만 조기 종료할 수 있습니다.
@@ -122,7 +125,7 @@ export const AI_REJECTION_REASONS = {
   EMPTY: '본문이 비어 있음', TOO_SHORT: '너무 짧음', TOO_LONG: '글자 수 상한을 넘음', URL: '인터넷 주소를 씀',
   PII: '개인정보 형태가 있음', NUMBER_NOT_IN_SOURCE: '제공되지 않은 숫자·통계를 씀', LATIN_WORD: '영어 단어·약어를 씀',
   SENTENCE_TOO_LONG: '문장이 너무 길어 고1 수준을 넘음', MEDICAL_ADVICE: '개인 건강 조언을 함', GHOSTWRITING: '학생 글을 대신 쓰거나 고쳐 줌',
-  HELD_SOURCE: '⑦ 설문이나 사용 보류 카드를 사실처럼 씀', NOT_QUESTION: '질문 형식(물음표로 끝나는 두 문장 이하)이 아님', REF_UNKNOWN: '제공되지 않은 자료 번호를 인용함', BRACKET_REF: '본문에 [자료 번호]를 씀(자료 제목을 문장으로 풀어 쓰고 번호는 refs에만)',
+  HELD_SOURCE: '⑦ 설문이나 사용 보류 카드를 사실처럼 씀', NOT_QUESTION: '질문 형식이 아님(짧은 응수 두 문장 이하 뒤에 물음표로 끝나는 질문 한두 문장)', REF_UNKNOWN: '제공되지 않은 자료 번호를 인용함', BRACKET_REF: '본문에 [자료 번호]를 씀(자료 제목을 문장으로 풀어 쓰고 번호는 refs에만)',
 };
 function reject(reason) {
   const error = new DomainError('AI_OUTPUT_REJECTED', AI_REJECTION_REASONS[reason] || '출력 규칙을 지키지 않았습니다.');
@@ -164,7 +167,11 @@ export function checkAiOutput(turn, output, { allowedText = '', allowedRefs = []
   // AI가 질문으로 ⑦을 확인하는 것은 허용하고, 주장·답변에서 사실처럼 쓰는 것만 막습니다.
   if (turn.kind !== 'cross_question' && !HELD_LIMIT.test(text)
     && (HELD_CARD.test(text) || (/의료\s*잡지/.test(text) && /일곱|7\s*명|70\s*%/.test(text)))) throw reject('HELD_SOURCE');
-  if (turn.kind === 'cross_question' && (!/[?？]$/.test(text) || parts.length > 2 || parts.some(part => !/[?？]$/.test(part)))) throw reject('NOT_QUESTION');
+  if (turn.kind === 'cross_question') {
+    // 앞의 답에 대한 짧은 응수(두 문장·100자 이하)를 먼저 둘 수 있고, 그 뒤는 물음표로 끝나는 질문 한두 문장이어야 합니다.
+    const first = parts.findIndex(part => /[?？]$/.test(part)), lead = first < 0 ? parts : parts.slice(0, first), asks = first < 0 ? [] : parts.slice(first);
+    if (!asks.length || asks.length > 2 || asks.some(part => !/[?？]$/.test(part)) || lead.length > 2 || lead.join(' ').length > 100) throw reject('NOT_QUESTION');
+  }
   const refs = [...new Set([...(Array.isArray(output?.refs) ? output.refs : []), ...tagged].map(String))];
   if (refs.some(id => !allowedRefs.includes(id))) throw reject('REF_UNKNOWN');
   // 학생이 읽기 어려운 [자료 번호] 표기는 본문에 남기지 않습니다(카드는 발언 아래에 따로 보임).
