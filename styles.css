@@ -42,3 +42,4 @@
 .debate-transcript .debate-line{margin-top:10px}
 .inline-field{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);font-weight:700}.inline-field select{min-height:44px;padding:8px 10px}.inline-field input[type=checkbox]{width:20px;height:20px;min-height:auto}
 @media (max-width:720px){.debate-steps{grid-template-columns:repeat(3,minmax(0,1fr))}.debate-line{max-width:100%}}
+.debate-material.real{border-style:solid;border-color:var(--sage)}.debate-material.real .virtual-strip{background:var(--sage-light)}.debate-material a{color:var(--sage);font-weight:700}

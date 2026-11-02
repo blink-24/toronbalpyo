@@ -5627,6 +5627,124 @@ export const LESSON4_CONTENT = {
       "verify": "보류된 자료를 빼고 남은 근거가 실제로 무엇을 말하는지 확인하셨습니까?",
       "better": "원집계·원보고서를 확인하기 전 수치나 출처를 만들어 채우지 않는다. 보류를 인정한 표현과 확인된 사실처럼 인용한 표현을 구분한다."
     }
+  ],
+  "realSources": [
+    {
+      "id": "R01",
+      "kind": "기사",
+      "topics": [
+        "responsibility",
+        "role"
+      ],
+      "title": "'고영향 인공지능 규제' AI기본법 국회 통과…2026년 1월 시행",
+      "publisher": "뉴시스",
+      "date": "2024-12-26",
+      "url": "https://www.newsis.com/view/NISX20241226_0003011314",
+      "summary": "「인공지능 발전과 신뢰 기반 조성 등에 관한 기본법」이 2024년 12월 국회를 통과해 2026년 1월 22일부터 시행되었다. 사람의 생명·안전과 권리에 큰 영향을 줄 수 있는 고영향 인공지능에는 사업자의 책임과 안전 조치 의무를 둔다."
+    },
+    {
+      "id": "R02",
+      "kind": "법령",
+      "topics": [
+        "responsibility",
+        "scope"
+      ],
+      "title": "디지털의료제품법",
+      "publisher": "국가법령정보센터",
+      "date": "2025-01-24",
+      "url": "https://www.law.go.kr/법령/디지털의료제품법",
+      "summary": "인공 지능 같은 디지털 기술을 쓴 의료기기 등의 허가와 안전 관리를 정한 법으로 2024년 1월 제정되어 2025년 1월 24일부터 시행되었다. 제품을 만들고 쓰는 전 과정에서 안전을 관리하도록 한다."
+    },
+    {
+      "id": "R03",
+      "kind": "기사",
+      "topics": [
+        "sustainability"
+      ],
+      "title": "Babylon Health, once the 'future of the NHS', goes into administration",
+      "publisher": "Computing",
+      "date": "2023-08",
+      "url": "https://www.computing.co.uk/news/4121796/babylon-health-future-nhs-goes-administration",
+      "summary": "영국 공공 의료(NHS)의 디지털 진료 앱을 운영하던 바빌론 헬스가 2023년 8월 경영난으로 영국 사업은 법정 관리에, 미국 사업은 청산 절차에 들어갔다. 영국의 진료 서비스는 다른 회사에 넘겨져 계속 운영되었다."
+    },
+    {
+      "id": "R04",
+      "kind": "연구",
+      "topics": [
+        "scope",
+        "role"
+      ],
+      "title": "New study warns of risks in AI chatbots giving medical advice",
+      "publisher": "옥스퍼드 대학교(Nature Medicine 논문 소개)",
+      "date": "2026-02-10",
+      "url": "https://www.ox.ac.uk/news/2026-02-10-new-study-warns-risks-ai-chatbots-giving-medical-advice",
+      "summary": "영국 성인 1,298명에게 의료 상황 10개를 주고 실험한 결과, 인공 지능 상담을 쓴 사람들은 인터넷 검색 등 기존 방법을 쓴 사람들보다 더 나은 판단을 하지 못했다. 인공 지능만 시험했을 때는 상태를 94.9% 맞혔지만, 사람이 정보를 빠뜨리거나 인공 지능이 틀린 정보를 주는 문제가 함께 나타났다."
+    },
+    {
+      "id": "R05",
+      "kind": "보고서",
+      "topics": [
+        "role",
+        "alternatives",
+        "responsibility"
+      ],
+      "title": "WHO releases AI ethics and governance guidance for large multi-modal models",
+      "publisher": "세계보건기구(WHO)",
+      "date": "2024-01-18",
+      "url": "https://www.who.int/news/item/18-01-2024-who-releases-ai-ethics-and-governance-guidance-for-large-multi-modal-models",
+      "summary": "세계보건기구는 의료에 쓰는 생성형 인공 지능에 대해 40개가 넘는 권고를 냈다. 거짓·부정확·편향된 정보와 사람이 인공 지능을 지나치게 믿는 문제를 위험으로 꼽고, 정부가 승인 기관을 정하고 널리 쓰일 때 사후 점검을 하도록 권했다."
+    },
+    {
+      "id": "R06",
+      "kind": "기사",
+      "topics": [
+        "access"
+      ],
+      "title": "\"아들아, 챗GPT가 뭐니?\"…취약계층 AI 경험률, 일반인 절반 그쳐",
+      "publisher": "머니투데이",
+      "date": "2026-03-27",
+      "url": "https://www.mt.co.kr/tech/2026/03/27/2026032710093798860",
+      "summary": "과학기술정보통신부와 한국지능정보사회진흥원의 2025 디지털정보격차 실태조사를 다룬 기사로, 고령층·장애인 등 정보 취약계층의 인공 지능 서비스 경험률이 일반 국민의 절반 수준이라고 전했다."
+    },
+    {
+      "id": "R07",
+      "kind": "기사",
+      "topics": [
+        "privacy"
+      ],
+      "title": "AI 생애주기별 개인정보 처리기준 첫 공개",
+      "publisher": "바이라인네트워크",
+      "date": "2025-08-06",
+      "url": "https://byline.network/2025/08/6-277/",
+      "summary": "개인정보보호위원회가 「생성형 인공지능 개발·활용을 위한 개인정보 처리 안내서」를 공개했다. 목적 설정부터 개발·운영까지 단계별로 지켜야 할 개인정보 기준과 안전 조치를 정리했고, 민감한 정보를 많이 다루면 영향 평가를 하도록 권했다."
+    },
+    {
+      "id": "R08",
+      "kind": "기사",
+      "topics": [
+        "need",
+        "access",
+        "role"
+      ],
+      "title": "내년 12월 시행 비대면 진료법안 무슨 내용 담겼나",
+      "publisher": "데일리팜",
+      "date": "2025-12",
+      "url": "https://dailypharm.com/user/news/333586",
+      "summary": "2025년 12월 2일 국회를 통과한 비대면 진료 법안은 대면 진료를 원칙으로 하고, 동네 의원과 다시 진료받는 환자를 중심으로 비대면 진료를 허용한다. 진료를 연결하는 플랫폼에는 신고·인증 제도를 두며, 공포 1년 뒤 시행된다."
+    },
+    {
+      "id": "R09",
+      "kind": "책",
+      "topics": [
+        "need",
+        "role"
+      ],
+      "title": "Deep Medicine: How Artificial Intelligence Can Make Healthcare Human Again",
+      "publisher": "에릭 토폴, Basic Books",
+      "date": "2019-03-12",
+      "url": "https://www.hachette.com.au/eric-topol/deep-medicine-how-artificial-intelligence-can-make-healthcare-human-again",
+      "summary": "심장내과 의사인 저자는 의사가 업무에 쫓겨 환자와 충분히 대화하지 못하는 현실을 지적하고, 인공 지능이 반복 업무를 덜어 주면 의사와 환자가 마주하는 시간을 되찾을 수 있다고 주장한다."
+    }
   ]
 };
 export default LESSON4_CONTENT;

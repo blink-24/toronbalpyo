@@ -102,8 +102,17 @@ export function selectDebateMaterials(content, text, { seed = '', max = 3 } = {}
   for (const topic of content.topics || []) if ((topic.keywords || []).some(word => value.includes(canonical(word)))) topics.add(topic.id);
   topics.delete('held');
   const cards = (content.helpCards || []).filter(card => topics.has(card.topic) && card.virtual === true && card.topic !== 'held');
-  return cards.map(card => ({ card, order: seedHash(`${seed}:${card.id}`) })).sort((a, b) => a.order - b.order)
+  const virtual = cards.map(card => ({ card, order: seedHash(`${seed}:${card.id}`) })).sort((a, b) => a.order - b.order)
     .slice(0, max).map(({ card }) => ({ id: card.id, title: card.title, content: card.content, source: card.source, badge: card.badge, virtual: true }));
+  return [...virtual, ...realSourcesFor(content, [...topics]).slice(0, 2)];
+}
+
+// 쟁점 주제(가상 자료 topic 또는 단서 분류)에 맞는 실제 자료 요약입니다. ⑦·보류 근거 주제에는 붙이지 않습니다.
+export function realSourcesFor(content, topics) {
+  const families = new Set((Array.isArray(topics) ? topics : [topics]).map(topic => String(topic).startsWith('keyword.')
+    ? (content.keywordProfiles || []).find(profile => `keyword.${profile.id}` === topic)?.family : topic).filter(Boolean));
+  return (content.realSources || []).filter(item => item.topics.some(topic => families.has(topic))).map(item => ({ id: item.id, title: item.title,
+    content: item.summary, source: `${item.publisher} · ${item.date}`, url: item.url, kind: item.kind, badge: `실제 자료 · ${item.kind}`, virtual: false }));
 }
 
 const URL_PATTERN = /https?:\/\/|www\.|\.(?:com|kr|org|net)\b/i;
