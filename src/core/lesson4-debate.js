@@ -117,7 +117,7 @@ export const AI_REJECTION_REASONS = {
   EMPTY: '본문이 비어 있음', TOO_SHORT: '너무 짧음', TOO_LONG: '글자 수 상한을 넘음', URL: '인터넷 주소를 씀',
   PII: '개인정보 형태가 있음', NUMBER_NOT_IN_SOURCE: '제공되지 않은 숫자·통계를 씀', LATIN_WORD: '영어 단어·약어를 씀',
   SENTENCE_TOO_LONG: '문장이 너무 길어 고1 수준을 넘음', MEDICAL_ADVICE: '개인 건강 조언을 함', GHOSTWRITING: '학생 글을 대신 쓰거나 고쳐 줌',
-  HELD_SOURCE: '⑦ 설문이나 사용 보류 카드를 사실처럼 씀', NOT_QUESTION: '질문 형식(물음표로 끝나는 두 문장 이하)이 아님', REF_UNKNOWN: '제공되지 않은 자료 번호를 인용함',
+  HELD_SOURCE: '⑦ 설문이나 사용 보류 카드를 사실처럼 씀', NOT_QUESTION: '질문 형식(물음표로 끝나는 두 문장 이하)이 아님', REF_UNKNOWN: '제공되지 않은 자료 번호를 인용함', BRACKET_REF: '본문에 [자료 번호]를 씀(자료 제목을 문장으로 풀어 쓰고 번호는 refs에만)',
 };
 function reject(reason) {
   const error = new DomainError('AI_OUTPUT_REJECTED', AI_REJECTION_REASONS[reason] || '출력 규칙을 지키지 않았습니다.');
@@ -156,6 +156,8 @@ export function checkAiOutput(turn, output, { allowedText = '', allowedRefs = []
   if (turn.kind === 'cross_question' && (!/[?？]$/.test(text) || parts.length > 2 || parts.some(part => !/[?？]$/.test(part)))) throw reject('NOT_QUESTION');
   const refs = [...new Set([...(Array.isArray(output?.refs) ? output.refs : []), ...tagged].map(String))];
   if (refs.some(id => !allowedRefs.includes(id))) throw reject('REF_UNKNOWN');
+  // 학생이 읽기 어려운 [자료 번호] 표기는 본문에 남기지 않습니다(카드는 발언 아래에 따로 보임).
+  if (tagged.length) throw reject('BRACKET_REF');
   return { text, refs };
 }
 
