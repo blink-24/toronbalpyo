@@ -41,7 +41,7 @@ turn·progress·submit에서 lesson:4와 별도 모둠 필드를 검증한다. �
 
 ## 개방 설정과 기록 보호
 
-공개 config는 implementedLessons:[2,4], l4Questions:3~5, l4AiEnabled:false를 반환한다. 기본 acceptLessons='2'로 4차시는 처음 닫힘이다. 교사는 PASSCODE 인증된 set_lessons로 2·4를 열거나 닫으며 []로 모두 닫을 수 있다. 프런트의 15초 설정 확인과 별개로 서버가 학생 요청마다 닫힘을 검사한다. 닫혔을 때 초안·완료 상태를 지우지 않고 재개 후 이어 간다.
+공개 config는 implementedLessons:[2,4], l4Questions:3~5, l4AiEnabled:false를 반환한다. 기본 acceptLessons='2'로 4차시는 처음 닫힘이다. 교사는 PASSCODE 인증된 set_lessons로 2·4를 열거나 닫으며 []로 모두 닫을 수 있다. 프런트의 45~60초 설정 확인과 별개로 서버가 학생 요청마다 닫힘을 검사한다. 닫혔을 때 초안·완료 상태를 지우지 않고 재개 후 이어 간다.
 
 9탭은 config,l2_sessions,ai_log,l3_args,l4_sessions,recordings,uploads,log,progress다. 기존 L4 열 뒤에 groupName,groupKey,memberStudentIds,stance,arg1,arg5,completedQuestionCount,earlyFinish,durationSec,ruleFeedback,payloadHash를 추가한다. 3차시 자동 입론 제출·녹음 업로드는 이번 확장에 포함하지 않는다.
 

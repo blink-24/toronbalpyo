@@ -249,8 +249,11 @@ export function createLesson4Controller({ api, storage, getState, setState, pers
     const d = a().debate, turnNo = d.next.turnNo;
     d.requestIds ||= {}; d.requestIds[turnNo] ||= makeLesson4Id('req'); d.aiError = null;
     return debateRequest(async current => {
-      for (let attempt = 0; attempt < 12; attempt++) {
-        const { data } = await debatePost('ai_turn', { turnNo, requestId: d.requestIds[turnNo] }, 40000);
+      for (let attempt = 0; attempt < 25; attempt++) {
+        let data;
+        // 서버가 붐비면(BUSY·429) 같은 요청 ID로 잠시 뒤 다시 묻습니다. 같은 차례는 서버가 한 번만 생성합니다.
+        try { ({ data } = await debatePost('ai_turn', { turnNo, requestId: d.requestIds[turnNo] }, 40000)); }
+        catch (caught) { if (!['BUSY', 'HTTP_429'].includes(caught.code) || attempt === 24) throw caught; await wait(2000 + Math.random() * 3000); if (!current()) return false; continue; }
         if (!current()) return false;
         // 같은 차례를 서버가 만드는 중이면 잠시 뒤 결과를 받아 옵니다.
         if (data.pending) { await wait(Number(data.retryAfterMs) || 3000); if (!current()) return false; continue; }

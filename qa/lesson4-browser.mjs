@@ -207,7 +207,8 @@ try {
   assert.deepEqual((await call('config', {}, 'GET')).data.acceptLessons, []);
   assert.equal((await call('progress', { lesson: 2, studentId: '21199' })).error.code, 'LESSON_CLOSED');
   assert.equal((await call('progress', { lesson: 4, studentId: '21199' })).error.code, 'LESSON_CLOSED');
-  await watching.locator('[data-lesson-locked="4"]').waitFor();
+  // 열린 화면은 45~60초 간격 설정 확인으로 닫힘을 반영한다(서버는 위처럼 즉시 거부).
+  await watching.locator('[data-lesson-locked="4"]').waitFor({ timeout: 70000 });
   assert.equal((await state(watching)).lesson4.groupName, '닫힘 중 보존할 초안');
   const closedContext = await context(); const closed = await closedContext.newPage();
   await closed.goto(site, { waitUntil: 'networkidle' });
@@ -216,7 +217,7 @@ try {
   assert.equal(await closed.locator('form[data-form="l4-entry"]').count(), 0);
   await inspect(closed, 'both-lessons-closed'); await closedContext.close();
   await teacher.locator('[data-action="toggle-lesson"][data-lesson="4"]').click();
-  await watching.locator('#l4-group-name').waitFor();
+  await watching.locator('#l4-group-name').waitFor({ timeout: 70000 });
   assert.equal(await watching.locator('#l4-group-name').inputValue(), '닫힘 중 보존할 초안');
   await inspect(watching, 'reopened-draft-preserved'); await watchingContext.close();
   report.cases.push({ name: 'teacher group results and both closed on client/server', status: 'passed' });

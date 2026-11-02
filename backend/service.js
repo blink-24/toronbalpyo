@@ -123,7 +123,7 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
   // 스크립트 속성이 계속 늘어나지 않게 합니다(원본 판정은 시트 행으로 다시 확인).
   const temporary = cache || properties;
   function cacheGet(key) { try { return temporary.get(key); } catch { return null; } }
-  function cacheSet(key, value) { try { temporary.set(key, value); return true; } catch { return false; } }
+  function cacheSet(key, value, seconds) { try { temporary.set(key, value, seconds); return true; } catch { return false; } }
   function append(tab, values) {
     const safe = {};
     for (const field of HEADERS[tab]) {
@@ -133,9 +133,20 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
       invariant(typeof safe[field] !== 'string' || safe[field].length <= (['2차시', '4차시'].includes(tab) ? 20000 : 2000), 'STORAGE_LENGTH', '기록할 입력란이 너무 깁니다.');
     }
     store.append(tab, safe);
+    return safe;
   }
+  // 설정 탭은 모든 요청이 읽으므로 30초 캐시에 둡니다(교사 저장 시 즉시 비움, 시트 직접 수정은 30초 안에 반영).
+  function configRows() {
+    if (!cache) return rows('config');
+    const hit = parseJSON(cacheGet('config:rows'));
+    if (Array.isArray(hit)) return hit;
+    const list = rows('config').map(row => ({ key: safeText(row.key), value: safeText(row.value) }));
+    cacheSet('config:rows', JSON.stringify(list), 30);
+    return list;
+  }
+  function writeConfig(key, value) { store.writeConfig(key, value); cacheSet('config:rows', ''); }
   function config() {
-    const source = Object.fromEntries(rows('config').map(x => [x.key, x.value]));
+    const source = Object.fromEntries(configRows().map(x => [x.key, x.value]));
     const integer = (key, base, low, high) => { const n = Number(source[key] || base); return Number.isInteger(n) && n >= low && n <= high ? n : base; };
     const accepts = [...new Set(safeText(source.acceptLessons == null ? '2' : source.acceptLessons).split(',').map(Number).filter(x => x === 2 || x === 4))];
     const provider = prop('AI_PROVIDER'), l4Mode = safeText(source.l4Mode) === 'debate' ? 'debate' : 'script', debateReady = debateServerReady();
@@ -175,7 +186,12 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
     if (!latest) return null;
     return parseJSON([1, 2, 3, 4, 5, 6, 7, 8].map(n => { const part = latest[`state${n}`] || ''; return String(part).startsWith('~') ? String(part).slice(1) : part; }).join(''));
   }
-  function stateFor(sessionId, lesson = 2) { return stateFromRow(stateRowFor(sessionId, lesson)); }
+  // 최신 상태를 캐시에 함께 두어 요청마다 진행 탭 전체를 읽지 않습니다. 캐시가 비면 시트에서 다시 읽습니다.
+  const stateKey = (sessionId, lesson) => `state:${lesson}:${sessionId}`;
+  function stateFor(sessionId, lesson = 2) {
+    const hit = parseJSON(cacheGet(stateKey(sessionId, lesson)));
+    return hit && hit.text ? parseJSON(hit.text) : stateFromRow(stateRowFor(sessionId, lesson));
+  }
   function stateText(state) {
     // 4차시 피드백은 엔진으로 다시 계산할 수 있으므로 긴 입론·답변을 상태에 중복 저장하지 않습니다.
     const snapshot = Number(state.lesson) === 4 ? Object.fromEntries(Object.entries(state).filter(([key]) => !['feedback', 'questionCache'].includes(key))) : state;
@@ -184,10 +200,13 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
     return text;
   }
   function saveState(state, request, actor, stage) {
-    const text = stateText(state);
+    const text = stateText(state), key = stateKey(state.sessionId, Number(request.lesson || 2));
     const value = { ...common(request, actor), sessionId: state.sessionId, stage };
     for (let n = 1; n <= 8; n++) { const part = text.slice((n - 1) * 1999, n * 1999); value[`state${n}`] = part ? `~${part}` : ''; }
+    // 시트 기록이 실패하면 낡은 캐시가 남지 않도록 먼저 비우고, 기록 뒤에 채웁니다.
+    cacheSet(key, '');
     append('progress', value);
+    cacheSet(key, JSON.stringify({ stage, text }));
   }
   function publicState(state) {
     const { studentId, cls, reprompted, ...rest } = state;
@@ -614,7 +633,7 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
         && new Set(request.acceptLessons).size === request.acceptLessons.length && request.acceptLessons.every(value => value === 2 || value === 4),
       'INVALID_LESSONS', '개방할 차시는 2차시·4차시 중에서 선택해 주세요.');
       invariant(typeof store.writeConfig === 'function', 'CONFIG_NOT_SUPPORTED', '차시 설정을 지원하는 서버로 갱신해 주세요.');
-      locked(() => store.writeConfig('acceptLessons', request.acceptLessons.slice().sort().join(','))); return config();
+      locked(() => writeConfig('acceptLessons', request.acceptLessons.slice().sort().join(','))); return config();
     }
     if (request.action === 'set_l4_mode') return setLesson4Mode(request);
     if (request.action === 'l4_debate') return handleDebate(request);
@@ -674,9 +693,11 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
   // config()가 요청마다 여러 번 부르므로 필요한 세 속성만 읽습니다.
   function debateServerReady() { return typeof debateCall === 'function' && prop('L4_DEBATE_PROVIDER') === 'solar' && Boolean(prop('SOLAR_API_KEY') && prop('SOLAR_MODEL')); }
   function debateLimits() {
-    return { session: intProp('L4_DEBATE_SESSION_CALL_MAX', 20, 1, 200), daily: intProp('L4_DEBATE_DAILY_CALL_MAX', 400, 1, 20000) };
+    return { session: intProp('L4_DEBATE_SESSION_CALL_MAX', 20, 1, 200), daily: intProp('L4_DEBATE_DAILY_CALL_MAX', 2400, 1, 20000),
+      concurrent: intProp('L4_DEBATE_MAX_CONCURRENT', 6, 1, 30) };
   }
   // 하루 사용량은 날짜별 키를 늘리지 않고 스크립트 속성 하나(L4_DEBATE_USAGE = 날짜:횟수)에 덮어씁니다.
+  const INFLIGHT_KEY = 'l4debate:inflight';
   const today = () => new Date(clock()).toISOString().slice(0, 10);
   function usageToday() { const [day, count] = safeText(prop('L4_DEBATE_USAGE')).split(':'); return day === today() ? Number(count) || 0 : 0; }
   function setUsageToday(count) { try { properties.set('L4_DEBATE_USAGE', `${today()}:${Math.max(0, count)}`); return true; } catch { return false; } }
@@ -697,14 +718,22 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
     invariant(request.l4DebateRebuttal === undefined || typeof request.l4DebateRebuttal === 'boolean', 'INVALID_MODE', '반박 단계 설정을 확인해 주세요.');
     invariant(typeof store.writeConfig === 'function', 'CONFIG_NOT_SUPPORTED', '설정을 지원하는 서버로 갱신해 주세요.');
     locked(() => {
-      store.writeConfig('l4Mode', request.l4Mode);
-      if (exchanges !== null) store.writeConfig('l4DebateExchanges', String(exchanges));
-      if (request.l4DebateRebuttal !== undefined) store.writeConfig('l4DebateRebuttal', String(request.l4DebateRebuttal));
+      writeConfig('l4Mode', request.l4Mode);
+      if (exchanges !== null) writeConfig('l4DebateExchanges', String(exchanges));
+      if (request.l4DebateRebuttal !== undefined) writeConfig('l4DebateRebuttal', String(request.l4DebateRebuttal));
     });
     return { ...config(), ...debateUsage() };
   }
   function planFor(state) { return buildDebatePlan({ stance: state.stance, exchanges: state.exchanges, rebuttal: state.rebuttal }); }
+  // 차례 기록도 캐시에 두어 요청마다 l4_debate_turns 탭 전체를 읽지 않습니다. 캐시가 비면 시트에서 다시 만듭니다.
   function debateTurns(sid) {
+    const hit = parseJSON(cacheGet(`turns:${sid}`));
+    if (Array.isArray(hit)) return hit;
+    const list = readDebateTurns(sid);
+    cacheSet(`turns:${sid}`, JSON.stringify(list));
+    return list;
+  }
+  function readDebateTurns(sid) {
     const seen = new Map();
     for (const row of rows('l4_debate_turns')) if (row.sessionId === sid && Number(row.lesson) === 4 && !seen.has(Number(row.turnNo))) seen.set(Number(row.turnNo), row);
     return [...seen.values()].sort((a, b) => Number(a.turnNo) - Number(b.turnNo));
@@ -733,11 +762,22 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
     const state = stateFor(sid, 4);
     invariant(state, 'DEBATE_NOT_FOUND', 'AI 토론 기록을 찾지 못했습니다. 처음부터 다시 시작해 주세요.');
     invariant(state.mode === 'debate', 'SESSION_MODE_MISMATCH', '대본 활동 기록에는 AI 토론을 이어 갈 수 없습니다.');
-    assertGroupOwner(state, actor); return state;
+    assertGroupOwner(state, actor);
+    const turns = debateTurns(sid); let count = 0;
+    while (turns[count] && Number(turns[count].turnNo) === count + 1) count++;
+    if (!state.finished && count > (Number(state.cursor) || 0)) state.cursor = count;
+    return state;
   }
   function appendDebateTurn(request, actor, state, turn, values) {
-    append('l4_debate_turns', { ...common(request, actor), sessionId: state.sessionId, debateVersion: state.debateVersion, turnNo: turn.turnNo,
+    const key = `turns:${state.sessionId}`, before = debateTurns(state.sessionId);
+    cacheSet(key, '');
+    const row = append('l4_debate_turns', { ...common(request, actor), sessionId: state.sessionId, debateVersion: state.debateVersion, turnNo: turn.turnNo,
       step: turn.step, exchange: turn.exchange, actor: turn.actor, kind: turn.kind, ...values });
+    cacheSet(key, JSON.stringify([...before, row]));
+  }
+  // 매 차례 진행 탭에 행을 쓰지 않고(시트 쓰기 절반) 캐시에만 둡니다. 차례 기록이 원본이므로 캐시가 비어도 차례 수로 복원합니다.
+  function rememberState(state, request) {
+    cacheSet(stateKey(state.sessionId, Number(request.lesson || 2)), JSON.stringify({ stage: 'debate', text: stateText(state) }));
   }
   function debateStart(request, actor, sid) {
     const cfg = config();
@@ -774,7 +814,7 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
       const text = turn.kind === 'group_constructive' ? (turn.slot === 1 ? state.arg1 : state.arg5) : validateGroupTurn(turn, request.text);
       appendDebateTurn(request, actor, state, turn, { text, refs: [], mode: 'group' });
       const next = { ...state, cursor: state.cursor + 1 };
-      saveState(next, request, actor, `debate:${turn.turnNo}`);
+      rememberState(next, request);
       return debateView(next);
     });
   }
@@ -862,18 +902,23 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
       if (started && clock() - started < 45000) return { pending: true };
       const limits = debateLimits(), used = usageToday(), spent = Number(state.aiCalls) || 0;
       const ready = debateServerReady();
+      // 동시에 Solar를 기다리는 요청 수를 제한합니다. 자리가 없으면 호출하지 않고 잠시 뒤 다시 묻게 합니다(60초 지난 기록은 정리).
+      const active = (parseJSON(cacheGet(INFLIGHT_KEY), []) || []).filter(item => clock() - Number(item.t) < 60000 && item.k !== pendingKey);
+      if (ready && active.length >= limits.concurrent) return { pending: true };
       let reserve = ready ? Math.max(0, Math.min(2, limits.session - spent, limits.daily - used)) : 0;
       // 사용량을 기록하지 못하면 호출하지 않아 한도를 넘지 않습니다.
       if (reserve && !setUsageToday(used + reserve)) reserve = 0;
-      if (reserve) cacheSet(pendingKey, String(clock()));
+      if (reserve) { cacheSet(pendingKey, String(clock())); cacheSet(INFLIGHT_KEY, JSON.stringify([...active, { k: pendingKey, t: clock() }])); }
       return { state, plan, turn, transcript, reserve, limitReason: ready ? (reserve ? '' : 'AI_LIMIT') : 'DEBATE_UNAVAILABLE' };
     });
     if (prepared.done) return { ...prepared.done, duplicate: true };
-    if (prepared.pending) return { pending: true, retryAfterMs: 3000, turnNo };
+    // 여러 모둠이 같은 순간에 다시 묻지 않도록 대기 시간을 2~5초로 흩뜨립니다.
+    if (prepared.pending) return { pending: true, retryAfterMs: 2000 + Math.floor(Math.random() * 3000), turnNo };
     const result = generateDebateTurn(prepared);
     return locked(() => {
       if (prepared.reserve) {
         cacheSet(pendingKey, '');
+        cacheSet(INFLIGHT_KEY, JSON.stringify((parseJSON(cacheGet(INFLIGHT_KEY), []) || []).filter(item => item.k !== pendingKey)));
         if (result.attempts < prepared.reserve) setUsageToday(usageToday() - (prepared.reserve - result.attempts));
       }
       const state = loadDebate(sid, actor), transcript = debateTurns(sid);
@@ -893,7 +938,7 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
         provider: result.mode === 'ai' ? 'solar' : 'none', model: result.mode === 'ai' ? debateSettings().model : '', latencyMs: result.latencyMs,
         attempts: result.attempts, error: result.error || '', weaknessType: result.weaknessType || '', requestId: safeText(request.requestId).slice(0, 64) });
       const next = { ...counted, cursor: counted.cursor + 1 };
-      saveState(next, request, actor, `debate:${turnNo}`);
+      rememberState(next, request);
       return debateView(next);
     });
   }
