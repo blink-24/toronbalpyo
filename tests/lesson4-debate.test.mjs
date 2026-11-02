@@ -95,17 +95,12 @@ test('모델 응답의 JSON·코드 블록·일반 글을 같은 검사로 보�
   assert.deepEqual(parseAiContent('그냥 문장입니다.'), { text: '그냥 문장입니다.', refs: [] });
 });
 
-test('쟁점이 맞는 수업용 가상 자료만 고르고 보류 자료는 쓰지 않는다', () => {
-  const cards = selectDebateMaterials(lesson4Content, '응급 상황에서 의료인 연결이 늦어질 수 있습니다.', { seed: 's1' });
-  const virtual = cards.filter(card => card.virtual === true), real = cards.filter(card => card.virtual === false);
-  assert.ok(virtual.length > 0 && virtual.length <= 3 && real.length <= 2 && virtual.length + real.length === cards.length);
-  assert.ok(virtual.every(card => /가상/.test(card.source)));
-  assert.ok(real.every(card => card.badge.startsWith('실제 자료') && card.url.startsWith('https://')));
-  assert.deepEqual(selectDebateMaterials(lesson4Content, '오늘 점심은 무엇인가요', { seed: 's1' }), []);
-  assert.ok(selectDebateMaterials(lesson4Content, '개인정보와 건강정보 보호', { seed: 's4' }).some(card => card.id === 'R07'));
-  const held = selectDebateMaterials(lesson4Content, '카드5 사용보류 근거 카드6', { seed: 's2', max: 10 });
-  assert.ok(held.every(card => lesson4Content.helpCards.find(item => item.id === card.id).topic !== 'held'));
-  assert.deepEqual(selectDebateMaterials(lesson4Content, '응급 대응', { seed: 's3' }), selectDebateMaterials(lesson4Content, '응급 대응', { seed: 's3' }));
+test('AI 토론 근거는 쟁점이 맞는 실제 자료만 고르고 보류·⑦ 주제에는 붙이지 않는다', () => {
+  const cards = selectDebateMaterials(lesson4Content, '개인정보와 건강정보 보호 기준이 필요합니다.');
+  assert.ok(cards.length > 0 && cards.length <= 3 && cards.some(card => card.id === 'R07'));
+  assert.ok(cards.every(card => card.virtual === false && card.badge.startsWith('실제 자료') && card.url.startsWith('https://')));
+  assert.deepEqual(selectDebateMaterials(lesson4Content, '오늘 점심은 무엇인가요'), []);
+  assert.deepEqual(selectDebateMaterials(lesson4Content, '카드5 사용보류 근거 카드6 의료잡지 설문'), []);
 });
 
 test('두 AI 입론의 허점 종류가 다르고 돌아보기에 공개된다', () => {
