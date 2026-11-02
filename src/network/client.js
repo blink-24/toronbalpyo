@@ -34,7 +34,7 @@ export function createApiClient({ endpoint = '', timeoutMs = 20000, fetchImpl = 
     try { return await Promise.race([work, deadline]); } finally { clearTimeout(timeout); }
   }
   return {
-    get: (action, payload = {}) => request(action, payload, 'GET'),
+    get: (action, payload = {}, options = {}) => request(action, payload, 'GET', options),
     // AI 토론처럼 외부 생성이 필요한 요청만 마감 시간을 늘립니다.
     post: (action, payload = {}, options = {}) => request(action, payload, 'POST', options),
     isConfigured: () => Boolean(currentEndpoint),

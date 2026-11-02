@@ -117,7 +117,14 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
   const lesson4Engine = createLesson4Engine(lesson4Content);
   const now = () => new Date(clock()).toISOString();
   const prop = key => safeText(properties.get(key));
-  const rows = tab => store.read(tab) || [];
+  // 조회(GET)는 시트를 바꾸지 않으므로 한 요청 안에서 같은 탭을 한 번만 읽습니다.
+  // (교사 대시보드가 기록 행마다 진행 탭 전체를 다시 읽어 기록이 쌓일수록 느려지던 문제)
+  let readMemo = null;
+  const rows = tab => {
+    if (!readMemo) return store.read(tab) || [];
+    if (!readMemo.has(tab)) readMemo.set(tab, store.read(tab) || []);
+    return readMemo.get(tab);
+  };
   const locked = fn => store.withLock(fn);
   // 중복 확인 표시·사용량 같은 임시 값은 cache에 둡니다. Apps Script에서는 만료되는 CacheService를 써서
   // 스크립트 속성이 계속 늘어나지 않게 합니다(원본 판정은 시트 행으로 다시 확인).
@@ -1009,7 +1016,9 @@ export function createService({ content, lesson4Content = LESSON4_CONTENT, store
   }
   function respond(method, request) {
     try {
-      const data = method === 'GET' ? handleGet(request) : handlePost(request);
+      let data;
+      if (method === 'GET') { readMemo = new Map(); try { data = handleGet(request); } finally { readMemo = null; } }
+      else data = handlePost(request);
       if (method === 'POST' && request.action === 'submit' && data.accepted) rebuildReports(request.submissionId);
       return { ok: true, data };
     }

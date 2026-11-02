@@ -40,13 +40,14 @@ test('로그아웃 뒤 늦게 실패한 질문 요청은 새 입장 상태를 �
   assert.equal(context.state.activity.blocked, undefined); assert.equal(context.errorMessage, ''); assert.equal(context.busy, false);
 });
 test('로그아웃 뒤 교사 조회 응답이 와도 교사 로그인과 기록을 되살리지 않는다', async () => {
-  let resolve;
+  const resolvers = [];
   const context = { requestGeneration: 0, teacherPasscode: '', teacherClass: 1, teacherLesson: 2, teacherData: null, teacherRows: [], errorMessage: '', busy: false, render() {},
-    api: { isConfigured: () => true, get: () => new Promise(yes => { resolve = yes; }) } };
+    api: { isConfigured: () => true, get: () => new Promise(yes => { resolvers.push(yes); }) } };
   vm.runInNewContext(source('async function loadTeacher(', 'function openDialog(') + ';globalThis.run=loadTeacher;', context);
   const pending = context.run('fake-private-passcode', 1); context.requestGeneration++;
-  // 첫 응답 뒤 두 번째 조회는 더 이상 진행하지 않는 것이 안전합니다.
-  context.api.get = async () => ({ data: [] }); resolve({ data: { total: 1 } }); await pending;
+  // 요약·목록 조회는 동시에 보내며, 로그아웃 뒤 늦게 온 두 응답 모두 적용하지 않아야 합니다.
+  assert.equal(resolvers.length, 2);
+  resolvers[0]({ data: { total: 1 } }); resolvers[1]({ data: [{ studentId: '20301' }] }); await pending;
   assert.equal(context.teacherPasscode, ''); assert.equal(context.teacherData, null); assert.equal(context.teacherRows.length, 0);
 });
 test('저장 공간 오류 때 로그아웃은 현재 활동을 지우지 않는다', () => {
