@@ -105,7 +105,7 @@ function classroomDebateSettings_() {
 }
 
 // 이전 버전이 스크립트 속성에 남긴 임시 표시입니다. 원본 판정은 시트 행으로 다시 하므로 지워도 기록은 그대로입니다.
-var CLASSROOM_TEMPORARY_PROPERTY_ = /^(submission:|log:|rate:|l4debate:pending:|l4debate:day:)/;
+var CLASSROOM_TEMPORARY_PROPERTY_ = /^(submission:|log:|rate:|state:|l4debate:pending:|l4debate:day:|l4debate:inflight)/;
 
 // 편집기 또는 채움 관리 메뉴에서 실행: 임시 표시만 지우고 설정값(PASSCODE·SPREADSHEET_ID·AI·SOLAR 등)은 그대로 둡니다.
 function cleanupScriptProperties() {
@@ -248,7 +248,8 @@ function classroomService_() {
     },
     withLock: function(fn) {
       var lock = LockService.getScriptLock();
-      if (!lock.tryLock(3000)) throw new ClassroomCore.DomainError('BUSY', '잠시 뒤 다시 전송해 주세요.');
+      // 100명 동시 사용 때 짧은 대기열을 견디도록 8초까지 기다립니다(잠금 안에서는 시트 읽기·쓰기만 하고 AI 호출은 하지 않음).
+      if (!lock.tryLock(8000)) throw new ClassroomCore.DomainError('BUSY', '잠시 뒤 다시 전송해 주세요.');
       try { return fn(); } finally { lock.releaseLock(); }
     }
   };

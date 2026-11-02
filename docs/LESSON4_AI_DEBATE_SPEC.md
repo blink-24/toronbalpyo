@@ -160,8 +160,9 @@ Apps Script 서버
 | `L4_SEARCH_PROVIDER` | `none` | `gemini`일 때만 검색. 8절 확인 전에는 `none` 유지 |
 | `GEMINI_SEARCH_API_KEY`·`GEMINI_SEARCH_MODEL` | 없음 | 2차시용 `AI_API_KEY`·`AI_MODEL`과 분리 |
 | `L4_SEARCH_TO_SOLAR` | `false` | Gemini 결과를 Solar에 넘길지. 약관 확인 전 `true` 금지 |
-| `L4_DEBATE_SESSION_CALL_MAX` | `16` | 세션당 Solar 호출 상한(재시도 포함) |
-| `L4_DEBATE_DAILY_CALL_MAX` | `400` | 하루 전체 Solar 호출 상한 |
+| `L4_DEBATE_SESSION_CALL_MAX` | `20` | 세션당 Solar 호출 상한(재시도 포함) |
+| `L4_DEBATE_DAILY_CALL_MAX` | `1200` | 하루 전체 Solar 호출 상한(100명 동시 사용 반영, 2026-11-02) |
+| `L4_DEBATE_MAX_CONCURRENT` | `6` | 동시에 Solar를 기다리는 요청 상한 |
 | `L4_SEARCH_SESSION_MAX`·`L4_SEARCH_DAILY_MAX` | `4`·`80` | 검색 상한 |
 
 시트 `config` 탭(교사 화면에서 변경, 서버 PASSCODE 인증):

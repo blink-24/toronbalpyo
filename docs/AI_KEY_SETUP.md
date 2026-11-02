@@ -41,7 +41,8 @@
 
 | 속성 | 기본값 | 바꿀 때 |
 |---|---|---|
-| `L4_DEBATE_DAILY_CALL_MAX` | `400` | 하루 전체 Solar 호출 상한. 한 모둠은 문답 2회 기준 약 12회 호출 |
+| `L4_DEBATE_DAILY_CALL_MAX` | `1200` | 하루 전체 Solar 호출 상한. 한 모둠은 문답 2회 기준 약 12회 호출이라 100명(약 25모둠) 한 수업에 약 300회 |
+| `L4_DEBATE_MAX_CONCURRENT` | `6` | 동시에 Solar를 기다리는 요청 수. 넘치면 학생 화면이 2~5초 뒤 자동으로 다시 묻는다. Upstage에서 429(사용량 제한)가 자주 나면 줄인다 |
 | `L4_DEBATE_SESSION_CALL_MAX` | `20` | 한 모둠 토론의 호출 상한(재시도 포함) |
 | `SOLAR_MAX_TOKENS` | `2000` | 응답이 중간에 끊기면 늘린다 |
 | `SOLAR_REASONING_EFFORT` | 비움 | 응답이 너무 느리거나 Upstage 문서가 값을 안내할 때만 넣는다 |
