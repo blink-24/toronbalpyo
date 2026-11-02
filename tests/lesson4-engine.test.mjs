@@ -219,6 +219,12 @@ test('현재 가상 자료 인용·논리 연결·한계 인정 표현에 피드
   assert.match(LESSON4_CONTENT.labels.feedbackScope, /사실 검증.*아닙니다/);
 });
 
+test('실제 자료의 매체·기관 이름을 밝힌 답도 출처를 밝힌 답으로 본다', () => {
+  let session = engine.buildSession(input());
+  session = engine.recordAnswer(session, { turn: 1, answer: '세계보건기구 지침에 따르면 정부가 승인 기관을 정해야 하기 때문에 공공 의료 도입은 조건을 갖추어야 합니다.', helpIds: [] });
+  assert.equal(engine.getFeedback(session).items[0].reliability, '●');
+});
+
 test('긴 회피·무관한 답·근거 이름만 나열한 답을 좋은 논증으로 판정하지 않는다', () => {
   const run = answer => engine.getFeedback(engine.recordAnswer(engine.buildSession(input()), { turn: 1, answer, helpIds: [] })).items[0];
   const evasive = run('그건 중요하지 않습니다. 아무튼 우리는 처음의 입장만 계속 반복하겠습니다.');

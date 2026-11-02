@@ -93,18 +93,14 @@ export function weaknessFor(seed, slot) {
 }
 
 const canonical = value => String(value).normalize('NFKC').toLowerCase().replace(/[\s\p{P}\p{S}]/gu, '');
-// 현재 글에서 감지한 쟁점 주제와 맞는 수업용 가상 자료만 고릅니다. 맞는 자료가 없으면 비웁니다.
-export function selectDebateMaterials(content, text, { seed = '', max = 3 } = {}) {
+// 현재 글에서 감지한 쟁점에 맞는 실제 자료 요약만 고릅니다(4차시는 가상 자료를 쓰지 않음, 사용자 결정 2026-11-02).
+export function selectDebateMaterials(content, text, { max = 3 } = {}) {
   const value = canonical(text || '');
   if (!value || !content) return [];
   const topics = new Set();
   for (const profile of content.keywordProfiles || []) if (profile.keywords.some(word => value.includes(canonical(word)))) topics.add(`keyword.${profile.id}`);
   for (const topic of content.topics || []) if ((topic.keywords || []).some(word => value.includes(canonical(word)))) topics.add(topic.id);
-  topics.delete('held');
-  const cards = (content.helpCards || []).filter(card => topics.has(card.topic) && card.virtual === true && card.topic !== 'held');
-  const virtual = cards.map(card => ({ card, order: seedHash(`${seed}:${card.id}`) })).sort((a, b) => a.order - b.order)
-    .slice(0, max).map(({ card }) => ({ id: card.id, title: card.title, content: card.content, source: card.source, badge: card.badge, virtual: true }));
-  return [...virtual, ...realSourcesFor(content, [...topics]).slice(0, 2)];
+  return realSourcesFor(content, [...topics]).slice(0, max);
 }
 
 // 쟁점 주제(가상 자료 topic 또는 단서 분류)에 맞는 실제 자료 요약입니다. ⑦·보류 근거 주제에는 붙이지 않습니다.

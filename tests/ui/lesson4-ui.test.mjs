@@ -82,7 +82,8 @@ test('닫힌 4차시는 진입·초안 입력·시작을 막고 기존 초안을
 test('4차시 모둠 4답·성찰은 실제 서비스 모형으로 한 번 저장되고 내려받을 수 있다', async () => {
   const server = serverFixture(), f = controllerFixture(server); await prepare(f);
   assert.doesNotMatch(f.controller.render(), /criterion-badge|겨냥한 기준|숨은 약점/);
-  assert.equal((f.controller.render().match(/수업용 가상 자료/g) || []).length >= 2, true);
+  // 4차시는 실제 자료만 보여 준다(사용자 결정 2026-11-02).
+  assert.doesNotMatch(f.controller.render(), /수업용 가상 자료/); assert.match(f.controller.render(), /답변에 활용할 실제 자료/);
   for (let i = 0; i < 4; i++) await answer(f);
   assert.equal(f.state().stage, 'feedback'); assert.equal(f.state().feedback.items.length, 4);
   f.controller.handleInput('l4-reflection', reflection); await f.controller.handleClick('l4-submit', { dataset: {} });

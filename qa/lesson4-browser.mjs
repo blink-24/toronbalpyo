@@ -145,10 +145,12 @@ try {
       assert.ok((await state(page)).lesson4.session.plan.some(q => q.id.startsWith('L4K-')));
       for (let turn = 1; turn <= (options.early ? 3 : 4); turn++) {
         assert.equal((await state(page)).lesson4.turn, turn);
-        assert.ok((await page.locator('.l4-help-cards .evidence-card').count()) >= 2);
+        // 4차시는 실제 자료만 표시한다. 쟁점에 맞는 실제 자료가 없으면 안내 문구만 보인다.
+        assert.equal(await page.locator('.virtual-strip:has-text("수업용 가상 자료")').count(), 0);
+        await page.locator('text=답변에 활용할 실제 자료').waitFor();
         assert.equal(await page.locator('.criterion-badge').count(), 0, 'no criteria before feedback');
         await page.locator('#l4-answer').fill('한계는 인정합니다. 다만 의료 상담 도입 여부는 자료의 출처와 검증 범위, 공공 의료 접근성과 책임 배분을 함께 확인해야 하므로 범위를 제한해 보완하겠습니다.');
-        await page.locator('[data-action="l4-cite"]').first().click();
+        if (await page.locator('[data-action="l4-cite"]').count()) await page.locator('[data-action="l4-cite"]').first().click();
         if (turn === 1) await inspect(page, `${options.name}-dialogue`);
         await page.locator('[data-action="l4-answer-next"]').click();
         await stage(page, !options.early && turn === 4 ? 'feedback' : 'dialogue');

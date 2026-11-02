@@ -449,7 +449,8 @@ function createLesson4Engine(content) {
   function evaluate(entry, question) {
     const text = entry.answer.trim();
     const quoted = [...text.matchAll(helpPattern)].map(match => match[1]);
-    const citation = question.helpCards.some(card => quoted.includes(card.id) || text.includes(card.citation));
+    const citation = question.helpCards.some(card => quoted.includes(card.id) || text.includes(card.citation))
+      || (content.realSources || []).some(source => text.includes(source.publisher.split(/[(,]/)[0].trim()));
     const unsafeSource = unsupportedSource(text);
     const offTopic = unrelated(text);
     const reliability = unsafeSource || offTopic ? '○' : citation ? '●'
@@ -472,9 +473,9 @@ function createLesson4Engine(content) {
       const { unsafeSource, ...scores } = evaluate(entry, question);
       const comment = unsafeSource ? '사용 보류 카드나 원출처가 불명확한 설문을 확인된 사실로 쓰지 마세요.'
         : scores.attitude === '피함' ? '질문이 겨냥한 부분에 직접 답하고 확인하지 못한 점은 솔직히 밝혀 보세요.'
-        : scores.reliability !== '●' ? '현재 제공된 가상 자료의 출처나 번호를 밝히고 확인 범위를 구분해 보세요.'
+        : scores.reliability !== '●' ? '제시된 자료의 출처를 밝히고 확인 범위를 구분해 보세요.'
         : scores.validity !== '●' ? '인용한 자료가 이유와 정책 주장으로 이어지는 범위를 설명해 보세요.'
-        : '출처와 논리 연결을 표현했습니다. 가상 자료의 한계와 유지할 조건도 점검해 보세요.';
+        : '출처와 논리 연결을 표현했습니다. 자료의 한계와 유지할 조건도 점검해 보세요.';
       return { turn: index + 1, questionId: question.id, criterion: question.criterion,
         criterionDescription: content.criterionDescriptions[question.criterion], confirm: question.confirm,
         verify: question.verify, answer: entry.answer, ...scores, comment, better: question.better };
@@ -486,9 +487,9 @@ function createLesson4Engine(content) {
       score: items.reduce((sum, item) => sum + ({ '●': 2, '◐': 1, '○': 0, 인정함: 2, 보통: 1, 피함: 0 }[item[key]]), 0) }))
       .sort((a, b) => a.score - b.score || a.index - b.index)[0].key;
     return { items, summary: { reliabilityGood, validityGood,
-      good: reliabilityGood ? '가상 자료의 출처나 번호를 밝혀 답변을 뒷받침했습니다.'
+      good: reliabilityGood ? '자료의 출처를 밝혀 답변을 뒷받침했습니다.'
         : validityGood ? '의료 공공 도입의 이유와 근거를 연결해 설명했습니다.' : '모둠 입론에 대한 반대 신문을 읽고 답변을 남겼습니다.',
-      improve: weakest === 'reliability' ? '확인한 출처와 가상 자료의 한계를 구분해 밝혀 보세요.'
+      improve: weakest === 'reliability' ? '확인한 출처와 자료의 한계를 구분해 밝혀 보세요.'
         : weakest === 'validity' ? '자료가 해당 정책 주장으로 이어지는 이유와 조건을 풀어 설명해 보세요.'
           : '인정할 한계와 유지할 주장을 구별하고 질문에 직접 답해 보세요.',
       cardWarning: unsafe ? '제시문 ⑦의 불명확한 설문과 사용 보류 카드 5·6을 검증된 사실로 쓰지 않습니다.' : '' } };
@@ -611,18 +612,14 @@ function weaknessFor(seed, slot) {
 }
 
 const canonical = value => String(value).normalize('NFKC').toLowerCase().replace(/[\s\p{P}\p{S}]/gu, '');
-// 현재 글에서 감지한 쟁점 주제와 맞는 수업용 가상 자료만 고릅니다. 맞는 자료가 없으면 비웁니다.
-function selectDebateMaterials(content, text, { seed = '', max = 3 } = {}) {
+// 현재 글에서 감지한 쟁점에 맞는 실제 자료 요약만 고릅니다(4차시는 가상 자료를 쓰지 않음, 사용자 결정 2026-11-02).
+function selectDebateMaterials(content, text, { max = 3 } = {}) {
   const value = canonical(text || '');
   if (!value || !content) return [];
   const topics = new Set();
   for (const profile of content.keywordProfiles || []) if (profile.keywords.some(word => value.includes(canonical(word)))) topics.add(`keyword.${profile.id}`);
   for (const topic of content.topics || []) if ((topic.keywords || []).some(word => value.includes(canonical(word)))) topics.add(topic.id);
-  topics.delete('held');
-  const cards = (content.helpCards || []).filter(card => topics.has(card.topic) && card.virtual === true && card.topic !== 'held');
-  const virtual = cards.map(card => ({ card, order: seedHash(`${seed}:${card.id}`) })).sort((a, b) => a.order - b.order)
-    .slice(0, max).map(({ card }) => ({ id: card.id, title: card.title, content: card.content, source: card.source, badge: card.badge, virtual: true }));
-  return [...virtual, ...realSourcesFor(content, [...topics]).slice(0, 2)];
+  return realSourcesFor(content, [...topics]).slice(0, max);
 }
 
 // 쟁점 주제(가상 자료 topic 또는 단서 분류)에 맞는 실제 자료 요약입니다. ⑦·보류 근거 주제에는 붙이지 않습니다.
