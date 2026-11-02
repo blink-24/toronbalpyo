@@ -102,3 +102,24 @@ test('AI 입론 생성 실패 시 다시 시도와 대본 활동 전환을 제�
   await f.controller.handleClick('l4-start', { dataset: {} });
   assert.equal(f.state().stage, 'dialogue');
 });
+
+test('모둠 차례에는 제한 시간이 있고, 시작 화면에 먼저 알리며, 시간이 끝나면 쓴 내용(없으면 안내 문장)을 보낸다', async () => {
+  const f = setup(); await enter(f, '찬성');
+  assert.match(f.controller.render(), /제한 시간/); assert.match(f.controller.render(), /시간이 끝나면 그때까지 쓴 내용이 그대로 보내집니다/);
+  await f.controller.handleClick('l4-debate-start', { dataset: {} });
+  await f.controller.handleClick('l4-debate-send', { dataset: {} }); // 1단계 입론 발표 뒤 AI 질문까지 진행
+  let next = f.state().debate.next;
+  assert.equal(next.kind, 'group_answer'); assert.ok(f.state().debate.deadlines[next.turnNo] > Date.now());
+  assert.match(f.controller.render(), /data-l4-timer/);
+  // 시간이 남아 있으면 보내지 않는다.
+  await f.controller.tick(Date.now()); assert.equal(f.state().debate.next.turnNo, next.turnNo);
+  // 쓴 답이 있으면 그 답을 보낸다.
+  f.controller.handleInput('l4-debate-draft', GROUP_TEXT.group_answer);
+  await f.controller.tick(f.state().debate.deadlines[next.turnNo] + 1);
+  const answered = f.state().debate.transcript.find(row => row.turnNo === next.turnNo);
+  assert.equal(answered.text, GROUP_TEXT.group_answer);
+  // 다음 모둠 차례에서 아무것도 쓰지 않으면 안내 문장을 보낸다.
+  next = f.state().debate.next; assert.equal(next.actor, 'group');
+  await f.controller.tick(f.state().debate.deadlines[next.turnNo] + 1);
+  assert.match(f.state().debate.transcript.find(row => row.turnNo === next.turnNo).text, /제한 시간 안에/);
+});

@@ -9,6 +9,10 @@ import { DEBATE_SEQUENCE, DEBATE_LIMITS, DEBATE_KIND_LABELS, validateDebateArgum
 const parse = value => { try { return JSON.parse(value); } catch { return null; } };
 const label = value => ({ '●': '잘 바탕함', '◐': '조금', '○': '보완 필요' }[value] || '확인 중');
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+const clockText = seconds => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+const LIMIT_NOTICE = `모둠 차례마다 제한 시간이 있습니다. 질문 ${clockText(DEBATE_LIMITS.groupSeconds.group_question)}, 답변 ${clockText(DEBATE_LIMITS.groupSeconds.group_answer)}, 반박 ${clockText(DEBATE_LIMITS.groupSeconds.group_rebuttal)}. 시간이 끝나면 그때까지 쓴 내용이 그대로 보내집니다.`;
+// 시간이 끝났는데 보낼 수 있는 글이 없을 때 대신 보내는 문장입니다(서버 길이 기준을 만족).
+const TIMEOUT_TEXT = { group_question: '(제한 시간 안에 질문을 마치지 못했습니다.)', group_answer: '(제한 시간 안에 답하지 못했습니다.)', group_rebuttal: '(제한 시간 안에 반박을 마치지 못했습니다.)' };
 const AI_NOTICE = '상대 토론자의 발언은 인공 지능이 만든 글입니다. 틀리거나 근거가 부족할 수 있으니 그대로 믿지 말고 질문으로 확인하세요. 우리 모둠의 입론과 발언은 상대 발언을 만들기 위해 외부 인공 지능 서비스로 전송됩니다. 이름·학번·연락처는 쓰지 마세요. 활동의 판단과 평가는 선생님이 합니다.';
 
 export function createLesson4Controller({ api, storage, getState, setState, persist, render, toast, getConfig, getAccess, closedView, getAppVersion, downloadFile }) {
@@ -81,7 +85,7 @@ export function createLesson4Controller({ api, storage, getState, setState, pers
     return `<div class="choice-grid l4-stance">${['찬성', '반대'].map(stance => `<button class="reason-button ${a().stance === stance ? 'selected' : ''}" data-action="l4-stance" data-value="${stance}" aria-pressed="${a().stance === stance}"><span class="radio-mark">${a().stance === stance ? '✓' : ''}</span><span>${stance}</span></button>`).join('')}</div>`;
   }
   function debateArgumentView() {
-    return `<section class="activity-panel"><div class="section-kicker">STEP 01 · 우리 모둠 입론</div><h2>이미 작성한 입론을 넣어 주세요.</h2><p class="section-intro">AI 토론에서는 ①·⑤ 입론이 모두 필요합니다.<br>우리 모둠과 반대 입장을 맡은 AI가 교과서의 12단계 순서로 토론합니다.</p><div class="motion"><span class="motion-tag">토론 논제</span>${h(LESSON4_CONTENT.motion)}</div>${stanceButtons()}<label class="field-label" for="l4-arg1">① 우리 모둠 입론1 · 20~1500자</label><textarea id="l4-arg1" data-input="l4-arg1" maxlength="1500" rows="8" placeholder="모둠에서 작성한 입론을 붙여 넣거나 적어 주세요.">${h(a().arg1)}</textarea>${count('arg1', a().arg1, 1500)}<label class="field-label" for="l4-arg5" style="margin-top:25px">⑤ 우리 모둠 입론2 · 20~1500자</label><textarea id="l4-arg5" data-input="l4-arg5" maxlength="1500" rows="6" placeholder="두 번째 입론을 붙여 넣거나 적어 주세요.">${h(a().arg5)}</textarea>${count('arg5', a().arg5, 1500)}<div class="chat-notice ai-notice" role="note"><b>AI 토론 안내</b><br>${h(AI_NOTICE)}</div>${errorHtml()}<div class="action-bar">${btn('모둠 정보 확인', 'entry')}<div class="trailing">${btn('AI 토론 시작 →', 'debate-start', { primary: true })}</div></div></section>`;
+    return `<section class="activity-panel"><div class="section-kicker">STEP 01 · 우리 모둠 입론</div><h2>이미 작성한 입론을 넣어 주세요.</h2><p class="section-intro">AI 토론에서는 ①·⑤ 입론이 모두 필요합니다.<br>우리 모둠과 반대 입장을 맡은 AI가 교과서의 12단계 순서로 토론합니다.</p><div class="motion"><span class="motion-tag">토론 논제</span>${h(LESSON4_CONTENT.motion)}</div>${stanceButtons()}<label class="field-label" for="l4-arg1">① 우리 모둠 입론1 · 20~1500자</label><textarea id="l4-arg1" data-input="l4-arg1" maxlength="1500" rows="8" placeholder="모둠에서 작성한 입론을 붙여 넣거나 적어 주세요.">${h(a().arg1)}</textarea>${count('arg1', a().arg1, 1500)}<label class="field-label" for="l4-arg5" style="margin-top:25px">⑤ 우리 모둠 입론2 · 20~1500자</label><textarea id="l4-arg5" data-input="l4-arg5" maxlength="1500" rows="6" placeholder="두 번째 입론을 붙여 넣거나 적어 주세요.">${h(a().arg5)}</textarea>${count('arg5', a().arg5, 1500)}<div class="chat-notice ai-notice" role="note"><b>AI 토론 안내</b><br>${h(AI_NOTICE)}</div><div class="chat-notice limit-notice" role="note"><b>⏱ 제한 시간</b><br>${h(LIMIT_NOTICE)}</div>${errorHtml()}<div class="action-bar">${btn('모둠 정보 확인', 'entry')}<div class="trailing">${btn('AI 토론 시작 →', 'debate-start', { primary: true })}</div></div></section>`;
   }
   function materialHtml(card) {
     const link = card.url && /^https:\/\//.test(card.url) ? ` · <a href="${h(card.url)}" target="_blank" rel="noopener noreferrer">원문 보기</a>` : '';
@@ -107,10 +111,11 @@ export function createLesson4Controller({ api, storage, getState, setState, pers
     const heading = `${next.label} · ${DEBATE_KIND_LABELS[next.kind]}`;
     if (next.kind === 'group_constructive') return `<div class="debate-turn"><h3>${h(heading)}</h3><p class="field-help">미리 입력한 ${next.slot === 1 ? '①' : '⑤'} 입론을 우리 모둠의 입론${next.slot}로 발표합니다.</p><div class="my-answer"><span>우리 모둠 입론${next.slot}</span>${h(next.slot === 1 ? a().arg1 : a().arg5)}</div><div class="action-bar"><span></span>${btn(`입론${next.slot} 발표하기 →`, 'debate-send', { primary: true })}</div></div>`;
     const [min, max] = DEBATE_LIMITS.group[next.kind], value = drafts()[next.turnNo] || '';
+    const left = Math.max(0, Math.ceil(((d.deadlines?.[next.turnNo] || Date.now()) - Date.now()) / 1000));
     const guide = { group_question: `AI 입론${next.slot}에 반대 신문 질문을 해 주세요(${next.exchange}/${d.exchanges}). 상대가 실제로 한 말을 짚어 구체적이고 제한적으로 물어요.`,
       group_answer: '방금 받은 AI의 질문에 답해 주세요. 인정할 것은 인정하고, 근거와 이유의 연결을 밝혀요.',
       group_rebuttal: `우리 모둠 반박${next.slot}입니다. 앞에서 나온 쟁점을 골라 우리 주장이 유지되는 이유를 정리해요.` }[next.kind];
-    return `<div class="debate-turn"><h3>${h(heading)}</h3><p class="field-help">${h(guide)}</p><label class="field-label" for="l4-debate-draft">${h(DEBATE_KIND_LABELS[next.kind])} · ${min}~${max}자</label><textarea id="l4-debate-draft" data-input="l4-debate-draft" maxlength="${max}" rows="${next.kind === 'group_rebuttal' ? 6 : 4}" placeholder="모둠에서 상의한 내용을 대표가 입력해요.">${h(value)}</textarea>${count('debate-draft', value, max)}<div class="action-bar"><span></span>${btn('보내기 →', 'debate-send', { primary: true })}</div></div>`;
+    return `<div class="debate-turn"><h3>${h(heading)} <span class="debate-timer ${left <= 15 ? 'urgent' : ''}" data-l4-timer role="timer" aria-live="off">⏱ ${clockText(left)}</span></h3><p class="field-help">${h(guide)}</p><label class="field-label" for="l4-debate-draft">${h(DEBATE_KIND_LABELS[next.kind])} · ${min}~${max}자</label><textarea id="l4-debate-draft" data-input="l4-debate-draft" maxlength="${max}" rows="${next.kind === 'group_rebuttal' ? 6 : 4}" placeholder="모둠에서 상의한 내용을 대표가 입력해요.">${h(value)}</textarea>${count('debate-draft', value, max)}<div class="action-bar"><span></span>${btn('보내기 →', 'debate-send', { primary: true })}</div></div>`;
   }
   function debateView() {
     const d = a().debate;
@@ -224,6 +229,10 @@ export function createLesson4Controller({ api, storage, getState, setState, pers
       transcript: data.transcript || [], cursor: data.cursor, next: data.next, earlyFinishTurn: data.earlyFinishTurn, finished: data.finished,
       earlyFinish: data.earlyFinish, review: data.review });
     d.aiError = data.unavailable ? { reason: data.unavailable.reason, message: data.unavailable.message, canScript: true } : null;
+    // 모둠 차례가 화면에 나타난 때부터 제한 시간을 잽니다(새로 고침해도 같은 마감 시각 유지).
+    const seconds = d.next?.actor === 'group' ? DEBATE_LIMITS.groupSeconds[d.next.kind] : 0;
+    d.deadlines ||= {};
+    if (seconds && !d.deadlines[d.next.turnNo]) d.deadlines[d.next.turnNo] = Date.now() + seconds * 1000;
     if (data.finished && a().stage === 'debate') a().stage = 'debate-review';
   }
   async function debateRequest(work) {
@@ -281,13 +290,13 @@ export function createLesson4Controller({ api, storage, getState, setState, pers
     if (!started && a().stage !== 'debate') { a().debate = null; a().mode = 'script-local'; save(); render(); return; }
     await debateContinue();
   }
-  async function debateSend() {
+  async function debateSend(timedOut = false) {
     if (!ensureOpen()) return;
     const d = a().debate, turn = d?.next;
     if (!turn || turn.actor !== 'group') return;
     let text;
     try { if (turn.kind !== 'group_constructive') text = validateGroupTurn(turn, String(drafts()[turn.turnNo] || '')); }
-    catch (caught) { return fail(caught.message); }
+    catch (caught) { if (!timedOut) return fail(caught.message); text = TIMEOUT_TEXT[turn.kind]; }
     const sent = await debateRequest(async current => {
       const { data } = await debatePost('group_turn', { turnNo: turn.turnNo, ...(text === undefined ? {} : { text }) });
       if (!current()) return false;
@@ -396,7 +405,19 @@ export function createLesson4Controller({ api, storage, getState, setState, pers
   }
   function onConfigChanged() { if (!getAccess().allowed) { generation++; busy = false; } }
   function suspend() { save(); generation++; busy = false; error = ''; }
-  function startRecovery() { queue.start(); flushProgress(); }
+  // 1초마다 남은 시간을 고치고, 시간이 끝나면 쓴 내용(없으면 안내 문장)을 한 번 보냅니다.
+  let ticker = null, timing = null;
+  async function tick(now = Date.now()) {
+    const d = a().debate, next = d?.next, deadline = next && d.deadlines?.[next.turnNo];
+    if (a().stage !== 'debate' || !deadline || next.actor !== 'group' || busy || !getAccess().allowed) return;
+    const left = Math.max(0, Math.ceil((deadline - now) / 1000));
+    const node = globalThis.document?.querySelector('[data-l4-timer]');
+    if (node) { node.textContent = `⏱ ${clockText(left)}`; node.classList.toggle('urgent', left <= 15); }
+    if (left > 0 || timing === next.turnNo) return;
+    timing = next.turnNo; toast('제한 시간이 끝나 지금까지 쓴 내용을 보냈어요.');
+    try { await debateSend(true); } finally { timing = null; }
+  }
+  function startRecovery() { queue.start(); flushProgress(); ticker ||= setInterval(() => { tick(); }, 1000); }
   async function recover() {
     if (!getAccess().allowed || busy) return;
     await queue.flush(); await flushProgress();
@@ -406,5 +427,5 @@ export function createLesson4Controller({ api, storage, getState, setState, pers
     else if (a().stage === 'feedback' && a().blocked) await remote('feedback');
   }
   return { render: view, handleForm, handleInput, handleClick, onConfigChanged, startRecovery, recover, resultText, suspend,
-    hasPending: () => queue.getItems().length > 0, stop: () => queue.stop(), isBusy: () => busy };
+    hasPending: () => queue.getItems().length > 0, stop: () => { queue.stop(); clearInterval(ticker); ticker = null; }, isBusy: () => busy, tick };
 }

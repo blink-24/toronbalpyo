@@ -61,12 +61,12 @@ test('AI 출력 검사: 정상 발언은 통과하고 새 숫자·주소·개인
   assert.equal(reason(() => checkAiOutput(answer, { text: '제 연락처는 010-1234-5678입니다. 확인해 보세요.' })), 'PII');
   assert.equal(reason(() => checkAiOutput(answer, { text: '' })), 'EMPTY');
   assert.equal(reason(() => checkAiOutput(constructive, { text: '짧은 입론입니다.' })), 'TOO_SHORT');
-  assert.equal(reason(() => checkAiOutput(rebuttal, { text: '가'.repeat(401) })), 'TOO_LONG');
+  assert.equal(reason(() => checkAiOutput(rebuttal, { text: '가'.repeat(451) })), 'TOO_LONG');
   // 조금 넘친 발언은 상한 안의 마지막 완결 문장까지만 남긴다(94.9% 같은 소수점에서는 자르지 않음).
-  const long = `${goodConstructive} 실험에서 상태를 94.9% 맞혔다는 결과도 있습니다. ${'주민의 불편을 함께 살펴야 합니다. '.repeat(20)}`;
+  const long = `${goodConstructive} 실험에서 상태를 94.9% 맞혔다는 결과도 있습니다. ${'주민의 불편을 함께 살펴야 합니다. '.repeat(24)}`;
   const trimmed = checkAiOutput(constructive, { text: long }, { allowedText: '94.9%' }).text;
-  assert.ok(long.length > 450 && trimmed.length <= 450 && /합니다\.$/.test(trimmed) && trimmed.includes('94.9%'));
-  assert.equal(reason(() => checkAiOutput(question, { text: `${'입론에서 접근을 넓힌다고 하셨지요'.repeat(10)}? 그 근거를 확인하셨습니까?` })), 'TOO_LONG');
+  assert.ok(long.length > 500 && trimmed.length <= 500 && /합니다\.$/.test(trimmed) && trimmed.includes('94.9%'));
+  assert.equal(reason(() => checkAiOutput(question, { text: `${'입론에서 접근을 넓힌다고 하셨지요'.repeat(15)}? 그 근거를 확인하셨습니까?` })), 'TOO_LONG');
 });
 
 test('AI 출력 검사: 의료 조언·대필·보류 자료·긴 문장·영어 약어를 거절한다', () => {
@@ -80,6 +80,13 @@ test('AI 출력 검사: 의료 조언·대필·보류 자료·긴 문장·영어
   assert.equal(reason(() => checkAiOutput(constructive, { text: `${goodConstructive} ${'주민의 불편과 담당자의 부담과 지역의 사정과 예산의 범위와 정보 보호의 조건과 의료인 연결의 절차를 모두 함께 생각하지 않으면 이 정책은 결국 실패할 수밖에 없다는 점을 우리는 처음부터 끝까지 분명히 기억해야 합니다'}.` })), 'SENTENCE_TOO_LONG');
   assert.equal(reason(() => checkAiOutput(constructive, { text: `${goodConstructive} 이는 UX 문제입니다.` })), 'LATIN_WORD');
   assert.equal(checkAiOutput(constructive, { text: `${goodConstructive} AI 상담의 한계입니다.` }).text.includes('AI'), true);
+});
+
+test('반대 신문 질문 앞에는 직전 답에 대한 짧은 응수를 둘 수 있다', () => {
+  const reply = '그 점은 이해합니다. 세계보건기구도 승인 기관을 먼저 정하라고 권했습니다. 그렇다면 그 기관은 누가 맡습니까? 입론에 그 조건이 들어 있습니까?';
+  assert.equal(checkAiOutput(question, { text: reply }).text, reply);
+  assert.equal(reason(() => checkAiOutput(question, { text: '첫째 응수입니다. 둘째 응수입니다. 셋째 응수입니다. 그 근거는 무엇입니까?' })), 'NOT_QUESTION');
+  assert.equal(reason(() => checkAiOutput(question, { text: '그 근거는 무엇입니까? 그 점은 이해합니다.' })), 'NOT_QUESTION');
 });
 
 test('AI 질문 형식과 인용 자료 번호를 검사한다', () => {
