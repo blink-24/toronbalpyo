@@ -81,8 +81,10 @@ test('AI 질문 형식과 인용 자료 번호를 검사한다', () => {
   assert.equal(reason(() => checkAiOutput(question, { text: '입론에서 접근을 넓힌다고 하셨지요. 그 근거를 말씀해 주세요.' })), 'NOT_QUESTION');
   assert.equal(reason(() => checkAiOutput(question, { text: '접근을 넓힌다고 하셨지요? 근거가 있습니까? 출처는 어디입니까?' })), 'NOT_QUESTION');
   const cited = `${goodConstructive} [자료 L4H01]처럼 연결 방안을 나누어 보아야 합니다.`;
-  assert.deepEqual(checkAiOutput(constructive, { text: cited, refs: [] }, { allowedText: '"id":"L4H01"', allowedRefs: ['L4H01'] }).refs, ['L4H01']);
+  assert.equal(reason(() => checkAiOutput(constructive, { text: cited, refs: [] }, { allowedText: '"id":"L4H01"', allowedRefs: ['L4H01'] })), 'BRACKET_REF');
   assert.equal(reason(() => checkAiOutput(constructive, { text: cited, refs: [] }, { allowedRefs: [] })), 'REF_UNKNOWN');
+  const plainCite = `${goodConstructive} 가온군 공공 상담 검토안에 따르면 연결 방안을 나누어 보아야 합니다.`;
+  assert.deepEqual(checkAiOutput(constructive, { text: plainCite, refs: ['L4H01'] }, { allowedRefs: ['L4H01'] }).refs, ['L4H01']);
   assert.equal(reason(() => checkAiOutput(constructive, { text: goodConstructive, refs: ['L4H99'] }, { allowedRefs: ['L4H01'] })), 'REF_UNKNOWN');
 });
 
