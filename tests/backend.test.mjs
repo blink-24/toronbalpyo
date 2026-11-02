@@ -240,8 +240,10 @@ test('전송 대기 초기 진행 정보가 늦게 도착해도 제출 단계를
   const late = f.service.respond('POST', { action: 'progress', lesson: 2, studentId: '20315', cls: 3, sessionId: request.sessionId, stage: 'argument' });
   assert.equal(late.data.ignored, true); assert.equal(f.db.progress.length, count); assert.equal(f.db.progress.at(-1).stage, 'submitted');
 });
-test('기존9개와 기록2개 탭 및 append-only 머리글, GAS doPost text/plain JSON 포장', async () => {
-  assert.equal(Object.keys(HEADERS).length, 11);
+test('기존9개·기록2개·AI 토론2개 탭 및 append-only 머리글, GAS doPost text/plain JSON 포장', async () => {
+  assert.equal(Object.keys(HEADERS).length, 13);
+  assert.deepEqual(Object.keys(HEADERS).slice(0, 11), ['2차시', '4차시', 'config', 'l2_sessions', 'ai_log', 'l3_args', 'l4_sessions', 'recordings', 'uploads', 'log', 'progress']);
+  assert.deepEqual(Object.keys(HEADERS).slice(11), ['l4_debate_turns', 'l4_debates']);
   const sandbox = { PropertiesService: {}, SpreadsheetApp: {}, LockService: {}, ContentService: { MimeType: { JSON: 'application/json' }, createTextOutput: text => ({ text, setMimeType(type) { this.mime = type; return this; } }) } };
   vm.createContext(sandbox); vm.runInContext(await fs.readFile(new URL('../backend/ServerBundle.gs', import.meta.url), 'utf8'), sandbox);
   let actual = ['legacy', 'receivedAt'], writes = [];

@@ -7,6 +7,11 @@ export function normalizeLessonConfig(data = {}) {
     l4Questions: [3, 4, 5].includes(Number(data.l4Questions)) ? Number(data.l4Questions) : 4,
     l4ScriptVersion: data.l4ScriptVersion === '1.1.0' ? '1.1.0' : '1.0.0',
     aiEnabled: Boolean(data.aiEnabled), l4AiEnabled: false, publicSharing: data.publicSharing !== false,
+    // AI 토론(서버 5.4.0). 서버가 준비를 알릴 때만 학생에게 토론 시작을 보입니다.
+    l4DebateSupported: typeof data.l4Mode === 'string' || data.l4DebateSupported === true, l4Mode: data.l4Mode === 'debate' ? 'debate' : 'script',
+    l4DebateAvailable: data.l4DebateAvailable === true, l4DebateVersion: String(data.l4DebateVersion || ''),
+    l4DebateExchanges: [1, 2, 3].includes(Number(data.l4DebateExchanges)) ? Number(data.l4DebateExchanges) : 2,
+    l4DebateRebuttal: data.l4DebateRebuttal !== false,
     appVersion: String(data.appVersion || data.version || '5.0.0') };
 }
 export function lessonAccess(config, lesson, resolved = true) {

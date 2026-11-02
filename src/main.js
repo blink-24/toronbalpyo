@@ -6,6 +6,7 @@ import { STATE_KEY, uid, validateStudentId, maskStudentId, studentClass, escapeH
 import { createLesson4Controller } from './ui/lesson4.js';
 import { freshLesson4 } from './ui/lesson4-state.js';
 import { normalizeLessonConfig, lessonAccess } from './ui/lesson-policy.js';
+import { DEBATE_SEQUENCE_LABELS, WEAKNESS_TYPES } from './core/lesson4-debate.js';
 
 const app = document.querySelector('#app');
 const dialogRoot = document.querySelector('#dialog-root');
@@ -33,6 +34,7 @@ let teacherClass = state.studentId ? studentClass(state.studentId) : 1;
 let teacherData = null;
 let teacherRows = [];
 let teacherLesson = 2;
+let teacherDebateStatus = null;
 let sharedData = null;
 let shareLoading = false;
 let toastTimer;
@@ -130,7 +132,7 @@ function tabs() {
   return `<nav class="main-tabs" role="tablist" aria-label="수업 활동"><button id="tab-learn" class="main-tab" role="tab" aria-selected="${state.tab === 'learn'}" aria-controls="main-content" data-action="tab" data-value="learn"><span class="tab-num">01</span>PPT 내용 학습<span class="tab-desc">개념을 차근차근</span></button><button id="tab-activity" class="main-tab" role="tab" aria-selected="${state.tab === 'activity'}" aria-controls="main-content" data-action="tab" data-value="activity"><span class="tab-num">02</span>활동 수행 · 결과 공유<span class="tab-desc">질문에 직접 답하기</span></button></nav>`;
 }
 
-const debateSequence = ['찬성 1 입론', '반대 2 신문', '반대 1 입론', '찬성 1 신문', '찬성 2 입론', '반대 1 신문', '반대 2 입론', '찬성 2 신문', '반대 1 반박', '찬성 1 반박', '반대 2 반박', '찬성 2 반박'];
+const debateSequence = DEBATE_SEQUENCE_LABELS;
 function conceptExtra(slide) {
   const title = slide.title || '';
   if (/타당성|신뢰성·공정성|검토 기준/.test(title)) return `<div class="concept-grid">${Object.entries(CONTENT.criterionExplanations).map(([name, text]) => `<div class="concept-box"><strong>검토 기준</strong><h3>${h(name)}</h3><p>${h(text)}</p></div>`).join('')}</div>`;
@@ -221,7 +223,7 @@ function shareView() {
 function teacherView() {
   if (!teacherPasscode || !teacherData) return `<div class="teacher-wrap"><div class="teacher-top"><div><div class="section-kicker">TEACHER'S DESK</div><h1>교사용 모아 보기</h1></div>${button('학생 화면으로', 'student-screen')}</div><section class="activity-panel intro-login"><h2>수업 기록을 확인합니다.</h2><p class="section-intro">교사용 암호를 확인한 뒤 기록을 불러옵니다.</p><form data-form="teacher-login"><label class="field-label" for="teacher-class">반</label><select id="teacher-class" name="cls">${Array.from({ length: serverConfig.classCount || 11 }, (_, i) => `<option value="${i + 1}" ${teacherClass === i + 1 ? 'selected' : ''}>${i + 1}반</option>`).join('')}</select><label class="field-label" for="teacher-passcode" style="margin-top:20px">교사용 암호</label><input id="teacher-passcode" name="passcode" type="password" autocomplete="off" required placeholder="암호 입력"><div class="action-bar"><span></span><button type="submit" class="btn primary" ${busy || !api.isConfigured() ? 'disabled' : ''}>${busy ? '확인 중…' : '확인하고 열기 →'}</button></div></form>${errorHtml()}${!api.isConfigured() ? '<p class="quiet-note">수업 기록을 연결하면 모아 보기를 열 수 있습니다.</p>' : ''}</section></div>`;
   const total = Number(teacherData.total ?? teacherData.count ?? teacherRows.length), groupMode = teacherLesson === 4;
-  return `<div class="teacher-wrap"><div class="teacher-top"><div><div class="section-kicker">TEACHER'S DESK · ${teacherLesson}차시</div><h1>생각의 과정 모아 보기</h1></div><div>${button('학생 화면', 'student-screen')}${button('닫기', 'teacher-logout')}</div></div>${teacherLessonControls()}<div class="teacher-filters"><label for="teacher-lesson">차시</label><select id="teacher-lesson" data-input="teacher-lesson"><option value="2" ${teacherLesson === 2 ? 'selected' : ''}>2차시 · 개인</option><option value="4" ${teacherLesson === 4 ? 'selected' : ''} ${serverConfig.implementedLessons.includes(4) ? '' : 'disabled'}>4차시 · 모둠</option></select><label for="teacher-filter">반</label><select id="teacher-filter" data-input="teacher-class">${Array.from({ length: serverConfig.classCount || 11 }, (_, i) => `<option value="${i + 1}" ${teacherClass === i + 1 ? 'selected' : ''}>${i + 1}반</option>`).join('')}</select>${button('새로 고침', 'teacher-refresh', { className: 'small', disabled: busy })}</div><div class="share-grid"><div class="share-metric"><b>${total}</b><span>${groupMode ? '참여 모둠' : '활동 기록'}</span></div><div class="share-metric"><b>${Number(teacherData.completed ?? total)}</b><span>제출 완료${groupMode ? ' 모둠' : ''}</span></div><div class="share-metric"><b>${groupMode ? teacherRows.reduce((sum, row) => sum + Number(row.completedQuestionCount || 0), 0) : Math.round(Number(teacherData.lowReliability?.rate || 0) * 100) + '%'}</b><span>${groupMode ? '확정한 답변 수' : '출처 재검토가 필요한 자료 선택'}</span></div></div>${groupMode ? '' : `<div class="chart-panel"><h3>근거 카드 선택 분포</h3>${bars(teacherData.cardCounts || teacherData.byCard)}</div>`}${teacherStancePanel()}${teacherClassTable()}${teacherProgressPanel()}<div class="chart-panel"><h3>${groupMode ? '모둠별 기록' : '학생별 기록'}</h3><div class="table-scroll"><table class="teacher-table"><thead><tr><th>${groupMode ? '모둠' : '학생'}</th><th>입장</th><th>${groupMode ? '모둠원' : '자료'}</th><th>진행</th><th>기록</th></tr></thead><tbody>${teacherRows.map((row, i) => `<tr><td>${h(groupMode ? row.groupName || '모둠' : maskStudentId(row.studentId))}</td><td>${h(row.stance || row.data?.stance || '')}</td><td>${h(groupMode ? `${memberList(row).length}명` : row.cardId || row.data?.cardId || '')}</td><td>${h(row.stage || row.status || '제출')}</td><td><button class="text-btn" data-action="teacher-record" data-index="${i}">열기 ↗</button></td></tr>`).join('')}</tbody></table></div>${!teacherRows.length ? '<p class="share-note">아직 불러온 개별 기록이 없습니다.</p>' : ''}</div>${errorHtml()}</div>`;
+  return `<div class="teacher-wrap"><div class="teacher-top"><div><div class="section-kicker">TEACHER'S DESK · ${teacherLesson}차시</div><h1>생각의 과정 모아 보기</h1></div><div>${button('학생 화면', 'student-screen')}${button('닫기', 'teacher-logout')}</div></div>${teacherLessonControls()}${teacherDebateControls()}<div class="teacher-filters"><label for="teacher-lesson">차시</label><select id="teacher-lesson" data-input="teacher-lesson"><option value="2" ${teacherLesson === 2 ? 'selected' : ''}>2차시 · 개인</option><option value="4" ${teacherLesson === 4 ? 'selected' : ''} ${serverConfig.implementedLessons.includes(4) ? '' : 'disabled'}>4차시 · 모둠</option></select><label for="teacher-filter">반</label><select id="teacher-filter" data-input="teacher-class">${Array.from({ length: serverConfig.classCount || 11 }, (_, i) => `<option value="${i + 1}" ${teacherClass === i + 1 ? 'selected' : ''}>${i + 1}반</option>`).join('')}</select>${button('새로 고침', 'teacher-refresh', { className: 'small', disabled: busy })}</div><div class="share-grid"><div class="share-metric"><b>${total}</b><span>${groupMode ? '참여 모둠' : '활동 기록'}</span></div><div class="share-metric"><b>${Number(teacherData.completed ?? total)}</b><span>제출 완료${groupMode ? ' 모둠' : ''}</span></div><div class="share-metric"><b>${groupMode ? teacherRows.reduce((sum, row) => sum + Number(row.completedQuestionCount || 0), 0) : Math.round(Number(teacherData.lowReliability?.rate || 0) * 100) + '%'}</b><span>${groupMode ? '확정한 답변 수' : '출처 재검토가 필요한 자료 선택'}</span></div></div>${groupMode ? '' : `<div class="chart-panel"><h3>근거 카드 선택 분포</h3>${bars(teacherData.cardCounts || teacherData.byCard)}</div>`}${teacherStancePanel()}${teacherClassTable()}${teacherProgressPanel()}${teacherDebatePanel()}<div class="chart-panel"><h3>${groupMode ? '모둠별 기록' : '학생별 기록'}</h3><div class="table-scroll"><table class="teacher-table"><thead><tr><th>${groupMode ? '모둠' : '학생'}</th><th>입장</th><th>${groupMode ? '모둠원' : '자료'}</th><th>진행</th><th>기록</th></tr></thead><tbody>${teacherRows.map((row, i) => `<tr><td>${h(groupMode ? row.groupName || '모둠' : maskStudentId(row.studentId))}</td><td>${h(row.stance || row.data?.stance || '')}</td><td>${h(groupMode ? `${memberList(row).length}명` : row.cardId || row.data?.cardId || '')}</td><td>${h(row.stage || row.status || '제출')}</td><td><button class="text-btn" data-action="teacher-record" data-index="${i}">열기 ↗</button></td></tr>`).join('')}</tbody></table></div>${!teacherRows.length ? '<p class="share-note">아직 불러온 개별 기록이 없습니다.</p>' : ''}</div>${errorHtml()}</div>`;
 }
 function teacherClassTable() {
   if (!Array.isArray(teacherData.classBreakdown)) return '';
@@ -237,6 +239,35 @@ function teacherStancePanel() {
 function teacherLessonControls() {
   const supported = serverConfig.implementedLessons.includes(4);
   return `<section class="teacher-lesson-controls"><div><h2>차시별 개방 설정</h2><p>${supported ? '열기·닫기를 누르면 학생 화면에도 반영됩니다. 초안은 지우지 않습니다.' : '교사 기능 업데이트 필요: 새 서버 적용 후 2·4차시를 독립적으로 열고 닫을 수 있습니다.'}</p></div><div class="teacher-lesson-buttons">${[2, 4].map(lesson => { const open = serverConfig.acceptLessons.includes(lesson); return button(`${lesson}차시 ${open ? '닫기' : '열기'}`, 'toggle-lesson', { disabled: busy || !supported, extra: `data-lesson="${lesson}" aria-pressed="${open}"` }); }).join('')}</div></section>`;
+}
+function teacherDebateControls() {
+  if (!serverConfig.l4DebateSupported || !serverConfig.implementedLessons.includes(4)) return '';
+  const debate = serverConfig.l4Mode === 'debate', status = teacherDebateStatus;
+  const note = debate ? (serverConfig.l4DebateAvailable ? 'AI 토론으로 진행합니다. 새로 시작하는 모둠부터 적용됩니다.' : 'AI 토론을 골랐지만 서버의 Solar 설정이 없어 학생에게는 대본 활동이 보입니다.') : '대본 반대 신문으로 진행합니다.';
+  const usage = status ? ` · 오늘 AI 호출 ${Number(status.debateCallsToday) || 0}/${Number(status.debateDailyMax) || 0}${status.debateServerReady ? '' : ' · Solar 설정 필요'}` : '';
+  return `<section class="teacher-lesson-controls teacher-debate-controls"><div><h2>4차시 활동 방식</h2><p>${note}${usage}</p></div><div class="teacher-lesson-buttons">${button('대본', 'teacher-l4-mode', { disabled: busy, extra: `data-value="script" aria-pressed="${!debate}"` })}${button('AI 토론', 'teacher-l4-mode', { disabled: busy, extra: `data-value="debate" aria-pressed="${debate}"` })}<label class="inline-field" for="teacher-l4-exchanges">신문 문답<select id="teacher-l4-exchanges" data-input="teacher-l4-exchanges" ${busy ? 'disabled' : ''}>${[1, 2, 3].map(n => `<option value="${n}" ${serverConfig.l4DebateExchanges === n ? 'selected' : ''}>${n}회</option>`).join('')}</select></label><label class="inline-field" for="teacher-l4-rebuttal"><input id="teacher-l4-rebuttal" type="checkbox" data-input="teacher-l4-rebuttal" ${serverConfig.l4DebateRebuttal ? 'checked' : ''} ${busy ? 'disabled' : ''}>반박 단계</label></div></section>`;
+}
+function pickDebateStatus(data) {
+  if (data && 'debateServerReady' in data) teacherDebateStatus = { debateServerReady: Boolean(data.debateServerReady), debateCallsToday: data.debateCallsToday, debateDailyMax: data.debateDailyMax };
+}
+async function setLesson4Mode(changes) {
+  if (!teacherPasscode || !teacherData || !serverConfig.l4DebateSupported) return;
+  busy = true; errorMessage = ''; render();
+  try {
+    const { data } = await api.post('set_l4_mode', { passcode: teacherPasscode, l4Mode: serverConfig.l4Mode, l4DebateExchanges: serverConfig.l4DebateExchanges, l4DebateRebuttal: serverConfig.l4DebateRebuttal, ...changes });
+    serverConfig = normalizeLessonConfig(data); configResolved = true; storage.setItem(publicConfigKey, JSON.stringify(serverConfig)); pickDebateStatus(data);
+    lesson4.onConfigChanged(); toast('4차시 활동 방식을 저장했습니다.');
+  } catch (error) { errorMessage = error.message; }
+  finally { busy = false; render(); }
+}
+function teacherDebatePanel() {
+  const rows = teacherLesson === 4 ? teacherData?.debates || [] : [];
+  if (!rows.length) return '';
+  return `<div class="chart-panel"><h3>AI 토론 기록</h3><div class="table-scroll"><table class="teacher-table"><thead><tr><th>모둠</th><th>입장</th><th>진행</th><th>AI 대체</th><th>기록</th></tr></thead><tbody>${rows.map((row, i) => `<tr><td>${h(row.groupName || '모둠')}</td><td>${h(row.stance)} · AI ${h(row.aiStance)}</td><td>${Number(row.stepsCompleted) || 0}단계${String(row.earlyFinish) === 'true' ? ' · 조기 종료' : ''}</td><td>${Number(row.fallbackTurns) || 0}회</td><td><button class="text-btn" data-action="teacher-debate" data-index="${i}">열기 ↗</button></td></tr>`).join('')}</tbody></table></div><p class="field-help">AI 발언은 생성 결과이며 사실 검증을 거치지 않았습니다. 남긴 허점은 교사 확인용입니다.</p></div>`;
+}
+function showTeacherDebate(index) {
+  const row = teacherData?.debates?.[index]; if (!row) return;
+  openDialog(`<h2 id="dialog-title">${h(row.groupName || '모둠')} · AI 토론 기록</h2><div class="teacher-record"><p class="field-help">모둠원 학번: ${h(memberList(row).join(', '))} · ${h(row.stance)} 모둠 · AI ${h(row.aiStance)}측</p>${(row.transcript || []).map(turn => `<div class="feedback-item"><span class="criterion-badge">${h(turn.label)} · ${turn.actor === 'ai' ? 'AI' : '모둠'}${turn.actor === 'ai' && turn.mode !== 'ai' ? ' · 대본 대체' : ''}</span><p>${h(turn.text)}</p>${turn.weaknessType ? `<p class="field-help">남긴 허점: ${h(WEAKNESS_TYPES[turn.weaknessType]?.label || turn.weaknessType)}</p>` : ''}</div>`).join('')}<label class="field-label" style="margin-top:24px">성찰</label><pre>${h(row.reflection || '')}</pre></div>`, { wide: true });
 }
 function memberList(record) {
   const value = record?.memberStudentIds;
@@ -483,7 +514,7 @@ async function loadTeacher(passcode = teacherPasscode, cls = teacherClass) {
     if (generation !== requestGeneration) return;
     const records = await api.get('list', { tab: teacherLesson === 4 ? 'l4_sessions' : 'l2_sessions', cls, latest: 1, passcode });
     if (generation !== requestGeneration) return;
-    teacherPasscode = passcode; teacherClass = Number(cls); teacherData = summary.data;
+    teacherPasscode = passcode; teacherClass = Number(cls); teacherData = summary.data; pickDebateStatus(summary.data);
     teacherRows = Array.isArray(records.data) ? records.data : records.data?.rows || records.data?.entries || [];
   } catch (error) { if (generation !== requestGeneration) return; teacherPasscode = ''; teacherData = null; teacherRows = []; errorMessage = error.message; }
   finally { if (generation === requestGeneration) { busy = false; render(); } }
@@ -513,8 +544,8 @@ function teacherFeedbackComparison(record) {
 function teacherProgressPanel() {
   const rows = teacherData?.progress || [];
   if (!rows.length) return '';
-  const stageName = stage => ({ entry: '입장', reason: '이유 선택', card: '근거 자료 선택', argument: '입론 작성', feedback: '피드백·성찰', submitted: '제출 완료' }[stage] || (/^question\d/.test(stage) ? `질문 ${stage.replace('question', '')}` : '진행 중'));
-  return `<div class="chart-panel"><h3>활동 진행 현황</h3><div class="table-scroll"><table class="teacher-table"><thead><tr><th>${teacherLesson === 4 ? '모둠' : '학생'}</th><th>단계</th><th>진행 방식</th></tr></thead><tbody>${rows.map(row => `<tr><td>${h(teacherLesson === 4 ? row.groupName || '모둠' : row.masked || maskStudentId(row.studentId))}</td><td>${h(stageName(row.stage))}</td><td>${row.mode === 'ai' && teacherLesson !== 4 ? 'AI 대담' : row.mode === 'script-local' ? '기기 대본' : '대본'}</td></tr>`).join('')}</tbody></table></div></div>`;
+  const stageName = stage => ({ entry: '입장', reason: '이유 선택', card: '근거 자료 선택', argument: '입론 작성', feedback: '피드백·성찰', submitted: '제출 완료', 'debate:finished': 'AI 토론 마침' }[stage] || (/^question\d/.test(stage) ? `질문 ${stage.replace('question', '')}` : /^debate/.test(stage) ? 'AI 토론 진행' : '진행 중'));
+  return `<div class="chart-panel"><h3>활동 진행 현황</h3><div class="table-scroll"><table class="teacher-table"><thead><tr><th>${teacherLesson === 4 ? '모둠' : '학생'}</th><th>단계</th><th>진행 방식</th></tr></thead><tbody>${rows.map(row => `<tr><td>${h(teacherLesson === 4 ? row.groupName || '모둠' : row.masked || maskStudentId(row.studentId))}</td><td>${h(stageName(row.stage))}</td><td>${row.mode === 'debate' ? 'AI 토론' : row.mode === 'ai' && teacherLesson !== 4 ? 'AI 대담' : row.mode === 'script-local' ? '기기 대본' : '대본'}</td></tr>`).join('')}</tbody></table></div></div>`;
 }
 function safeParse(value) { try { return JSON.parse(value); } catch { return {}; } }
 function teacherRecord(row) {
@@ -536,6 +567,8 @@ document.addEventListener('click', async event => {
   if (action === 'refresh-config') { await refreshConfig(); render(); return; }
   if (action.startsWith('l4-')) { await lesson4.handleClick(action, node); return; }
   if (action === 'toggle-lesson') { await toggleLesson(Number(node.dataset.lesson)); return; }
+  if (action === 'teacher-l4-mode') { await setLesson4Mode({ l4Mode: node.dataset.value === 'debate' ? 'debate' : 'script' }); return; }
+  if (action === 'teacher-debate') { showTeacherDebate(Number(node.dataset.index)); return; }
   if (['tab', 'learn-slide', 'learn-prev', 'learn-next', 'learn-finish', 'stance', 'reason', 'card', 'next', 'previous', 'commit-answer', 'early-feedback', 'submit', 'review-feedback', 'retry-submit', 'cite', 'share', 'perform', 'refresh-share', 'login-dialog', 'identity', 'textbook'].includes(action) && !lessonIsOpen(2)) { render(); return; }
   if (busy && ['next', 'commit-answer', 'submit', 'early-feedback'].includes(action)) return;
   try {
@@ -591,6 +624,8 @@ document.addEventListener('change', async event => {
   if (event.target.dataset.input === 'lesson-select' && lessonIsOpen(2)) { state.learningIndex = Number(event.target.value); persist(); render(); }
   if (event.target.dataset.input === 'teacher-class') { teacherClass = Number(event.target.value); await loadTeacher(); }
   if (event.target.dataset.input === 'teacher-lesson') { teacherLesson = Number(event.target.value) === 4 ? 4 : 2; await loadTeacher(); }
+  if (event.target.dataset.input === 'teacher-l4-exchanges') await setLesson4Mode({ l4DebateExchanges: Number(event.target.value) });
+  if (event.target.dataset.input === 'teacher-l4-rebuttal') await setLesson4Mode({ l4DebateRebuttal: Boolean(event.target.checked) });
 });
 document.addEventListener('submit', async event => {
   const form = event.target; if (!form.dataset.form) return; event.preventDefault(); const data = new FormData(form);

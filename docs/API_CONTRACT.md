@@ -123,3 +123,20 @@ comment, better
 새 엔진도 기존1.0.0의 질문22개·도움 자료33개·계획·문구·순서를 그대로 복원한다. 기존 오프라인 제출의 data.version도 보존한다. 이 변경은 시트 열 추가·개방 설정 변경을 요구하지 않는다. 새 대본에서도 서버가 버전·질문·카드·차례·피드백을 재계산하고 클라이언트의 임의 계획을 신뢰하지 않는다.
 
 새 대본은 예상 단서30종과 찬반별2변형120개, 주제별 가상 도움 자료90개를 추가한다. 기존22질문은 미검출 일반 질문 및 기존 세션용으로 유지한다. 같은 단서의 변형은 세션 시드로 고르고, 반복 단어의 빈도로 점수를 올리지 않는다. ①·⑤ 중 단서가 있는 문장을 인용하며 긴 문장 뒤의 단서도 인용 구간에 남긴다. 질문3~5개·세 기준 포함·중복 방지와 교육적 경계를 유지한다. 전체 문구는 [대본 명세](LESSON4_KEYWORD_SCRIPTS.md)에 있다.
+
+## 10. 4차시 AI 토론(서버 5.4.0)
+
+상세 설계·근거는 [AI 토론 스펙](LESSON4_AI_DEBATE_SPEC.md), 키 입력은 [AI 키 설정 안내](AI_KEY_SETUP.md)를 따른다. 기존 7~9절 대본 활동과 `l4_session`은 바꾸지 않는다.
+
+| 요청 | 내용 |
+|---|---|
+| `GET config` 추가 필드 | `l4Mode:'script'|'debate'`, `l4DebateAvailable`(교사 모드와 서버 Solar 설정이 모두 준비될 때만 참), `l4DebateVersion:'1.0.0'`, `l4DebateExchanges:1~3`, `l4DebateRebuttal`. 키·모델 이름은 내보내지 않음 |
+| `POST set_l4_mode` | `{passcode,l4Mode,l4DebateExchanges?,l4DebateRebuttal?}`. 교사 인증 뒤 config 탭에 저장. 응답에 `debateServerReady`, `debateCallsToday`, `debateDailyMax` |
+| `POST l4_debate` | 모둠 필드(7절)와 `sessionId`, `op`. `start{selection:{stance,arg1,arg5}}`(⑤ 20~1500자 필수), `state`, `group_turn{turnNo,text}`, `ai_turn{turnNo,requestId}`, `finish{earlyFinish}` |
+| `POST submit` | `kind:'l4_debate_session'`, `data:{sessionId,reflection,durationSec}`. 발언 원문은 서버 차례 기록을 쓰며 다시 받지 않음 |
+| `GET l4_summary` 추가 | `debates`(모둠별 최신 토론과 차례 기록·허점 종류), `debateCompleted`, Solar 사용량 |
+
+`l4_debate` 응답은 `{turns, transcript, cursor, next, finished, review, ...}` 전체 상태다. 서버가 순서를 정하며 다른 차례 요청은 `INVALID_STEP`이다. `ai_turn`은 같은 차례를 다시 요청하면 저장한 발언을 돌려주고(`duplicate`), 다른 요청이 만드는 중이면 `{pending:true,retryAfterMs}`를 준다. 생성 실패는 `ok:true`의 `unavailable:{reason,message}`로 알리며, AI 질문 차례는 기존 대본 질문으로 대체(`mode:'script-fallback'`)한다. 화면은 토론 요청에 40초 마감을 쓴다.
+
+Solar 요청에는 학번·반·모둠명·세션ID를 넣지 않는다. 서버 지시문과 키는 Apps Script 안에만 있다. 출력은 길이·숫자 출처·주소·개인정보·의료 조언·대필·보류 자료·질문 형식·자료 번호를 서버가 검사하고 실패하면 한 번 다시 생성한다. 이 검사는 규칙 판정이며 사실 검증이 아니다. 숨은 허점 종류는 `finish` 뒤에만 학생 응답에 포함한다. 공개 집계에는 토론 원문·모둠 식별 정보를 넣지 않는다.
+
