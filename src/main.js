@@ -241,7 +241,9 @@ function teacherLessonControls() {
   return `<section class="teacher-lesson-controls"><div><h2>차시별 개방 설정</h2><p>${supported ? '열기·닫기를 누르면 학생 화면에도 반영됩니다. 초안은 지우지 않습니다.' : '교사 기능 업데이트 필요: 새 서버 적용 후 2·4차시를 독립적으로 열고 닫을 수 있습니다.'}</p></div><div class="teacher-lesson-buttons">${[2, 4].map(lesson => { const open = serverConfig.acceptLessons.includes(lesson); return button(`${lesson}차시 ${open ? '닫기' : '열기'}`, 'toggle-lesson', { disabled: busy || !supported, extra: `data-lesson="${lesson}" aria-pressed="${open}"` }); }).join('')}</div></section>`;
 }
 function teacherDebateControls() {
-  if (!serverConfig.l4DebateSupported || !serverConfig.implementedLessons.includes(4)) return '';
+  if (!serverConfig.implementedLessons.includes(4)) return '';
+  // 웹앱 배포가 예전 버전이면 설정 자리를 숨기지 않고 무엇을 해야 하는지 알려 줍니다.
+  if (!serverConfig.l4DebateSupported) return `<section class="teacher-lesson-controls teacher-debate-controls" data-server-outdated><div><h2>4차시 활동 방식</h2><p>웹앱 서버가 이전 버전(${h(serverConfig.appVersion)})으로 응답하고 있어 AI 토론 설정을 쓸 수 없습니다. Apps Script에서 <b>배포 → 배포 관리 → 기존 배포 수정(연필) → 버전: 새 버전 → 배포</b>를 하면 이 자리에 설정이 나타납니다.</p></div></section>`;
   const debate = serverConfig.l4Mode === 'debate', status = teacherDebateStatus;
   const note = debate ? (serverConfig.l4DebateAvailable ? 'AI 토론으로 진행합니다. 새로 시작하는 모둠부터 적용됩니다.' : 'AI 토론을 골랐지만 서버의 Solar 설정이 없어 학생에게는 대본 활동이 보입니다.') : '대본 반대 신문으로 진행합니다.';
   const usage = status ? ` · 오늘 AI 호출 ${Number(status.debateCallsToday) || 0}/${Number(status.debateDailyMax) || 0}${status.debateServerReady ? '' : ' · Solar 설정 필요'}` : '';
@@ -510,9 +512,10 @@ async function loadTeacher(passcode = teacherPasscode, cls = teacherClass) {
   const generation = requestGeneration;
   busy = true; errorMessage = ''; render();
   try {
-    const summary = await api.get(teacherLesson === 4 ? 'l4_summary' : 'l2_summary', { cls, passcode });
-    if (generation !== requestGeneration) return;
-    const records = await api.get('list', { tab: teacherLesson === 4 ? 'l4_sessions' : 'l2_sessions', cls, latest: 1, passcode });
+    // 요약과 목록은 서로 독립된 조회라 동시에 요청합니다(기다리는 시간 절반). 기록이 많을 때를 위해 마감은 40초.
+    const [summary, records] = await Promise.all([
+      api.get(teacherLesson === 4 ? 'l4_summary' : 'l2_summary', { cls, passcode }, { timeoutMs: 40000 }),
+      api.get('list', { tab: teacherLesson === 4 ? 'l4_sessions' : 'l2_sessions', cls, latest: 1, passcode }, { timeoutMs: 40000 })]);
     if (generation !== requestGeneration) return;
     teacherPasscode = passcode; teacherClass = Number(cls); teacherData = summary.data; pickDebateStatus(summary.data);
     teacherRows = Array.isArray(records.data) ? records.data : records.data?.rows || records.data?.entries || [];

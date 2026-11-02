@@ -377,3 +377,18 @@ test('50모둠 교차 진행: 모두 끝까지 진행되고 기록이 섞이지 
   assert.equal(f.db.l4_debate_turns.length, 1200); assert.equal(f.db.progress.length, 100);
 });
 
+
+test('교사 대시보드 조회는 기록이 많아도 같은 탭을 한 번만 읽는다', () => {
+  const db = Object.fromEntries(Object.keys(HEADERS).map(key => [key, []])), reads = {};
+  db.config.push({ key: 'acceptLessons', value: '2,4' });
+  for (let i = 1; i <= 200; i++) db.progress.push({ lesson: 2, cls: 3, studentId: `203${String(i % 99 + 1).padStart(2, '0')}`, sessionId: `l2s_virtual_${String(i).padStart(4, '0')}`, stage: 'entry' });
+  const props = new Map([['PASSCODE', 'virtual-teacher-passcode']]);
+  const service = createService({ content, store: { read: tab => { reads[tab] = (reads[tab] || 0) + 1; return db[tab]; }, append() {}, withLock: fn => fn() },
+    properties: { get: key => props.get(key), set: (key, value) => props.set(key, value) }, hash: value => createHash('sha256').update(value).digest('hex') });
+  const summary = service.respond('GET', { action: 'l2_summary', passcode: 'virtual-teacher-passcode', cls: 3 });
+  assert.equal(summary.ok, true); assert.ok(summary.data.progress.length > 0);
+  assert.equal(reads.progress, 1, '이전에는 기록 행마다 진행 탭 전체를 다시 읽었음');
+  for (const key of Object.keys(reads)) delete reads[key];
+  assert.equal(service.respond('GET', { action: 'l4_summary', passcode: 'virtual-teacher-passcode', cls: 3 }).ok, true);
+  assert.ok(Object.values(reads).every(count => count === 1), JSON.stringify(reads));
+});
