@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import lesson4Content from '../src/core/lesson4-content.js';
 import { DEBATE_SEQUENCE_LABELS, DEBATE_LIMITS, buildDebatePlan, validateGroupTurn, validateDebateArguments, checkAiOutput, parseAiContent,
-  selectDebateMaterials, weaknessFor, debateReview, WEAKNESS_KEYS } from '../src/core/lesson4-debate.js';
+  selectDebateMaterials, realSourcesFor, weaknessFor, debateReview, WEAKNESS_KEYS } from '../src/core/lesson4-debate.js';
 
 const aiSteps = plan => [...new Set(plan.turns.filter(turn => ['constructive', 'rebuttal'].includes(turn.kind) || turn.kind === 'cross_question').map(turn => turn.step))];
 
@@ -97,9 +97,12 @@ test('모델 응답의 JSON·코드 블록·일반 글을 같은 검사로 보�
 
 test('쟁점이 맞는 수업용 가상 자료만 고르고 보류 자료는 쓰지 않는다', () => {
   const cards = selectDebateMaterials(lesson4Content, '응급 상황에서 의료인 연결이 늦어질 수 있습니다.', { seed: 's1' });
-  assert.ok(cards.length > 0 && cards.length <= 3);
-  assert.ok(cards.every(card => card.virtual === true && /가상/.test(card.source)));
+  const virtual = cards.filter(card => card.virtual === true), real = cards.filter(card => card.virtual === false);
+  assert.ok(virtual.length > 0 && virtual.length <= 3 && real.length <= 2 && virtual.length + real.length === cards.length);
+  assert.ok(virtual.every(card => /가상/.test(card.source)));
+  assert.ok(real.every(card => card.badge.startsWith('실제 자료') && card.url.startsWith('https://')));
   assert.deepEqual(selectDebateMaterials(lesson4Content, '오늘 점심은 무엇인가요', { seed: 's1' }), []);
+  assert.ok(selectDebateMaterials(lesson4Content, '개인정보와 건강정보 보호', { seed: 's4' }).some(card => card.id === 'R07'));
   const held = selectDebateMaterials(lesson4Content, '카드5 사용보류 근거 카드6', { seed: 's2', max: 10 });
   assert.ok(held.every(card => lesson4Content.helpCards.find(item => item.id === card.id).topic !== 'held'));
   assert.deepEqual(selectDebateMaterials(lesson4Content, '응급 대응', { seed: 's3' }), selectDebateMaterials(lesson4Content, '응급 대응', { seed: 's3' }));
@@ -113,4 +116,16 @@ test('두 AI 입론의 허점 종류가 다르고 돌아보기에 공개된다',
     { turnNo: 2, actor: 'ai', kind: 'cross_question', mode: 'script-fallback' }, { turnNo: 1, actor: 'group', kind: 'group_constructive' }]);
   assert.equal(review.weaknesses[0].label, '반대 1 입론'); assert.equal(review.weaknesses[0].weaknessLabel, '필요한 조건을 빠뜨림');
   assert.deepEqual([review.aiTurns, review.fallbackTurns, review.groupTurns], [2, 1, 1]);
+});
+
+test('실제 자료는 출처·날짜·링크를 갖추고 ⑦·보류 주제에는 붙지 않는다', () => {
+  const families = new Set(lesson4Content.topics.map(topic => topic.id));
+  assert.equal(new Set(lesson4Content.realSources.map(item => item.id)).size, lesson4Content.realSources.length);
+  for (const item of lesson4Content.realSources) {
+    assert.match(item.url, /^https:\/\//); assert.match(item.date, /^\d{4}-\d{2}(-\d{2})?$/);
+    assert.ok(item.title && item.publisher && item.summary.length <= 220 && ['기사', '보고서', '법령', '연구', '책'].includes(item.kind), item.id);
+    assert.ok(item.topics.every(topic => families.has(topic) && !['source', 'held', 'analogy'].includes(topic)), item.id);
+  }
+  assert.deepEqual(realSourcesFor(lesson4Content, 'keyword.privacy').map(item => item.id), ['R07']);
+  assert.deepEqual(realSourcesFor(lesson4Content, ['source', 'held', 'keyword.survey']), []);
 });
