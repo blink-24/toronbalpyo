@@ -45,6 +45,7 @@ else assert.ok(!config.data.l4ScriptVersion || config.data.l4ScriptVersion === '
 console.log(`INFO: 현재 대본 ${config.data.l4ScriptVersion || '1.0.0'}${ping.data.version === '5.1.0' ? ' (확장 대본은 서버 갱신 대기)' : ''}`);
 console.log(`INFO: 구현 차시 ${config.data.implementedLessons.join(',')}, 개방 차시 ${config.data.acceptLessons.join(',') || '없음'}, 4차시 질문 ${config.data.l4Questions}개, 대본 모드`);
 for (const key of ['PASSCODE', 'AI_API_KEY', 'AI_MODEL', 'SOLAR_API_KEY', 'SOLAR_MODEL', 'passcode', 'apiKey']) assert.ok(!(key in config.data));
+if (ping.data.version === '5.4.0') { assert.ok(['script', 'debate'].includes(config.data.l4Mode), '4차시 활동 방식 설정'); console.log(`INFO: 4차시 방식 ${config.data.l4Mode}, AI 토론 사용 가능 ${config.data.l4DebateAvailable}`); }
 console.log('PASS: 실제 시트 설정 조회 및 비밀값 비노출');
 
 const shared = await call('public_summary');
